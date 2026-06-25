@@ -260,7 +260,13 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
-                  onTap: () => context.go('/reset-password'),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Fonctionnalité bientôt disponible'),
+                      ),
+                    );
+                  },
                   child: Text(
                     'Mot de passe oublié?',
                     style: AppTextStyles.body.copyWith(

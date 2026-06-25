@@ -156,9 +156,9 @@ class _FindDoctorsScreenState extends State<FindDoctorsScreen> {
       case 'Cardiologue':
         return Icons.favorite;
       case 'Dentiste':
-        return Icons.tooth_1;
+        return Icons.medical_services;
       case 'Pneumologue':
-        return Icons.lungs;
+        return Icons.air;
       case 'Dermatologue':
         return Icons.spa;
       default:
