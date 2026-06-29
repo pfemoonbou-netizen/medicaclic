@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter config *)",
+      "Read(//Applications/**)",
+      "Bash(flutter run *)",
+      "Bash(mkdir -p ./supabase)",
+      "Bash(flutter build *)",
+      "Bash(lsof -iTCP:8080 -sTCP:LISTEN -n -P)",
+      "Bash(awk 'NR>1{print $2}')",
+      "Bash(xargs -r kill)",
+      "Bash(nohup python3 -m http.server 8080)",
+      "Bash(curl -sI http://localhost:8080)",
+      "Bash(lsof -iTCP:80 -sTCP:LISTEN -n -P)",
+      "Bash(lsof -iTCP:5000 -sTCP:LISTEN -n -P)",
+      "Bash(curl -sI http://localhost/)",
+      "Bash(curl -sI http://localhost:80/)",
+      "Bash(flutter analyze *)",
+      "Bash(curl -s \"https://nfshbiamzszeenmasxop.supabase.co/rest/v1/doctors?select=id&limit=1\" -H \"apikey: sb_publishable_is5fB-8JZ50DAXt6TVw_2w_7rEazqCj\" -H \"Authorization: Bearer sb_publishable_is5fB-8JZ50DAXt6TVw_2w_7rEazqCj\")"
+    ],
+    "additionalDirectories": [
+      "/Users/mac/Desktop/medical-app-dz/medicaclic"
+    ]
+  }
+}
