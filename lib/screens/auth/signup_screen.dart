@@ -13,16 +13,19 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _email = TextEditingController();
+  final _phone = TextEditingController();
   final _password = TextEditingController();
   final _confirmPassword = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   DateTime? _birthDate;
   String? _gender;
+  bool _usePhone = false; // false = Email, true = Téléphone
 
   @override
   void dispose() {
     _email.dispose();
+    _phone.dispose();
     _password.dispose();
     _confirmPassword.dispose();
     super.dispose();
@@ -31,23 +34,37 @@ class _SignupScreenState extends State<SignupScreen> {
   InputDecoration _fieldDecoration(String hint, IconData icon, {Widget? suffixIcon}) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Color(0xFFA0A7B0), fontSize: 16),
+      hintStyle: const TextStyle(color: Color(0xFFA0A7B0), fontSize: 15),
       prefixIcon: Icon(icon, color: const Color(0xFFA0A7B0)),
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: const Color(0xFFF9F9FB),
       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: AppColors.primary, width: 2),
+      ),
+    );
+  }
+
+  Widget _label(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Color(0xFF101522),
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -63,31 +80,42 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   void _signup() async {
-    if (_email.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Email required')));
+    final identifier = _usePhone ? _phone.text : _email.text;
+    if (identifier.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_usePhone ? 'Numéro de téléphone requis' : 'Adresse e-mail requise')),
+      );
       return;
     }
     if (_password.text.isEmpty || _password.text.length < 8) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password must be at least 8 characters')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Le mot de passe doit contenir au moins 8 caractères')),
+      );
       return;
     }
     if (_password.text != _confirmPassword.text) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Les mots de passe ne correspondent pas')),
+      );
       return;
     }
     if (_birthDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Birth date required')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Date de naissance requise')),
+      );
       return;
     }
     if (_gender == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gender required')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez sélectionner votre genre')),
+      );
       return;
     }
 
     final auth = context.read<AuthProvider>();
     final success = await auth.signup(
-      _email.text,
-      _email.text,
+      identifier,
+      identifier,
       _password.text,
       birthDate: _birthDate!,
       gender: _gender!,
@@ -106,7 +134,7 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF101522)),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF101522), size: 20),
           onPressed: () => context.pop(),
         ),
         title: const Text(
@@ -117,153 +145,123 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
                 'Créez votre\ncompte',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF101522)),
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: Color(0xFF14152E), height: 1.1),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               const Text(
                 'Rejoignez MedicaClic en quelques secondes.',
-                style: TextStyle(color: Color(0xFFA0A7B0), fontSize: 16),
+                style: TextStyle(color: Color(0xFFA0A7B0), fontSize: 15),
               ),
-              const SizedBox(height: 32),
-              TextField(
-                controller: _email,
-                keyboardType: TextInputType.emailAddress,
-                decoration: _fieldDecoration('Enter your email', Icons.mail_outline),
+              const SizedBox(height: 28),
+              // Email / Téléphone toggle
+              Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    _toggleTab('Email', Icons.mail_outline, !_usePhone, () => setState(() => _usePhone = false)),
+                    _toggleTab('Téléphone', Icons.phone_outlined, _usePhone, () => setState(() => _usePhone = true)),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
+              // Email or Phone field
+              if (!_usePhone) ...[
+                _label('Adresse e-mail'),
+                TextField(
+                  controller: _email,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: _fieldDecoration('exemple@gmail.com', Icons.mail_outline),
+                ),
+              ] else ...[
+                _label('Numéro de téléphone'),
+                TextField(
+                  controller: _phone,
+                  keyboardType: TextInputType.phone,
+                  decoration: _fieldDecoration('0555 00 00 00', Icons.phone_outlined),
+                ),
+              ],
+              const SizedBox(height: 18),
+              _label('Mot de passe'),
               TextField(
                 controller: _password,
                 obscureText: _obscurePassword,
                 decoration: _fieldDecoration(
-                  'Enter your password',
+                  'Minimum 8 caractères',
                   Icons.lock_outline,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                      _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                       color: const Color(0xFFA0A7B0),
                     ),
                     onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
+              _label('Confirmer le mot de passe'),
               TextField(
                 controller: _confirmPassword,
                 obscureText: _obscureConfirm,
                 decoration: _fieldDecoration(
-                  'Confirm your password',
+                  'Répétez le mot de passe',
                   Icons.lock_outline,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscureConfirm ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                      _obscureConfirm ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                       color: const Color(0xFFA0A7B0),
                     ),
                     onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
+              _label('Date de naissance'),
               GestureDetector(
                 onTap: _selectDate,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF9F9FB),
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: const Color(0xFFE5E7EB)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.calendar_today, color: Color(0xFFA0A7B0)),
+                      const Icon(Icons.cake_outlined, color: Color(0xFFA0A7B0)),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           _birthDate == null
-                              ? 'DD / MM / AAAA'
+                              ? 'JJ / MM / AAAA'
                               : '${_birthDate!.day.toString().padLeft(2, '0')} / ${_birthDate!.month.toString().padLeft(2, '0')} / ${_birthDate!.year}',
                           style: TextStyle(
                             color: _birthDate == null ? const Color(0xFFA0A7B0) : const Color(0xFF101522),
-                            fontSize: 16,
+                            fontSize: 15,
                           ),
                         ),
                       ),
+                      const Icon(Icons.keyboard_arrow_down, color: Color(0xFFA0A7B0)),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text(
-                'Genre',
-                style: TextStyle(color: Color(0xFF101522), fontSize: 14, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 18),
+              _label('Genre'),
               Row(
                 children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _gender = 'Femme'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: _gender == 'Femme' ? AppColors.primary : const Color(0xFFF9F9FB),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: _gender == 'Femme' ? AppColors.primary : const Color(0xFFE5E7EB),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.female, color: _gender == 'Femme' ? Colors.white : const Color(0xFFA0A7B0)),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Femme',
-                              style: TextStyle(
-                                color: _gender == 'Femme' ? Colors.white : const Color(0xFF101522),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _gender = 'Homme'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: _gender == 'Homme' ? AppColors.primary : const Color(0xFFF9F9FB),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: _gender == 'Homme' ? AppColors.primary : const Color(0xFFE5E7EB),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.male, color: _gender == 'Homme' ? Colors.white : const Color(0xFFA0A7B0)),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Homme',
-                              style: TextStyle(
-                                color: _gender == 'Homme' ? Colors.white : const Color(0xFF101522),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  Expanded(child: _genderButton('Femme', Icons.woman, 'Femme')),
+                  const SizedBox(width: 14),
+                  Expanded(child: _genderButton('Homme', Icons.man, 'Homme')),
                 ],
               ),
               const SizedBox(height: 32),
@@ -274,8 +272,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: ElevatedButton(
                     onPressed: auth.isLoading ? null : _signup,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                      backgroundColor: AppColors.darkNavy,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
                     child: auth.isLoading
                         ? const SizedBox(
@@ -293,23 +291,86 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: const TextStyle(color: Color(0xFF707684), fontSize: 15),
                   children: [
-                    const TextSpan(text: 'Already have an account? '),
+                    const TextSpan(text: 'Vous avez déjà un compte ? '),
                     TextSpan(
-                      text: 'Log In',
+                      text: 'Se connecter',
                       style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
                       recognizer: TapGestureRecognizer()..onTap = () => context.go('/login'),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(height: 12),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _toggleTab(String text, IconData icon, bool active, VoidCallback onTap) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: active ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: active
+                ? [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 6, offset: const Offset(0, 2))]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 18, color: active ? const Color(0xFF14152E) : const Color(0xFFA0A7B0)),
+              const SizedBox(width: 8),
+              Text(
+                text,
+                style: TextStyle(
+                  color: active ? const Color(0xFF14152E) : const Color(0xFFA0A7B0),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _genderButton(String label, IconData icon, String value) {
+    final selected = _gender == value;
+    return GestureDetector(
+      onTap: () => setState(() => _gender = value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : const Color(0xFFF9F9FB),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: selected ? AppColors.primary : const Color(0xFFE5E7EB)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: selected ? Colors.white : const Color(0xFFA0A7B0)),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: selected ? Colors.white : const Color(0xFF101522),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );

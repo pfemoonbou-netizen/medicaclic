@@ -9,4 +9,5 @@ class AppColors {
   static const Color lightGray = Color(0xFFCCCCCC);
   static const Color danger = Color(0xFFFF6B6B);
   static const Color success = Color(0xFF4CAF50);
+  static const Color darkNavy = Color(0xFF14152E);
 }
