@@ -81,13 +81,8 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Image.network(
-            'https://storage.googleapis.com/codeless-app.appspot.com/uploads%2Fimages%2F0SVyNlKMgXA2KENfwuss%2F7214e19a-75c1-48f3-b61d-1ba81af083e4.png',
-            width: 24,
-            height: 24,
-            fit: BoxFit.contain,
-          ),
-          onPressed: () => context.pop(),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF101522)),
+          onPressed: () => context.canPop() ? context.pop() : context.go('/onboarding'),
         ),
         title: const Text(
           'Login',
