@@ -9,6 +9,7 @@ import 'providers/cart_provider.dart';
 import 'screens/auth/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
+import 'screens/auth/user_type_selection_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/pharmacy/pharmacy_screen.dart';
 import 'screens/pharmacy/cart_screen.dart';
@@ -32,6 +33,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/signup',
       builder: (context, state) => const SignupScreen(),
+    ),
+    GoRoute(
+      path: '/user-type-selection',
+      builder: (context, state) => const UserTypeSelectionScreen(),
     ),
     GoRoute(
       path: '/home',
