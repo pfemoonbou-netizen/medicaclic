@@ -6,7 +6,7 @@ import '../../utils/text_styles.dart';
 import '../../widgets/doctor_card.dart';
 
 class FindDoctorsScreen extends StatefulWidget {
-  const FindDoctorsScreen({Key? key}) : super(key: key);
+  const FindDoctorsScreen({super.key});
 
   @override
   State<FindDoctorsScreen> createState() => _FindDoctorsScreenState();

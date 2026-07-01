@@ -10,7 +10,7 @@ import '../../widgets/doctor_card.dart';
 import '../../widgets/product_card.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -262,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class FindDoctorsScreenContent extends StatelessWidget {
-  const FindDoctorsScreenContent({Key? key}) : super(key: key);
+  const FindDoctorsScreenContent({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -8,7 +8,7 @@ import '../../utils/text_styles.dart';
 import '../../widgets/product_card.dart';
 
 class PharmacyScreen extends StatefulWidget {
-  const PharmacyScreen({Key? key}) : super(key: key);
+  const PharmacyScreen({super.key});
 
   @override
   State<PharmacyScreen> createState() => _PharmacyScreenState();

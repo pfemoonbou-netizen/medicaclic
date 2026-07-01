@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../utils/app_colors.dart';
 
 class UserTypeSelectionScreen extends StatelessWidget {
-  const UserTypeSelectionScreen({Key? key}) : super(key: key);
+  const UserTypeSelectionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
