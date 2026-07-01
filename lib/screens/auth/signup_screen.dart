@@ -1,10 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/home_care_provider.dart';
 import '../../utils/app_colors.dart';
-import '../../utils/text_styles.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -13,153 +12,304 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  final _name = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  final _specialty = TextEditingController();
-  final _phone = TextEditingController();
-  bool _obscure = true;
-  String _role = 'utilisateur';
-  String? _providerCategoryId;
-  final _homeCare = HomeCareProvider();
-
-  @override
-  void initState() {
-    super.initState();
-    _homeCare.addListener(_onHomeCareChanged);
-  }
-
-  void _onHomeCareChanged() => setState(() {});
+  final _confirmPassword = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
+  DateTime? _birthDate;
+  String? _gender;
 
   @override
   void dispose() {
-    _name.dispose();
     _email.dispose();
     _password.dispose();
-    _specialty.dispose();
-    _phone.dispose();
-    _homeCare.removeListener(_onHomeCareChanged);
-    _homeCare.dispose();
+    _confirmPassword.dispose();
     super.dispose();
+  }
+
+  InputDecoration _fieldDecoration(String hint, IconData icon, {Widget? suffixIcon}) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: Color(0xFFA0A7B0), fontSize: 16),
+      prefixIcon: Icon(icon, color: const Color(0xFFA0A7B0)),
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: const Color(0xFFF9F9FB),
+      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(24),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(24),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(24),
+        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+      ),
+    );
+  }
+
+  Future<void> _selectDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2000),
+      firstDate: DateTime(1950),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) setState(() => _birthDate = picked);
+  }
+
+  void _signup() async {
+    if (_email.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Email required')));
+      return;
+    }
+    if (_password.text.isEmpty || _password.text.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password must be at least 8 characters')));
+      return;
+    }
+    if (_password.text != _confirmPassword.text) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      return;
+    }
+    if (_birthDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Birth date required')));
+      return;
+    }
+    if (_gender == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gender required')));
+      return;
+    }
+
+    final auth = context.read<AuthProvider>();
+    final success = await auth.signup(
+      _email.text,
+      _email.text,
+      _password.text,
+      birthDate: _birthDate!,
+      gender: _gender!,
+    );
+
+    if (success && mounted) {
+      context.go('/user-type-selection');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF101522)),
+          onPressed: () => context.pop(),
+        ),
+        title: const Text(
+          'Inscription',
+          style: TextStyle(color: Color(0xFF101522), fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 20),
-              GestureDetector(onTap: () => context.go('/login'), child: const Icon(Icons.arrow_back, color: AppColors.primary)),
-              const SizedBox(height: 20),
-              Text('Inscription', style: AppTextStyles.heading1),
-              const SizedBox(height: 10),
-              Text('Creez un nouveau compte', style: AppTextStyles.bodySmall),
-              const SizedBox(height: 40),
-              TextField(controller: _name, decoration: const InputDecoration(hintText: 'Nom complet', prefixIcon: Icon(Icons.person_outlined))),
-              const SizedBox(height: 15),
-              TextField(controller: _email, decoration: const InputDecoration(hintText: 'Email', prefixIcon: Icon(Icons.email_outlined)), keyboardType: TextInputType.emailAddress),
-              const SizedBox(height: 15),
+              const Text(
+                'Créez votre\ncompte',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF101522)),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Rejoignez MedicaClic en quelques secondes.',
+                style: TextStyle(color: Color(0xFFA0A7B0), fontSize: 16),
+              ),
+              const SizedBox(height: 32),
+              TextField(
+                controller: _email,
+                keyboardType: TextInputType.emailAddress,
+                decoration: _fieldDecoration('Enter your email', Icons.mail_outline),
+              ),
+              const SizedBox(height: 16),
               TextField(
                 controller: _password,
-                obscureText: _obscure,
-                decoration: InputDecoration(
-                  hintText: 'Mot de passe',
-                  prefixIcon: const Icon(Icons.lock_outlined),
-                  suffixIcon: IconButton(icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined), onPressed: () => setState(() => _obscure = !_obscure)),
+                obscureText: _obscurePassword,
+                decoration: _fieldDecoration(
+                  'Enter your password',
+                  Icons.lock_outline,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                      color: const Color(0xFFA0A7B0),
+                    ),
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  ),
                 ),
               ),
-              const SizedBox(height: 30),
-              Text('Type de compte', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _confirmPassword,
+                obscureText: _obscureConfirm,
+                decoration: _fieldDecoration(
+                  'Confirm your password',
+                  Icons.lock_outline,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirm ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                      color: const Color(0xFFA0A7B0),
+                    ),
+                    onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: _selectDate,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF9F9FB),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_today, color: Color(0xFFA0A7B0)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _birthDate == null
+                              ? 'DD / MM / AAAA'
+                              : '${_birthDate!.day.toString().padLeft(2, '0')} / ${_birthDate!.month.toString().padLeft(2, '0')} / ${_birthDate!.year}',
+                          style: TextStyle(
+                            color: _birthDate == null ? const Color(0xFFA0A7B0) : const Color(0xFF101522),
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Genre',
+                style: TextStyle(color: Color(0xFF101522), fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(child: _roleTile('utilisateur', 'Utilisateur', Icons.person_outline)),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _gender = 'Femme'),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: _gender == 'Femme' ? AppColors.primary : const Color(0xFFF9F9FB),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _gender == 'Femme' ? AppColors.primary : const Color(0xFFE5E7EB),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.female, color: _gender == 'Femme' ? Colors.white : const Color(0xFFA0A7B0)),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Femme',
+                              style: TextStyle(
+                                color: _gender == 'Femme' ? Colors.white : const Color(0xFF101522),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: _roleTile('prestataire', 'Prestataire à domicile', Icons.medical_services_outlined)),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _gender = 'Homme'),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: _gender == 'Homme' ? AppColors.primary : const Color(0xFFF9F9FB),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _gender == 'Homme' ? AppColors.primary : const Color(0xFFE5E7EB),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.male, color: _gender == 'Homme' ? Colors.white : const Color(0xFFA0A7B0)),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Homme',
+                              style: TextStyle(
+                                color: _gender == 'Homme' ? Colors.white : const Color(0xFF101522),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-              if (_role == 'prestataire') ...[
-                const SizedBox(height: 20),
-                if (_homeCare.isLoading)
-                  const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Center(child: CircularProgressIndicator()))
-                else
-                  DropdownButtonFormField<String>(
-                    initialValue: _providerCategoryId,
-                    decoration: const InputDecoration(hintText: 'Catégorie de service', prefixIcon: Icon(Icons.category_outlined)),
-                    items: _homeCare.categories.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
-                    onChanged: (value) => setState(() => _providerCategoryId = value),
-                  ),
-                const SizedBox(height: 15),
-                TextField(controller: _specialty, decoration: const InputDecoration(hintText: 'Spécialité (ex: Infirmière diplômée)', prefixIcon: Icon(Icons.badge_outlined))),
-                const SizedBox(height: 15),
-                TextField(controller: _phone, decoration: const InputDecoration(hintText: 'Téléphone', prefixIcon: Icon(Icons.phone_outlined)), keyboardType: TextInputType.phone),
-              ],
-              const SizedBox(height: 30),
+              const SizedBox(height: 32),
               Consumer<AuthProvider>(
                 builder: (context, auth, _) => SizedBox(
                   width: double.infinity,
+                  height: 56,
                   child: ElevatedButton(
-                    onPressed: auth.isLoading ? null : () async {
-                      final ok = await auth.signup(
-                        _name.text,
-                        _email.text,
-                        _password.text,
-                        role: _role,
-                        providerCategoryId: _providerCategoryId,
-                        providerSpecialty: _specialty.text.trim(),
-                        providerPhone: _phone.text.trim(),
-                      );
-                      if (ok && context.mounted) context.go('/home');
-                    },
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, padding: const EdgeInsets.symmetric(vertical: 15), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                    child: auth.isLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(AppColors.white))) : Text("S'inscrire", style: AppTextStyles.buttonText),
+                    onPressed: auth.isLoading ? null : _signup,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                    ),
+                    child: auth.isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Text(
+                            'Créer mon compte',
+                            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                          ),
                   ),
                 ),
               ),
-              Consumer<AuthProvider>(
-                builder: (context, auth, _) => auth.errorMessage == null
-                    ? const SizedBox.shrink()
-                    : Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Text(auth.errorMessage!, style: const TextStyle(color: Colors.red, fontSize: 12)),
-                      ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Deja inscrit? ', style: AppTextStyles.body),
-                  GestureDetector(onTap: () => context.go('/login'), child: Text('Se connecter', style: AppTextStyles.body.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold))),
-                ],
+              const SizedBox(height: 24),
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: const TextStyle(color: Color(0xFF707684), fontSize: 15),
+                  children: [
+                    const TextSpan(text: 'Already have an account? '),
+                    TextSpan(
+                      text: 'Log In',
+                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+                      recognizer: TapGestureRecognizer()..onTap = () => context.go('/login'),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _roleTile(String value, String label, IconData icon) {
-    final active = _role == value;
-    return GestureDetector(
-      onTap: () => setState(() => _role = value),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-        decoration: BoxDecoration(
-          color: active ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: active ? AppColors.primary : Colors.grey.shade300),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: active ? AppColors.primary : Colors.grey, size: 22),
-            const SizedBox(height: 6),
-            Text(label, textAlign: TextAlign.center, style: TextStyle(color: active ? AppColors.primary : Colors.grey.shade700, fontSize: 12, fontWeight: active ? FontWeight.bold : FontWeight.normal)),
-          ],
         ),
       ),
     );

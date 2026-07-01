@@ -8,14 +8,22 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   name text not null default '',
   email text not null,
+  birth_date date,
+  gender text,
   created_at timestamptz not null default now()
 );
 
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, name, email)
-  values (new.id, coalesce(new.raw_user_meta_data ->> 'name', ''), new.email);
+  insert into public.profiles (id, name, email, birth_date, gender)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data ->> 'name', ''),
+    new.email,
+    (new.raw_user_meta_data ->> 'birth_date')::date,
+    new.raw_user_meta_data ->> 'gender'
+  );
   return new;
 end;
 $$ language plpgsql security definer;

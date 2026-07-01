@@ -68,6 +68,8 @@ class AuthProvider extends ChangeNotifier {
     String email,
     String password, {
     String role = 'utilisateur',
+    DateTime? birthDate,
+    String? gender,
     String? providerCategoryId,
     String? providerSpecialty,
     String? providerPhone,
@@ -84,6 +86,15 @@ class AuthProvider extends ChangeNotifier {
       }
       final res = await supabase.auth.signUp(email: email, password: password, data: {'name': name, 'role': role});
       if (res.user == null) throw 'Inscription impossible';
+
+      await supabase.from('profiles').insert({
+        'id': res.user!.id,
+        'name': name,
+        'email': email,
+        'birth_date': birthDate?.toIso8601String().split('T')[0],
+        'gender': gender,
+      });
+
       if (role == 'prestataire') {
         await supabase.from('home_care_providers').insert({
           'user_id': res.user!.id,
