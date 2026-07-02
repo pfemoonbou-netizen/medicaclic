@@ -95,7 +95,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                   ),
                   const SizedBox(height: 12),
                   SizedBox(
-                    height: 150,
+                    height: 168,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: productProvider.promoOffers.length,
@@ -125,9 +125,9 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                                 ],
                               ),
                               const SizedBox(height: 8),
-                              Text(offer.discountText, style: const TextStyle(color: BoutiqueColors.textPrimary, fontSize: 17, fontWeight: FontWeight.w800, height: 1.2)),
+                              Text(offer.discountText, style: const TextStyle(color: BoutiqueColors.textPrimary, fontSize: 17, fontWeight: FontWeight.w800, height: 1.2), maxLines: 2, overflow: TextOverflow.ellipsis),
                               const SizedBox(height: 6),
-                              Text(offer.deliveryText, style: const TextStyle(color: BoutiqueColors.textSecondary, fontSize: 11)),
+                              Text(offer.deliveryText, style: const TextStyle(color: BoutiqueColors.textSecondary, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
                               const Spacer(),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
