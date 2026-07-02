@@ -4,11 +4,12 @@ import 'package:go_router/go_router.dart';
 class _OnboardPage {
   final Color accent;
   final IconData icon;
+  final String imagePath;
   final String badgeEmoji;
   final String badgeText;
   final String title;
   final String description;
-  const _OnboardPage({required this.accent, required this.icon, required this.badgeEmoji, required this.badgeText, required this.title, required this.description});
+  const _OnboardPage({required this.accent, required this.icon, required this.imagePath, required this.badgeEmoji, required this.badgeText, required this.title, required this.description});
 }
 
 const _kBackground = Color(0xFF0D1714);
@@ -27,6 +28,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _OnboardPage(
       accent: Color(0xFF1AA88F),
       icon: Icons.medical_services_outlined,
+      imagePath: 'assets/images/onboarding/doctors.jpg',
       badgeEmoji: '🏥',
       badgeText: '500+ Médecins',
       title: 'Des médecins de\nconfiance',
@@ -35,6 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _OnboardPage(
       accent: Color(0xFFE0588F),
       icon: Icons.family_restroom_outlined,
+      imagePath: 'assets/images/onboarding/family.jpg',
       badgeEmoji: '😊',
       badgeText: 'Yemma يمّا',
       title: 'La santé de\nvotre famille',
@@ -43,6 +46,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _OnboardPage(
       accent: Color(0xFF1AA88F),
       icon: Icons.home_repair_service_outlined,
+      imagePath: 'assets/images/onboarding/home_care.jpg',
       badgeEmoji: '🏠',
       badgeText: 'À domicile',
       title: 'Soins à\ndomicile',
@@ -51,6 +55,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _OnboardPage(
       accent: Color(0xFFF2994A),
       icon: Icons.medical_information_outlined,
+      imagePath: 'assets/images/onboarding/pharmacy.jpg',
       badgeEmoji: '🛍',
       badgeText: 'Boutique médicale',
       title: 'Équipements\ncertifiés',
@@ -210,30 +215,49 @@ class _OnboardPageView extends StatelessWidget {
         children: [
           AspectRatio(
             aspectRatio: 1.05,
-            child: Stack(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: page.accent, width: 1.5),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [page.accent.withValues(alpha: 0.18), page.accent.withValues(alpha: 0.04)],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: page.accent, width: 1.5),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [page.accent.withValues(alpha: 0.18), page.accent.withValues(alpha: 0.04)],
+                      ),
                     ),
                   ),
-                  child: Center(child: Icon(page.icon, size: 96, color: page.accent.withValues(alpha: 0.85))),
-                ),
-                Positioned(
-                  left: 16,
-                  bottom: 16,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(color: page.accent, borderRadius: BorderRadius.circular(20)),
-                    child: Text('${page.badgeEmoji}  ${page.badgeText}', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                  Image.asset(
+                    page.imagePath,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Center(
+                      child: Icon(page.icon, size: 96, color: page.accent.withValues(alpha: 0.85)),
+                    ),
                   ),
-                ),
-              ],
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Colors.black.withValues(alpha: 0.55)],
+                        stops: const [0.55, 1.0],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 16,
+                    bottom: 16,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(color: page.accent, borderRadius: BorderRadius.circular(20)),
+                      child: Text('${page.badgeEmoji}  ${page.badgeText}', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 28),
