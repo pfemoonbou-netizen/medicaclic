@@ -10,6 +10,12 @@ create table if not exists public.profiles (
   email text not null,
   birth_date date,
   gender text,
+  role text not null default 'utilisateur',
+  adresse text,
+  wilaya text,
+  photo_url text,
+  carte_identite_url text,
+  profile_completed boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -169,6 +175,16 @@ alter table public.community_posts enable row level security;
 -- Profiles: a user can read/update only their own profile
 create policy "profiles_select_own" on public.profiles for select using (auth.uid() = id);
 create policy "profiles_update_own" on public.profiles for update using (auth.uid() = id);
+
+-- ============ STORAGE: profile photos & ID cards ============
+insert into storage.buckets (id, name, public)
+values ('profile-photos', 'profile-photos', true)
+on conflict (id) do nothing;
+
+create policy "profile_photos_public_read" on storage.objects for select using (bucket_id = 'profile-photos');
+create policy "profile_photos_owner_insert" on storage.objects for insert with check (bucket_id = 'profile-photos' and auth.uid()::text = (storage.foldername(name))[1]);
+create policy "profile_photos_owner_update" on storage.objects for update using (bucket_id = 'profile-photos' and auth.uid()::text = (storage.foldername(name))[1]);
+create policy "profile_photos_owner_delete" on storage.objects for delete using (bucket_id = 'profile-photos' and auth.uid()::text = (storage.foldername(name))[1]);
 
 -- Public read-only catalogs: anyone (incl. anonymous) can read
 create policy "doctors_public_read" on public.doctors for select using (true);

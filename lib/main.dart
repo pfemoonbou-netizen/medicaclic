@@ -11,6 +11,7 @@ import 'screens/auth/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import 'screens/auth/user_type_selection_screen.dart';
+import 'screens/auth/complete_profile_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/pharmacy/pharmacy_screen.dart';
@@ -31,6 +32,10 @@ final GoRouter _router = GoRouter(
     GoRoute(path: '/login', builder: (c, s) => const LoginScreen()),
     GoRoute(path: '/signup', builder: (c, s) => const SignupScreen()),
     GoRoute(path: '/user-type-selection', builder: (c, s) => const UserTypeSelectionScreen()),
+    GoRoute(
+      path: '/complete-profile',
+      builder: (c, s) => CompleteProfileScreen(role: (s.extra as String?) ?? 'utilisateur'),
+    ),
     GoRoute(path: '/home', builder: (c, s) => const HomeScreen()),
     GoRoute(path: '/pharmacy', builder: (c, s) => const PharmacyScreen()),
     GoRoute(path: '/cart', builder: (c, s) => const CartScreen()),
