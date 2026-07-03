@@ -50,13 +50,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final pages = [
       _homeTab(),
-      const FindDoctorsScreen(),
       ChangeNotifierProvider(create: (_) => YemmaProvider(), child: const YemmaScreen()),
       const PharmacyScreen(),
       const ProfileScreen(),
     ];
-    final isYemma = _index == 2;
-    final isBoutique = _index == 3;
+    final isYemma = _index == 1;
+    final isBoutique = _index == 2;
     final isDark = isYemma || isBoutique;
     final darkBackground = isYemma ? YemmaColors.background : BoutiqueColors.background;
     final darkCard = isYemma ? YemmaColors.card : BoutiqueColors.card;
@@ -75,7 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: (i) => setState(() => _index = i),
         items: [
           const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
-          const BottomNavigationBarItem(icon: Icon(Icons.medical_services), label: 'Médecins'),
           BottomNavigationBarItem(
             icon: Image.asset(
               'assets/images/services/yemma.png',
@@ -110,6 +108,13 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ChangeNotifierProvider(create: (_) => HomeCareProvider(), child: const HomeCareScreen())),
+    );
+  }
+
+  void _openDoctorsScreen(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const FindDoctorsScreen()),
     );
   }
 
@@ -205,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         GestureDetector(
-          onTap: () => setState(() => _index = 4),
+          onTap: () => setState(() => _index = 3),
           child: CircleAvatar(
             radius: 26,
             backgroundColor: AppColors.primary,
@@ -227,16 +232,16 @@ class _HomeScreenState extends State<HomeScreen> {
             end: Alignment.bottomRight,
           ),
         ),
-        padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+        padding: const EdgeInsets.fromLTRB(20, 14, 0, 0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.only(bottom: 14),
                 child: Text(
                   'Les meilleurs services\nmédicaux en Algérie',
-                  style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800, height: 1.25),
+                  style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w800, height: 1.2),
                 ),
               ),
             ),
@@ -244,10 +249,10 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: const BorderRadius.only(bottomRight: Radius.circular(24)),
               child: Image.network(
                 'https://firebasestorage.googleapis.com/v0/b/codeless-app.appspot.com/o/projects%2F0SWfz3vtdincMUe0zzzH%2F74ffc6ad412edc8440bf2a10c35531341ac49d0eyoung-doctor-looking-pointing-removebg-preview%201.png?alt=media&token=e08f22ac-80cc-44cd-b386-3c524b7fc19e',
-                width: 130,
-                height: 110,
+                width: 105,
+                height: 88,
                 fit: BoxFit.contain,
-                errorBuilder: (context, error, stack) => const SizedBox(width: 130, height: 110),
+                errorBuilder: (context, error, stack) => const SizedBox(width: 105, height: 88),
               ),
             ),
           ],
@@ -307,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _greetingHeader(),
           const SizedBox(height: 20),
           GestureDetector(
-            onTap: () => setState(() => _index = 1),
+            onTap: () => _openDoctorsScreen(context),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               height: 44,
@@ -326,9 +331,9 @@ class _HomeScreenState extends State<HomeScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _categoryTile(Icons.medical_services_outlined, 'Médecin', () => setState(() => _index = 1), imagePath: 'assets/images/services/doctor.png'),
+                _categoryTile(Icons.medical_services_outlined, 'Médecin', () => _openDoctorsScreen(context), imagePath: 'assets/images/services/doctor.png'),
                 const SizedBox(width: 16),
-                _categoryTile(Icons.local_pharmacy_outlined, 'Pharmacie', () => setState(() => _index = 3), imagePath: 'assets/images/services/pharmacy.png'),
+                _categoryTile(Icons.local_pharmacy_outlined, 'Pharmacie', () => setState(() => _index = 2), imagePath: 'assets/images/services/pharmacy.png'),
                 const SizedBox(width: 16),
                 _categoryTile(Icons.emergency_outlined, 'Ambulance', () => _showAmbulanceSheet(context), imagePath: 'assets/images/services/ambulance.png'),
                 const SizedBox(width: 16),
@@ -371,7 +376,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Top Doctor', style: TextStyle(color: _darkText, fontSize: 16, fontWeight: FontWeight.w600)),
-              GestureDetector(onTap: () => setState(() => _index = 1), child: const Text('See all', style: TextStyle(color: AppColors.primary, fontSize: 12))),
+              GestureDetector(onTap: () => _openDoctorsScreen(context), child: const Text('See all', style: TextStyle(color: AppColors.primary, fontSize: 12))),
             ],
           ),
           const SizedBox(height: 12),
