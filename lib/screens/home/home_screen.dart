@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart';
+import '../../config/supabase_config.dart';
 import '../../providers/doctor_provider.dart';
 import '../../providers/yemma_provider.dart';
 import '../../utils/app_colors.dart';
@@ -22,6 +22,29 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
+  String _displayName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDisplayName();
+  }
+
+  Future<void> _loadDisplayName() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) return;
+    String result = '';
+    try {
+      final data = await supabase.from('profiles').select('name').eq('id', user.id).maybeSingle();
+      final name = data?['name'] as String?;
+      if (name != null && name.isNotEmpty && !name.contains('@')) result = name;
+    } catch (_) {}
+    if (result.isEmpty) {
+      final email = user.email ?? '';
+      result = email.isNotEmpty ? email.split('@').first.split('+').first : 'Bienvenue';
+    }
+    if (mounted) setState(() => _displayName = result);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,12 +73,20 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: isDark ? darkAccent : AppColors.primary,
         unselectedItemColor: isDark ? darkTextSecondary : null,
         onTap: (i) => setState(() => _index = i),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
-          BottomNavigationBarItem(icon: Icon(Icons.medical_services), label: 'Médecins'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Yemma يمّا'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_bag), label: 'Boutique'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
+        items: [
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
+          const BottomNavigationBarItem(icon: Icon(Icons.medical_services), label: 'Médecins'),
+          BottomNavigationBarItem(
+            icon: Image.asset(
+              'assets/images/services/yemma.png',
+              width: 26,
+              height: 26,
+              errorBuilder: (context, error, stack) => const Icon(Icons.favorite),
+            ),
+            label: 'Yemma يمّا',
+          ),
+          const BottomNavigationBarItem(icon: Icon(Icons.shopping_bag), label: 'Boutique'),
+          const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
     );
@@ -152,8 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _greetingHeader() {
-    final name = context.watch<AuthProvider>().user?.name;
-    final displayName = (name == null || name.isEmpty) ? 'Bienvenue' : name;
+    final displayName = _displayName.isEmpty ? 'Bienvenue' : _displayName;
     final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : '?';
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -170,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: 4),
-              Text(displayName, style: const TextStyle(color: Color(0xFF282C3F), fontSize: 26, fontWeight: FontWeight.bold)),
+              Text(displayName, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xFF282C3F), fontSize: 26, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
@@ -299,8 +329,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 _categoryTile(Icons.medical_services_outlined, 'Médecin', () => setState(() => _index = 1), imagePath: 'assets/images/services/doctor.png'),
                 const SizedBox(width: 16),
                 _categoryTile(Icons.local_pharmacy_outlined, 'Pharmacie', () => setState(() => _index = 3), imagePath: 'assets/images/services/pharmacy.png'),
-                const SizedBox(width: 16),
-                _categoryTile(Icons.favorite_outline, 'Yemma', () => setState(() => _index = 2)),
                 const SizedBox(width: 16),
                 _categoryTile(Icons.emergency_outlined, 'Ambulance', () => _showAmbulanceSheet(context), imagePath: 'assets/images/services/ambulance.png'),
                 const SizedBox(width: 16),
