@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _categoryTile(IconData icon, String label, VoidCallback? onTap) {
+  Widget _categoryTile(IconData icon, String label, VoidCallback? onTap, {String? imagePath}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -90,12 +90,19 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             width: 64,
             height: 56,
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: const [BoxShadow(color: Color(0x19000000), spreadRadius: -11, offset: Offset(0, 17), blurRadius: 70)],
             ),
-            child: Icon(icon, size: 28, color: AppColors.primary),
+            child: imagePath == null
+                ? Icon(icon, size: 28, color: AppColors.primary)
+                : Image.asset(
+                    imagePath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stack) => Icon(icon, size: 28, color: AppColors.primary),
+                  ),
           ),
           const SizedBox(height: 8),
           Text(label, style: const TextStyle(color: _gray, fontSize: 14)),
@@ -289,15 +296,15 @@ class _HomeScreenState extends State<HomeScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _categoryTile(Icons.medical_services_outlined, 'Médecin', () => setState(() => _index = 1)),
+                _categoryTile(Icons.medical_services_outlined, 'Médecin', () => setState(() => _index = 1), imagePath: 'assets/images/services/doctor.png'),
                 const SizedBox(width: 16),
-                _categoryTile(Icons.local_pharmacy_outlined, 'Pharmacie', () => setState(() => _index = 3)),
+                _categoryTile(Icons.local_pharmacy_outlined, 'Pharmacie', () => setState(() => _index = 3), imagePath: 'assets/images/services/pharmacy.png'),
                 const SizedBox(width: 16),
                 _categoryTile(Icons.favorite_outline, 'Yemma', () => setState(() => _index = 2)),
                 const SizedBox(width: 16),
-                _categoryTile(Icons.emergency_outlined, 'Ambulance', () => _showAmbulanceSheet(context)),
+                _categoryTile(Icons.emergency_outlined, 'Ambulance', () => _showAmbulanceSheet(context), imagePath: 'assets/images/services/ambulance.png'),
                 const SizedBox(width: 16),
-                _categoryTile(Icons.home_repair_service_outlined, 'Domicile', () => _openHomeCareScreen(context)),
+                _categoryTile(Icons.home_repair_service_outlined, 'Domicile', () => _openHomeCareScreen(context), imagePath: 'assets/images/services/home_care.png'),
               ],
             ),
           ),
