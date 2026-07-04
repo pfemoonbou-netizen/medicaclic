@@ -232,3 +232,28 @@ insert into public.promo_offers (title, discount_text, delivery_text, promo_code
   ('Pharmacie Centrale Algérie', '-20% sur tous les antibiotiques', 'Livraison 24h — Code promo : PC20', 'PC20', '#6C4FE0'),
   ('Vitamines & Compléments', '-30% sur la gamme bien-être', 'Livraison offerte dès 2000 DA', 'VITA30', '#F2994A')
 on conflict do nothing;
+
+-- ===================================================================
+-- MEDICAL RECORDS (dossier médical, par utilisateur)
+-- ===================================================================
+create table if not exists public.medical_records (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  category text not null check (category in (
+    'allergies', 'family_history', 'diagnoses', 'treatment',
+    'symptoms', 'lab_tests', 'imaging'
+  )),
+  title text not null,
+  description text,
+  record_date date not null default current_date,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists medical_records_user_cat_idx
+  on public.medical_records (user_id, category);
+
+alter table public.medical_records enable row level security;
+
+drop policy if exists "medical_records_owner_all" on public.medical_records;
+create policy "medical_records_owner_all" on public.medical_records
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

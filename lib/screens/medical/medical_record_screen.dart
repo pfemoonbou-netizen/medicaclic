@@ -1,26 +1,65 @@
 import 'package:flutter/material.dart';
+import '../../config/supabase_config.dart';
 import '../../utils/app_colors.dart';
 
-class _Record {
+class _Category {
+  final String key;
   final IconData icon;
   final String title;
-  final int count;
-  const _Record({required this.icon, required this.title, required this.count});
+  const _Category(this.key, this.icon, this.title);
 }
 
-class MedicalRecordScreen extends StatelessWidget {
+const _categories = [
+  _Category('allergies', Icons.coronavirus_outlined, 'Allergies'),
+  _Category('family_history', Icons.account_tree_outlined, 'Antécédents familiaux'),
+  _Category('diagnoses', Icons.monitor_heart_outlined, 'Diagnostics'),
+  _Category('treatment', Icons.medication_outlined, 'Traitement'),
+  _Category('symptoms', Icons.thermostat, 'Symptômes'),
+  _Category('lab_tests', Icons.biotech_outlined, 'Analyses'),
+  _Category('imaging', Icons.image_search_outlined, 'Scanner / Imagerie'),
+];
+
+class MedicalRecordScreen extends StatefulWidget {
   const MedicalRecordScreen({super.key, this.patientName = 'Mon dossier'});
   final String patientName;
 
-  static const _records = [
-    _Record(icon: Icons.coronavirus_outlined, title: 'Allergies', count: 4),
-    _Record(icon: Icons.account_tree_outlined, title: 'Antécédents familiaux', count: 2),
-    _Record(icon: Icons.monitor_heart_outlined, title: 'Diagnostics', count: 3),
-    _Record(icon: Icons.medication_outlined, title: 'Traitement', count: 4),
-    _Record(icon: Icons.thermostat, title: 'Symptômes', count: 2),
-    _Record(icon: Icons.biotech_outlined, title: 'Analyses', count: 4),
-    _Record(icon: Icons.image_search_outlined, title: 'Scanner / Imagerie', count: 2),
-  ];
+  @override
+  State<MedicalRecordScreen> createState() => _MedicalRecordScreenState();
+}
+
+class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
+  Map<String, int> _counts = {};
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCounts();
+  }
+
+  Future<void> _loadCounts() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
+    try {
+      final rows = await supabase.from('medical_records').select('category').eq('user_id', user.id);
+      final counts = <String, int>{};
+      for (final row in rows as List) {
+        final cat = row['category'] as String?;
+        if (cat != null) counts[cat] = (counts[cat] ?? 0) + 1;
+      }
+      if (mounted) {
+        setState(() {
+          _counts = counts;
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +106,7 @@ class MedicalRecordScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      patientName,
+                      widget.patientName,
                       style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                   ],
@@ -76,19 +115,31 @@ class MedicalRecordScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-              itemCount: _records.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 14),
-              itemBuilder: (context, i) => _RecordCard(
-                record: _records[i],
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('${_records[i].title} — bientôt disponible')),
-                  );
-                },
-              ),
-            ),
+            child: _loading
+                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                : RefreshIndicator(
+                    color: AppColors.primary,
+                    onRefresh: _loadCounts,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                      itemCount: _categories.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 14),
+                      itemBuilder: (context, i) {
+                        final cat = _categories[i];
+                        final count = _counts[cat.key] ?? 0;
+                        return _RecordCard(
+                          icon: cat.icon,
+                          title: cat.title,
+                          count: count,
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('${cat.title} — bientôt disponible')),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
           ),
         ],
       ),
@@ -97,9 +148,11 @@ class MedicalRecordScreen extends StatelessWidget {
 }
 
 class _RecordCard extends StatelessWidget {
-  final _Record record;
+  final IconData icon;
+  final String title;
+  final int count;
   final VoidCallback onTap;
-  const _RecordCard({required this.record, required this.onTap});
+  const _RecordCard({required this.icon, required this.title, required this.count, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +174,7 @@ class _RecordCard extends StatelessWidget {
                 color: AppColors.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(record.icon, color: AppColors.primary, size: 24),
+              child: Icon(icon, color: AppColors.primary, size: 24),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -129,12 +182,12 @@ class _RecordCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    record.title,
+                    title,
                     style: const TextStyle(color: Color(0xFF15A196), fontSize: 15, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${record.count} enregistrements',
+                    '$count enregistrement${count > 1 ? 's' : ''}',
                     style: const TextStyle(color: Color(0xFF727272), fontSize: 11),
                   ),
                 ],
