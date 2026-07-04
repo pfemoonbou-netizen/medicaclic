@@ -10,6 +10,7 @@ import '../yemma/yemma_screen.dart';
 import '../yemma/yemma_theme.dart';
 import '../pharmacy/boutique_theme.dart';
 import '../profile/profile_screen.dart';
+import '../medical/medical_record_screen.dart';
 import 'widgets/ambulance_sheet.dart';
 import 'home_care/home_care_screen.dart';
 import '../../providers/home_care_provider.dart';
@@ -115,6 +116,13 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const FindDoctorsScreen()),
+    );
+  }
+
+  void _openMedicalRecord(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MedicalRecordScreen(patientName: _displayName.isEmpty ? 'Mon dossier' : _displayName)),
     );
   }
 
@@ -390,62 +398,38 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Health article', style: TextStyle(color: _darkText, fontSize: 16, fontWeight: FontWeight.w600)),
-              const Text('See all', style: TextStyle(color: AppColors.primary, fontSize: 12)),
-            ],
-          ),
+          const Text('Mon dossier médical', style: TextStyle(color: _darkText, fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(border: Border.all(color: _lightTeal), borderRadius: BorderRadius.circular(10)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 55,
-                      height: 55,
-                      decoration: BoxDecoration(color: AppColors.secondary, borderRadius: BorderRadius.circular(8)),
-                      child: const Icon(Icons.article_outlined, color: AppColors.primary),
+          GestureDetector(
+            onTap: () => _openMedicalRecord(context),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: _lightTeal,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(12)),
+                    child: const Icon(Icons.folder_shared_outlined, color: AppColors.primary, size: 28),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Consulter mon dossier', style: TextStyle(color: _darkText, fontSize: 15, fontWeight: FontWeight.w700)),
+                        SizedBox(height: 4),
+                        Text('Allergies, traitements, analyses, antécédents...', style: TextStyle(color: _gray, fontSize: 12)),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('The 25 Healthiest Fruits You Can Eat, According to a Nutritionist', style: TextStyle(color: Color(0xFF565656), fontSize: 12, fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 8),
-                          Row(children: [
-                            const Text('Jun 10, 2021', style: TextStyle(color: _gray, fontSize: 10, fontWeight: FontWeight.w500)),
-                            const SizedBox(width: 8),
-                            const Text('•', style: TextStyle(color: _gray, fontSize: 10)),
-                            const SizedBox(width: 8),
-                            const Text('5min read', style: TextStyle(color: _gray, fontSize: 10, fontWeight: FontWeight.w500)),
-                          ]),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: const [
-
-
-                    
-                    Icon(Icons.favorite_border, size: 18, color: _gray),
-                    Icon(Icons.chat_bubble_outline, size: 18, color: _gray),
-                    Icon(Icons.bookmark_border, size: 18, color: _gray),
-                    Icon(Icons.share_outlined, size: 18, color: _gray),
-                  ],
-                ),
-              ],
+                  ),
+                  const Icon(Icons.chevron_right, color: AppColors.primary),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 12),
