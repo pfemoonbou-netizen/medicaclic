@@ -201,9 +201,16 @@ class _MedicalCategoryScreenState extends State<MedicalCategoryScreen> {
         final err = data is Map ? data['error'] : null;
         _showReport('Impossible d\'analyser ce document.\n\n${err ?? 'Réponse vide du serveur.'}');
       }
-    } catch (e) {
+    } catch (_) {
+      // La fonction IA n'est pas encore activée (clé API non configurée) :
+      // on affiche un message Premium propre plutôt qu'une erreur technique.
       if (mounted) Navigator.of(context, rootNavigator: true).pop();
-      _showReport('Erreur pendant l\'analyse :\n$e');
+      _showReport(
+        '✨ Analyse IA — Premium\n\n'
+        'Importez votre analyse et l\'intelligence artificielle vous expliquera '
+        'les résultats en langage simple.\n\n'
+        'Cette fonctionnalité sera activée très bientôt. 🔓',
+      );
     }
   }
 
