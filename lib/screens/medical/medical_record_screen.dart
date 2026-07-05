@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../config/supabase_config.dart';
 import '../../utils/app_colors.dart';
+import 'medical_category_screen.dart';
 
 class _Category {
   final String key;
@@ -131,10 +132,14 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                           icon: cat.icon,
                           title: cat.title,
                           count: count,
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('${cat.title} — bientôt disponible')),
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => MedicalCategoryScreen(categoryKey: cat.key, title: cat.title),
+                              ),
                             );
+                            _loadCounts();
                           },
                         );
                       },

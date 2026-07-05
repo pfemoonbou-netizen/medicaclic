@@ -257,3 +257,26 @@ alter table public.medical_records enable row level security;
 drop policy if exists "medical_records_owner_all" on public.medical_records;
 create policy "medical_records_owner_all" on public.medical_records
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ===================================================================
+-- MEDICAL DOCUMENTS (fichiers importés + rapport IA) — extension
+-- ===================================================================
+alter table public.medical_records
+  add column if not exists file_path text,
+  add column if not exists file_type text,
+  add column if not exists ai_report text;
+
+-- Bucket privé pour les documents médicaux (photos / PDF d'analyses)
+insert into storage.buckets (id, name, public)
+values ('medical-documents', 'medical-documents', false)
+on conflict (id) do nothing;
+
+drop policy if exists "medical_docs_owner_read" on storage.objects;
+drop policy if exists "medical_docs_owner_insert" on storage.objects;
+drop policy if exists "medical_docs_owner_update" on storage.objects;
+drop policy if exists "medical_docs_owner_delete" on storage.objects;
+
+create policy "medical_docs_owner_read" on storage.objects for select using (bucket_id = 'medical-documents' and auth.uid()::text = (storage.foldername(name))[1]);
+create policy "medical_docs_owner_insert" on storage.objects for insert with check (bucket_id = 'medical-documents' and auth.uid()::text = (storage.foldername(name))[1]);
+create policy "medical_docs_owner_update" on storage.objects for update using (bucket_id = 'medical-documents' and auth.uid()::text = (storage.foldername(name))[1]);
+create policy "medical_docs_owner_delete" on storage.objects for delete using (bucket_id = 'medical-documents' and auth.uid()::text = (storage.foldername(name))[1]);
