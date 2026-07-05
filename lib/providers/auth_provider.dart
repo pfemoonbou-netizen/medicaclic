@@ -84,16 +84,20 @@ class AuthProvider extends ChangeNotifier {
       if (role == 'prestataire' && (providerCategoryId == null || providerSpecialty == null || providerSpecialty.isEmpty || providerPhone == null || providerPhone.isEmpty)) {
         throw 'Veuillez renseigner votre spécialité, catégorie et téléphone';
       }
-      final res = await supabase.auth.signUp(email: email, password: password, data: {'name': name, 'role': role});
+      // Le profil est créé automatiquement côté base par le trigger
+      // handle_new_user à partir de ces métadonnées. On ne fait donc PAS
+      // d'insert manuel (sinon erreur "duplicate key").
+      final res = await supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {
+          'name': name,
+          'role': role,
+          'birth_date': birthDate?.toIso8601String().split('T')[0],
+          'gender': gender,
+        },
+      );
       if (res.user == null) throw 'Inscription impossible';
-
-      await supabase.from('profiles').insert({
-        'id': res.user!.id,
-        'name': name,
-        'email': email,
-        'birth_date': birthDate?.toIso8601String().split('T')[0],
-        'gender': gender,
-      });
 
       if (role == 'prestataire') {
         await supabase.from('home_care_providers').insert({

@@ -93,8 +93,13 @@ class _SignupScreenState extends State<SignupScreen> {
       gender: _gender!,
     );
 
-    if (success && mounted) {
+    if (!mounted) return;
+    if (success) {
       context.go('/user-type-selection');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(auth.errorMessage ?? 'Inscription impossible')),
+      );
     }
   }
 
