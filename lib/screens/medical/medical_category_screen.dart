@@ -7,6 +7,18 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../config/supabase_config.dart';
 import '../../utils/app_colors.dart';
 
+class _PremiumTag extends StatelessWidget {
+  const _PremiumTag();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(color: const Color(0xFFFFD54A), borderRadius: BorderRadius.circular(20)),
+      child: const Text('PREMIUM', style: TextStyle(color: Color(0xFF5B3B00), fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+    );
+  }
+}
+
 class MedicalCategoryScreen extends StatefulWidget {
   const MedicalCategoryScreen({super.key, required this.categoryKey, required this.title});
   final String categoryKey;
@@ -192,20 +204,81 @@ class _MedicalCategoryScreenState extends State<MedicalCategoryScreen> {
             : const Icon(Icons.add, color: Colors.white),
         label: const Text('Importer', style: TextStyle(color: Colors.white)),
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-          : _docs.isEmpty
-              ? _emptyState()
-              : RefreshIndicator(
-                  color: AppColors.primary,
-                  onRefresh: _load,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
-                    itemCount: _docs.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, i) => _docCard(_docs[i]),
-                  ),
+      body: Column(
+        children: [
+          _aiBanner(),
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                : _docs.isEmpty
+                    ? _emptyState()
+                    : RefreshIndicator(
+                        color: AppColors.primary,
+                        onRefresh: _load,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 90),
+                          itemCount: _docs.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          itemBuilder: (context, i) => _docCard(_docs[i]),
+                        ),
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _aiBanner() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: GestureDetector(
+        onTap: () {
+          if (_docs.isEmpty) {
+            _showImportSheet();
+          } else {
+            _analyzeWithAI(_docs.first);
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF7B4DFF), Color(0xFF9C6BFF)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.25), borderRadius: BorderRadius.circular(12)),
+                child: const Icon(Icons.auto_awesome, color: Colors.white),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text('Analyser avec l\'IA', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+                        SizedBox(width: 8),
+                        _PremiumTag(),
+                      ],
+                    ),
+                    SizedBox(height: 4),
+                    Text('Importez votre analyse, l\'IA vous l\'explique en langage simple.', style: TextStyle(color: Colors.white70, fontSize: 12, height: 1.3)),
+                  ],
                 ),
+              ),
+              const Icon(Icons.chevron_right, color: Colors.white),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
