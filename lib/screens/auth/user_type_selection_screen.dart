@@ -1,139 +1,127 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../utils/app_colors.dart';
 
 class UserTypeSelectionScreen extends StatelessWidget {
   const UserTypeSelectionScreen({Key? key}) : super(key: key);
+
+  // Dégradé vert de la maquette
+  static const Color _greenTop = Color(0xFF2E7D6B);
+  static const Color _greenBottom = Color(0xFF1E6B57);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF101522)),
-          onPressed: () => context.canPop() ? context.pop() : context.go('/signup'),
-        ),
-        title: const Text(
-          'Sélectionner votre type',
-          style: TextStyle(color: Color(0xFF101522), fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Quel est votre\ntype de compte?',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF101522)),
+      body: Stack(
+        children: [
+          // Vague verte en bas
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: ClipPath(
+              clipper: _WaveClipper(),
+              child: Container(
+                height: 220,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [_greenTop, _greenBottom],
+                  ),
+                ),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Choisissez le type de compte qui vous convient le mieux.',
-                style: TextStyle(color: Color(0xFFA0A7B0), fontSize: 16),
-              ),
-              const SizedBox(height: 32),
-              _TypeCard(
-                icon: Icons.shopping_cart,
-                title: 'Acheteur',
-                description: 'Parcourez et achetez des produits et services',
-                onTap: () => context.go('/complete-profile', extra: 'utilisateur'),
-              ),
-              const SizedBox(height: 16),
-              _TypeCard(
-                icon: Icons.store,
-                title: 'Vendeur',
-                description: 'Vendez vos produits et services',
-                onTap: () => context.go('/complete-profile', extra: 'vendeur'),
-              ),
-              const SizedBox(height: 16),
-              _TypeCard(
-                icon: Icons.edit,
-                title: 'Créateur de contenu',
-                description: 'Partagez votre expertise et créez du contenu',
-                onTap: () => context.go('/complete-profile', extra: 'createur'),
-              ),
-            ],
+            ),
           ),
-        ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: Column(
+                children: [
+                  const SizedBox(height: 40),
+                  const Text(
+                    'Bienvenue 👋',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF101522),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Choisissez votre type de compte',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 15, color: Color(0xFF7A8290)),
+                  ),
+                  const Spacer(),
+                  _TypeButton(
+                    label: 'Médecin',
+                    icon: Icons.medical_services_outlined,
+                    onTap: () => context.go('/complete-profile', extra: 'medecin'),
+                  ),
+                  const SizedBox(height: 20),
+                  _TypeButton(
+                    label: 'Patient',
+                    icon: Icons.person_outline,
+                    onTap: () => context.go('/complete-profile', extra: 'patient'),
+                  ),
+                  const SizedBox(height: 20),
+                  _TypeButton(
+                    label: 'Admin',
+                    icon: Icons.admin_panel_settings_outlined,
+                    onTap: () => context.go('/complete-profile', extra: 'admin'),
+                  ),
+                  const Spacer(flex: 2),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _TypeCard extends StatelessWidget {
+class _TypeButton extends StatelessWidget {
+  final String label;
   final IconData icon;
-  final String title;
-  final String description;
   final VoidCallback onTap;
 
-  const _TypeCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.onTap,
-  });
+  const _TypeButton({required this.label, required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(20),
+        width: double.infinity,
+        height: 60,
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
+          gradient: const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [Color(0xFF3A8C77), Color(0xFF2E7D6B)],
+          ),
+          borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: const Color(0xFF2E7D6B).withValues(alpha: 0.35),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: AppColors.primary, size: 28),
-            ),
-            const SizedBox(height: 12),
+            Icon(icon, color: Colors.white, size: 22),
+            const SizedBox(width: 12),
             Text(
-              title,
+              label,
               style: const TextStyle(
+                color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF101522),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              description,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFFA0A7B0),
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Icon(
-                Icons.arrow_forward,
-                color: AppColors.primary,
-                size: 20,
               ),
             ),
           ],
@@ -141,4 +129,22 @@ class _TypeCard extends StatelessWidget {
       ),
     );
   }
+}
+
+// Vague douce en haut du bloc vert du bas
+class _WaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.moveTo(0, 60);
+    path.quadraticBezierTo(size.width * 0.25, 0, size.width * 0.5, 30);
+    path.quadraticBezierTo(size.width * 0.75, 60, size.width, 20);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

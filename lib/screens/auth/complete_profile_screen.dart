@@ -24,7 +24,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   bool _isLoading = false;
   String? _error;
 
-  bool get _needsCarteIdentite => widget.role == 'vendeur' || widget.role == 'prestataire';
+  bool get _needsCarteIdentite => widget.role == 'medecin' || widget.role == 'vendeur' || widget.role == 'prestataire';
 
   Future<void> _pickImage(bool isCarteIdentite) async {
     final picker = ImagePicker();
@@ -134,6 +134,12 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
 
   String get _title {
     switch (widget.role) {
+      case 'medecin':
+        return 'Profil médecin';
+      case 'patient':
+        return 'Profil patient';
+      case 'admin':
+        return 'Profil administrateur';
       case 'vendeur':
         return 'Profil vendeur';
       case 'prestataire':
