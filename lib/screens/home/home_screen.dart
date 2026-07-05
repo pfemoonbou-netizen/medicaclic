@@ -5,6 +5,7 @@ import '../../providers/doctor_provider.dart';
 import '../../providers/yemma_provider.dart';
 import '../../utils/app_colors.dart';
 import '../pharmacy/pharmacy_screen.dart';
+import '../pharmacy/pharmacy_map_screen.dart';
 import '../doctors/find_doctors_screen.dart';
 import '../yemma/yemma_screen.dart';
 import '../yemma/yemma_theme.dart';
@@ -116,6 +117,13 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const FindDoctorsScreen()),
+    );
+  }
+
+  void _openPharmacyMap(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const PharmacyMapScreen()),
     );
   }
 
@@ -341,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _categoryTile(Icons.medical_services_outlined, 'Médecin', () => _openDoctorsScreen(context), imagePath: 'assets/images/services/doctor.png'),
                 const SizedBox(width: 16),
-                _categoryTile(Icons.local_pharmacy_outlined, 'Pharmacie', () => setState(() => _index = 2), imagePath: 'assets/images/services/pharmacy.png'),
+                _categoryTile(Icons.local_pharmacy_outlined, 'Pharmacie', () => _openPharmacyMap(context), imagePath: 'assets/images/services/pharmacy.png'),
                 const SizedBox(width: 16),
                 _categoryTile(Icons.emergency_outlined, 'Ambulance', () => _showAmbulanceSheet(context), imagePath: 'assets/images/services/ambulance.png'),
                 const SizedBox(width: 16),
