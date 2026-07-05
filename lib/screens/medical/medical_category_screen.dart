@@ -164,25 +164,81 @@ class _MedicalCategoryScreenState extends State<MedicalCategoryScreen> {
     }
   }
 
-  void _analyzeWithAI(Map<String, dynamic> doc) {
+  Future<void> _analyzeWithAI(Map<String, dynamic> doc) async {
+    final recordId = doc['id'] as String?;
+    if (recordId == null) return;
+
+    // Rapport déjà généré ? On l'affiche directement.
+    final existing = doc['ai_report'] as String?;
+    if (existing != null && existing.trim().isNotEmpty) {
+      _showReport(existing);
+      return;
+    }
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: const [
-            Icon(Icons.auto_awesome, color: AppColors.primary),
-            SizedBox(width: 8),
-            Text('Analyse IA', style: TextStyle(fontSize: 18)),
+      barrierDismissible: false,
+      builder: (ctx) => const AlertDialog(
+        content: Row(
+          children: [
+            CircularProgressIndicator(color: AppColors.primary),
+            SizedBox(width: 20),
+            Expanded(child: Text('L\'IA analyse votre document...')),
           ],
         ),
-        content: const Text(
-          'L\'analyse automatique de vos résultats par intelligence artificielle est une fonctionnalité Premium.\n\nElle sera disponible très bientôt : l\'IA lira votre analyse et vous expliquera les résultats en langage simple.',
-          style: TextStyle(height: 1.5),
+      ),
+    );
+
+    try {
+      final res = await supabase.functions.invoke('analyze-report', body: {'recordId': recordId});
+      if (mounted) Navigator.of(context, rootNavigator: true).pop(); // ferme le loader
+      final data = res.data;
+      final report = data is Map ? data['report'] as String? : null;
+      if (report != null && report.trim().isNotEmpty) {
+        doc['ai_report'] = report;
+        _showReport(report);
+      } else {
+        final err = data is Map ? data['error'] : null;
+        _showReport('Impossible d\'analyser ce document.\n\n${err ?? 'Réponse vide du serveur.'}');
+      }
+    } catch (e) {
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+      _showReport('Erreur pendant l\'analyse :\n$e');
+    }
+  }
+
+  void _showReport(String report) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: const [
+                  Icon(Icons.auto_awesome, color: AppColors.primary),
+                  SizedBox(width: 8),
+                  Text('Analyse IA', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Text(report, style: const TextStyle(height: 1.5, fontSize: 14)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Fermer')),
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Compris')),
-        ],
       ),
     );
   }
