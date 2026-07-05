@@ -67,6 +67,20 @@ class CommunityPost {
 
 class YemmaProvider extends ChangeNotifier {
   bool isLoading = false;
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  // Évite le crash "used after being disposed" quand une requête réseau
+  // se termine après la fermeture de l'écran Yemma.
+  @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
+  }
 
   List<PainEntry> _painEntries = [];
   final List<String> painFilters = ['Tout', 'Dos', 'Ventre', 'Tête', 'Jambes'];
