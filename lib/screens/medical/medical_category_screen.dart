@@ -123,7 +123,9 @@ class _MedicalCategoryScreenState extends State<MedicalCategoryScreen> {
     if (user == null) return;
     setState(() => _uploading = true);
     try {
-      final path = '${user.id}/${widget.categoryKey}/${DateTime.now().millisecondsSinceEpoch}_$fileName';
+      final ext = fileName.contains('.') ? fileName.split('.').last.toLowerCase() : (fileType == 'pdf' ? 'pdf' : 'jpg');
+      final safeName = '${DateTime.now().millisecondsSinceEpoch}.$ext';
+      final path = '${user.id}/${widget.categoryKey}/$safeName';
       await supabase.storage.from('medical-documents').uploadBinary(
             path,
             bytes,
