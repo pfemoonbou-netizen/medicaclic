@@ -19,11 +19,25 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
 
   String _category = 'Tout';
   String _name = '';
+  final PageController _bannerController = PageController();
+  int _bannerPage = 0;
+
+  static const List<_Ad> _ads = [
+    _Ad('Offre spéciale', '-20% Orthopédie', 'Genouillères, attelles & ceintures', Color(0xFF6C5FE0), Color(0xFF5147C4), Icons.local_offer),
+    _Ad('Livraison', 'Gratuite dès 5000 DA', 'Partout en Algérie · 48h', Color(0xFF1AA88F), Color(0xFF128273), Icons.local_shipping),
+    _Ad('Nouveautés', 'Matériel de diagnostic', 'Tensiomètres · Oxymètres · Glucomètres', Color(0xFFF2994A), Color(0xFFE07B2E), Icons.monitor_heart),
+  ];
 
   @override
   void initState() {
     super.initState();
     _loadName();
+  }
+
+  @override
+  void dispose() {
+    _bannerController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadName() async {
@@ -60,7 +74,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                   const SizedBox(height: 16),
                   _searchBar(),
                   const SizedBox(height: 18),
-                  _promoBanner(provider),
+                  _adCarousel(),
                   const SizedBox(height: 22),
                   if (featured.isNotEmpty) ...[
                     _sectionHeader('En vedette'),
@@ -163,28 +177,59 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
     );
   }
 
-  Widget _promoBanner(ProductProvider provider) {
-    final offer = provider.promoOffers.isNotEmpty ? provider.promoOffers.first : null;
-    final title = offer?.title ?? 'Offre spéciale';
-    final discount = offer?.discountText ?? '-20% Orthopédie';
-    final sub = offer?.deliveryText ?? 'Livraison partout en Algérie';
+  Widget _adCarousel() {
+    return Column(
+      children: [
+        SizedBox(
+          height: 130,
+          child: PageView.builder(
+            controller: _bannerController,
+            itemCount: _ads.length,
+            onPageChanged: (i) => setState(() => _bannerPage = i),
+            itemBuilder: (context, i) => _adSlide(_ads[i]),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            _ads.length,
+            (i) => AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              width: i == _bannerPage ? 20 : 7,
+              height: 7,
+              decoration: BoxDecoration(
+                color: i == _bannerPage ? _purple : const Color(0xFFD1D5DB),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _adSlide(_Ad ad) {
     return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 2),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF6C5FE0), Color(0xFF5147C4)]),
+        gradient: LinearGradient(colors: [ad.c1, ad.c2]),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
           Expanded(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(ad.title, style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 6),
-                Text(discount, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(ad.big, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 6),
-                Text(sub, style: const TextStyle(color: Colors.white70, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(ad.sub, style: const TextStyle(color: Colors.white70, fontSize: 12), maxLines: 2, overflow: TextOverflow.ellipsis),
               ],
             ),
           ),
@@ -192,7 +237,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
             width: 64,
             height: 64,
             decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), shape: BoxShape.circle),
-            child: const Icon(Icons.local_offer, color: Colors.white, size: 30),
+            child: Icon(ad.icon, color: Colors.white, size: 30),
           ),
         ],
       ),
@@ -234,4 +279,14 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
       ),
     );
   }
+}
+
+class _Ad {
+  final String title;
+  final String big;
+  final String sub;
+  final Color c1;
+  final Color c2;
+  final IconData icon;
+  const _Ad(this.title, this.big, this.sub, this.c1, this.c2, this.icon);
 }

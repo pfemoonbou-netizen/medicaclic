@@ -135,6 +135,15 @@ class _ProductCardState extends State<ProductCard> {
         errorBuilder: (c, e, s) => _placeholder(),
       );
     }
+    if (img != null && img.startsWith('assets/')) {
+      return Image.asset(
+        img,
+        height: 120,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (c, e, s) => _placeholder(),
+      );
+    }
     return _placeholder();
   }
 
