@@ -13,6 +13,46 @@ class PainTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final yemma = context.watch<YemmaProvider>();
 
+    // Données réelles (triées par date croissante), respectent le filtre de zone.
+    final entries = List<PainEntry>.from(yemma.filteredPainEntries)..sort((a, b) => a.date.compareTo(b.date));
+    final hasData = entries.isNotEmpty;
+
+    // Statistiques calculées dans l'app (gratuit, sans IA).
+    final double avg = hasData ? entries.map((e) => e.severity).reduce((a, b) => a + b) / entries.length : 0;
+
+    String trendText = 'Pas assez de données pour une tendance.';
+    IconData trendIcon = Icons.trending_flat;
+    Color trendColor = YemmaColors.textFaint;
+    if (entries.length >= 4) {
+      final half = entries.length ~/ 2;
+      final firstAvg = entries.sublist(0, half).map((e) => e.severity).reduce((a, b) => a + b) / half;
+      final secondAvg = entries.sublist(half).map((e) => e.severity).reduce((a, b) => a + b) / (entries.length - half);
+      final diff = secondAvg - firstAvg;
+      final pct = firstAvg == 0 ? 0 : (diff.abs() / firstAvg * 100).round();
+      if (diff < -0.3) {
+        trendText = 'Douleurs en baisse de $pct% récemment';
+        trendIcon = Icons.trending_down;
+        trendColor = YemmaColors.green;
+      } else if (diff > 0.3) {
+        trendText = 'Douleurs en hausse de $pct% récemment';
+        trendIcon = Icons.trending_up;
+        trendColor = YemmaColors.orange;
+      } else {
+        trendText = 'Douleurs stables récemment';
+        trendIcon = Icons.trending_flat;
+        trendColor = YemmaColors.blue;
+      }
+    }
+
+    String topZone = '—';
+    if (hasData) {
+      final counts = <String, int>{};
+      for (final e in entries) {
+        counts[e.location] = (counts[e.location] ?? 0) + 1;
+      }
+      topZone = counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+    }
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -28,32 +68,33 @@ class PainTab extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(color: YemmaColors.pink.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
-                    child: const Icon(Icons.psychology_outlined, color: YemmaColors.pink, size: 20),
+                    child: const Icon(Icons.insights_outlined, color: YemmaColors.pink, size: 20),
                   ),
                   const SizedBox(width: 10),
-                  const Expanded(child: Text('Analyse IA', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700))),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(color: YemmaColors.pink, borderRadius: BorderRadius.circular(20)),
-                    child: const Text('IA', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
-                  ),
+                  const Expanded(child: Text('Aperçu de mes douleurs', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700))),
                 ],
               ),
               const SizedBox(height: 16),
-              _insightRow(Icons.trending_down, YemmaColors.green, 'Douleurs en diminution de 40% cette semaine'),
-              const SizedBox(height: 10),
-              _insightRow(Icons.warning_amber_rounded, YemmaColors.orange, 'Jeudi 9/10 — possible fatigue accumulée'),
-              const SizedBox(height: 10),
-              _insightRow(Icons.wb_sunny_outlined, YemmaColors.orange, 'Dimanche — journée la plus confortable'),
+              if (!hasData)
+                _insightRow(Icons.info_outline, YemmaColors.textFaint, 'Aucune douleur enregistrée pour le moment.')
+              else ...[
+                _insightRow(Icons.speed, YemmaColors.severityColor(avg.round()), 'Intensité moyenne : ${avg.toStringAsFixed(1)}/10'),
+                const SizedBox(height: 10),
+                _insightRow(trendIcon, trendColor, trendText),
+                const SizedBox(height: 10),
+                _insightRow(Icons.my_location, YemmaColors.pink, 'Zone la plus fréquente : $topZone'),
+              ],
               const SizedBox(height: 18),
               const Text('Recommandations', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w700)),
               const SizedBox(height: 10),
-              _bullet('Reposez-vous les jeudis'),
-              _bullet('Buvez 2L d\'eau par jour'),
-              _bullet('Consultez votre gynécologue'),
+              _bullet('Notez vos douleurs régulièrement pour un meilleur suivi'),
+              _bullet('Buvez suffisamment d\'eau chaque jour'),
+              _bullet('Consultez un médecin si les douleurs persistent'),
             ],
           ),
         ),
+        const SizedBox(height: 20),
+        _painChart(entries),
         const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -93,7 +134,14 @@ class PainTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        ...yemma.filteredPainEntries.map((entry) {
+        if (!hasData)
+          Container(
+            padding: const EdgeInsets.all(20),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(color: YemmaColors.card, borderRadius: BorderRadius.circular(12), border: Border.all(color: YemmaColors.border)),
+            child: const Text('Aucune douleur enregistrée.', style: TextStyle(color: YemmaColors.textFaint, fontSize: 13)),
+          ),
+        ...entries.reversed.map((entry) {
           final color = YemmaColors.severityColor(entry.severity);
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
@@ -125,6 +173,57 @@ class PainTab extends StatelessWidget {
           );
         }),
       ],
+    );
+  }
+
+  Widget _painChart(List<PainEntry> entries) {
+    final recent = entries.length > 10 ? entries.sublist(entries.length - 10) : entries;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: YemmaColors.card, borderRadius: BorderRadius.circular(16), border: Border.all(color: YemmaColors.border)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Intensité (10 derniers jours)', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 16),
+          if (recent.isEmpty)
+            const SizedBox(
+              height: 80,
+              child: Center(child: Text('Ajoutez des douleurs pour voir le graphique.', style: TextStyle(color: YemmaColors.textFaint, fontSize: 13))),
+            )
+          else
+            SizedBox(
+              height: 170,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: recent.map((e) {
+                  final color = YemmaColors.severityColor(e.severity);
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text('${e.severity}', style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 4),
+                          Container(
+                            height: 8 + (e.severity / 10) * 110,
+                            decoration: BoxDecoration(
+                              color: color,
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text('${e.date.day}/${e.date.month}', style: const TextStyle(color: YemmaColors.textFaint, fontSize: 9)),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
+      ),
     );
   }
 

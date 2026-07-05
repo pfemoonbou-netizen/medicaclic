@@ -176,12 +176,16 @@ class BabyTab extends StatelessWidget {
   }
 
   void _showCreateBabyProfileSheet(BuildContext context) {
+    final provider = context.read<YemmaProvider>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: const Color(0x99000000),
-      builder: (context) => const _BabyProfileForm(),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: provider,
+        child: const _BabyProfileForm(),
+      ),
     );
   }
 }
@@ -237,6 +241,7 @@ class _BabyProfileFormState extends State<_BabyProfileForm> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(color: YemmaColors.card, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,6 +322,7 @@ class _BabyProfileFormState extends State<_BabyProfileForm> {
             ),
             const SizedBox(height: 10),
           ],
+        ),
         ),
       ),
     );
