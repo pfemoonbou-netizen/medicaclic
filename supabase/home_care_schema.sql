@@ -4,7 +4,7 @@
 -- ============ PROFILES: rôle de compte ============
 alter table public.profiles add column if not exists role text not null default 'utilisateur';
 alter table public.profiles drop constraint if exists profiles_role_check;
-alter table public.profiles add constraint profiles_role_check check (role in ('utilisateur', 'prestataire'));
+alter table public.profiles add constraint profiles_role_check check (role in ('utilisateur', 'prestataire', 'medecin', 'patient', 'admin'));
 
 create or replace function public.handle_new_user()
 returns trigger as $$
