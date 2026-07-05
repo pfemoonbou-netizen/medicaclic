@@ -9,7 +9,6 @@ import '../pharmacy/pharmacy_map_screen.dart';
 import '../doctors/find_doctors_screen.dart';
 import '../yemma/yemma_screen.dart';
 import '../yemma/yemma_theme.dart';
-import '../pharmacy/boutique_theme.dart';
 import '../profile/profile_screen.dart';
 import '../medical/medical_record_screen.dart';
 import 'widgets/ambulance_sheet.dart';
@@ -57,12 +56,11 @@ class _HomeScreenState extends State<HomeScreen> {
       const ProfileScreen(),
     ];
     final isYemma = _index == 1;
-    final isBoutique = _index == 2;
-    final isDark = isYemma || isBoutique;
-    final darkBackground = isYemma ? YemmaColors.background : BoutiqueColors.background;
-    final darkCard = isYemma ? YemmaColors.card : BoutiqueColors.card;
-    final darkAccent = isYemma ? YemmaColors.pink : BoutiqueColors.accent;
-    final darkTextSecondary = isYemma ? YemmaColors.textSecondary : BoutiqueColors.textSecondary;
+    final isDark = isYemma;
+    final darkBackground = YemmaColors.background;
+    final darkCard = YemmaColors.card;
+    final darkAccent = YemmaColors.pink;
+    final darkTextSecondary = YemmaColors.textSecondary;
     return Scaffold(
       appBar: _index == 0 ? AppBar(title: const Text('MedicaClic')) : null,
       backgroundColor: isDark ? darkBackground : null,

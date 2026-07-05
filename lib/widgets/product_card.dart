@@ -1,98 +1,111 @@
 import 'package:flutter/material.dart';
 import '../providers/product_provider.dart';
-import '../screens/pharmacy/boutique_theme.dart';
 import '../screens/pharmacy/product_detail_screen.dart';
 
-class ProductCard extends StatelessWidget {
+class ProductCard extends StatefulWidget {
   final Product product;
   final VoidCallback onAddToCart;
-  const ProductCard({Key? key, required this.product, required this.onAddToCart}) : super(key: key);
+  const ProductCard({super.key, required this.product, required this.onAddToCart});
+
+  @override
+  State<ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<ProductCard> {
+  static const _purple = Color(0xFF5F55D7);
+  static const _dark = Color(0xFF101522);
+  static const _grey = Color(0xFF9B9999);
+  bool _fav = false;
 
   @override
   Widget build(BuildContext context) {
-    final discount = product.discountPercent;
+    final p = widget.product;
+    final discount = p.discountPercent;
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailScreen(product: product))),
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailScreen(product: p))),
       child: Container(
-        decoration: BoxDecoration(color: BoutiqueColors.card, borderRadius: BorderRadius.circular(16), border: Border.all(color: BoutiqueColors.border)),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10, offset: const Offset(0, 4))],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Stack(
               children: [
-                Container(
-                  height: 110,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(color: BoutiqueColors.background, borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-                  child: Center(child: Text(product.image ?? 'RX', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: BoutiqueColors.accent))),
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  child: _image(p),
+                ),
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: GestureDetector(
+                    onTap: () => setState(() => _fav = !_fav),
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 4)],
+                      ),
+                      child: Icon(_fav ? Icons.favorite : Icons.favorite_border, size: 16, color: _fav ? Colors.red : Colors.grey),
+                    ),
+                  ),
                 ),
                 if (discount != null)
                   Positioned(
-                    left: 10,
-                    top: 10,
+                    left: 8,
+                    top: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: BoutiqueColors.red, borderRadius: BorderRadius.circular(20)),
-                      child: Text('-$discount%', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(20)),
+                      child: Text('-$discount%', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
                     ),
                   ),
               ],
             ),
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(child: Text(product.name, style: const TextStyle(color: BoutiqueColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                      const Icon(Icons.chevron_right, size: 16, color: BoutiqueColors.textFaint),
-                    ],
-                  ),
+                  Text(p.name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: _dark), maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 2),
-                  Text(product.brand, style: const TextStyle(color: BoutiqueColors.textFaint, fontSize: 11)),
+                  Text(p.brand, style: const TextStyle(fontSize: 11, color: _grey), maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(Icons.star, size: 13, color: BoutiqueColors.orange),
-                      const SizedBox(width: 4),
-                      Text('${product.rating}', style: const TextStyle(color: BoutiqueColors.textPrimary, fontSize: 12, fontWeight: FontWeight.w600)),
-                      const SizedBox(width: 4),
-                      Text('(${product.reviewCount})', style: const TextStyle(color: BoutiqueColors.textFaint, fontSize: 11)),
+                      const Icon(Icons.star, size: 12, color: Color(0xFFFFB020)),
+                      const SizedBox(width: 3),
+                      Text('${p.rating}', style: const TextStyle(fontSize: 11, color: _dark, fontWeight: FontWeight.w600)),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text('${product.price.toStringAsFixed(0)} DA', style: const TextStyle(color: BoutiqueColors.accent, fontSize: 15, fontWeight: FontWeight.w700)),
-                      if (product.originalPrice != null) ...[
-                        const SizedBox(width: 6),
-                        Text('${product.originalPrice!.toStringAsFixed(0)} DA', style: const TextStyle(color: BoutiqueColors.textFaint, fontSize: 12, decoration: TextDecoration.lineThrough)),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: onAddToCart,
-                      icon: const Icon(Icons.shopping_cart_outlined, size: 16, color: Colors.white),
-                      label: const Text('Acheter', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
-                      style: ElevatedButton.styleFrom(backgroundColor: BoutiqueColors.accent, padding: const EdgeInsets.symmetric(vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Divider(color: BoutiqueColors.border, height: 1),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.store_outlined, size: 13, color: BoutiqueColors.textFaint),
-                      const SizedBox(width: 4),
-                      Expanded(child: Text(product.seller, style: const TextStyle(color: BoutiqueColors.textFaint, fontSize: 11), overflow: TextOverflow.ellipsis)),
-                      const Icon(Icons.call_outlined, size: 14, color: BoutiqueColors.accent),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${p.price.toStringAsFixed(0)} DA', style: const TextStyle(color: _purple, fontSize: 14, fontWeight: FontWeight.w800)),
+                            if (p.originalPrice != null)
+                              Text('${p.originalPrice!.toStringAsFixed(0)} DA', style: const TextStyle(color: _grey, fontSize: 10, decoration: TextDecoration.lineThrough)),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: widget.onAddToCart,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(color: _purple, borderRadius: BorderRadius.circular(10)),
+                          child: const Icon(Icons.add, color: Colors.white, size: 18),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -102,5 +115,48 @@ class ProductCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _image(Product p) {
+    final img = p.image;
+    if (img != null && img.startsWith('http')) {
+      return Image.network(
+        img,
+        height: 120,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        loadingBuilder: (c, child, progress) => progress == null
+            ? child
+            : Container(
+                height: 120,
+                color: const Color(0xFFF3F4F6),
+                child: const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+              ),
+        errorBuilder: (c, e, s) => _placeholder(),
+      );
+    }
+    return _placeholder();
+  }
+
+  Widget _placeholder() => Container(
+        height: 120,
+        width: double.infinity,
+        color: const Color(0xFFF3F4F6),
+        child: Center(child: Icon(_iconFor(widget.product.category), size: 40, color: _purple)),
+      );
+
+  IconData _iconFor(String category) {
+    switch (category) {
+      case 'Orthopédie':
+        return Icons.healing_outlined;
+      case 'Mobilité':
+        return Icons.accessible_outlined;
+      case 'Diagnostic':
+        return Icons.monitor_heart_outlined;
+      case 'Hygiène':
+        return Icons.sanitizer_outlined;
+      default:
+        return Icons.medical_services_outlined;
+    }
   }
 }

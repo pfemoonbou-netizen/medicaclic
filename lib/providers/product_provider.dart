@@ -74,7 +74,12 @@ class ProductProvider extends ChangeNotifier {
     fetchAll();
   }
 
-  List<String> get categories => ['Tout', 'Location', 'Achat', 'Vitamines', 'Hygiène'];
+  List<String> get categories => ['Tout', 'Orthopédie', 'Mobilité', 'Diagnostic', 'Hygiène', 'Location'];
+
+  List<Product> get featured {
+    final sorted = List<Product>.from(_products)..sort((a, b) => b.rating.compareTo(a.rating));
+    return sorted.take(6).toList();
+  }
   List<Product> get products => _products;
   bool get isLoading => _isLoading;
   String? get error => _error;
