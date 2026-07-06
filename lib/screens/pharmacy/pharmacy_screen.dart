@@ -212,10 +212,12 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
     // Bannières de l'admin (base) si présentes, sinon bannières par défaut.
     final dbBanners = provider.banners;
     final int count = dbBanners.isNotEmpty ? dbBanners.length : _ads.length;
+    // Format carré : hauteur = largeur (plafonnée pour les grands écrans).
+    final double size = (MediaQuery.of(context).size.width - 32).clamp(200, 380).toDouble();
     return Column(
       children: [
         SizedBox(
-          height: 130,
+          height: size,
           child: PageView.builder(
             controller: _bannerController,
             itemCount: count,
