@@ -70,8 +70,11 @@ class AdBanner {
   final String title;
   final String subtitle;
   final String? imageUrl;
+  final String mediaType; // 'image' ou 'video'
   final Color color;
-  AdBanner({required this.id, required this.title, required this.subtitle, required this.imageUrl, required this.color});
+  AdBanner({required this.id, required this.title, required this.subtitle, required this.imageUrl, required this.mediaType, required this.color});
+
+  bool get isVideo => mediaType == 'video' && imageUrl != null;
 
   factory AdBanner.fromMap(Map<String, dynamic> map) {
     final hex = (map['color_hex'] as String?) ?? '#6C5FE0';
@@ -80,6 +83,7 @@ class AdBanner {
       title: (map['title'] as String?) ?? '',
       subtitle: (map['subtitle'] as String?) ?? '',
       imageUrl: map['image_url'] as String?,
+      mediaType: (map['media_type'] as String?) ?? 'image',
       color: Color(int.parse(hex.replaceFirst('#', '0xFF'))),
     );
   }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../config/supabase_config.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/cart_provider.dart';
+import 'package:video_player/video_player.dart';
 import '../../widgets/product_card.dart';
 import 'add_banner_screen.dart';
 
@@ -289,7 +290,9 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (b.imageUrl != null)
+          if (b.isVideo)
+            _BannerVideo(url: b.imageUrl!)
+          else if (b.imageUrl != null)
             Image.network(b.imageUrl!, fit: BoxFit.cover, errorBuilder: (c, e, s) => const SizedBox.shrink()),
           if (b.imageUrl != null) Container(color: Colors.black.withValues(alpha: 0.35)),
           Padding(
@@ -356,4 +359,64 @@ class _Ad {
   final Color c2;
   final IconData icon;
   const _Ad(this.title, this.big, this.sub, this.c1, this.c2, this.icon);
+}
+
+/// Lecture d'une vidéo de bannière (auto, en boucle, sans son).
+class _BannerVideo extends StatefulWidget {
+  final String url;
+  const _BannerVideo({required this.url});
+
+  @override
+  State<_BannerVideo> createState() => _BannerVideoState();
+}
+
+class _BannerVideoState extends State<_BannerVideo> {
+  VideoPlayerController? _controller;
+  bool _ready = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    try {
+      final c = VideoPlayerController.networkUrl(Uri.parse(widget.url));
+      await c.initialize();
+      c.setLooping(true);
+      c.setVolume(0);
+      c.play();
+      if (mounted) {
+        setState(() {
+          _controller = c;
+          _ready = true;
+        });
+      }
+    } catch (_) {
+      // En cas d'échec, on laisse la couleur de fond de la bannière.
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_ready || _controller == null) {
+      return const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(Colors.white))));
+    }
+    return FittedBox(
+      fit: BoxFit.cover,
+      clipBehavior: Clip.hardEdge,
+      child: SizedBox(
+        width: _controller!.value.size.width,
+        height: _controller!.value.size.height,
+        child: VideoPlayer(_controller!),
+      ),
+    );
+  }
 }

@@ -14,6 +14,9 @@ create table if not exists public.promo_banners (
   created_at timestamptz not null default now()
 );
 
+-- Type de média : 'image' ou 'video'
+alter table public.promo_banners add column if not exists media_type text not null default 'image';
+
 alter table public.promo_banners enable row level security;
 
 drop policy if exists "promo_banners_public_read" on public.promo_banners;

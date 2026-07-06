@@ -17,7 +17,10 @@ class _AddBannerScreenState extends State<AddBannerScreen> {
 
   final _title = TextEditingController();
   final _subtitle = TextEditingController();
-  Uint8List? _imageBytes;
+  Uint8List? _mediaBytes;
+  String _mediaType = 'image'; // 'image' ou 'video'
+  String _fileExt = 'jpg';
+  String _contentType = 'image/jpeg';
   String _colorHex = '#6C5FE0';
   bool _saving = false;
   String? _error;
@@ -42,15 +45,40 @@ class _AddBannerScreenState extends State<AddBannerScreen> {
       final x = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 80, maxWidth: 1200);
       if (x == null) return;
       final bytes = await x.readAsBytes();
-      if (mounted) setState(() => _imageBytes = bytes);
+      if (mounted) {
+        setState(() {
+          _mediaBytes = bytes;
+          _mediaType = 'image';
+          _fileExt = 'jpg';
+          _contentType = 'image/jpeg';
+        });
+      }
     } catch (e) {
       if (mounted) setState(() => _error = 'Image: $e');
     }
   }
 
+  Future<void> _pickVideo() async {
+    try {
+      final x = await ImagePicker().pickVideo(source: ImageSource.gallery, maxDuration: const Duration(seconds: 30));
+      if (x == null) return;
+      final bytes = await x.readAsBytes();
+      if (mounted) {
+        setState(() {
+          _mediaBytes = bytes;
+          _mediaType = 'video';
+          _fileExt = 'mp4';
+          _contentType = 'video/mp4';
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _error = 'Vidéo: $e');
+    }
+  }
+
   Future<void> _publish() async {
-    if (_title.text.trim().isEmpty && _imageBytes == null) {
-      setState(() => _error = 'Ajoute au moins un titre ou une image.');
+    if (_title.text.trim().isEmpty && _mediaBytes == null) {
+      setState(() => _error = 'Ajoute au moins un titre, une image ou une vidéo.');
       return;
     }
     setState(() {
@@ -58,20 +86,21 @@ class _AddBannerScreenState extends State<AddBannerScreen> {
       _error = null;
     });
     try {
-      String? imageUrl;
-      if (_imageBytes != null) {
-        final path = 'banners/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      String? mediaUrl;
+      if (_mediaBytes != null) {
+        final path = 'banners/${DateTime.now().millisecondsSinceEpoch}.$_fileExt';
         await supabase.storage.from('banner-images').uploadBinary(
               path,
-              _imageBytes!,
-              fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
+              _mediaBytes!,
+              fileOptions: FileOptions(contentType: _contentType, upsert: true),
             );
-        imageUrl = supabase.storage.from('banner-images').getPublicUrl(path);
+        mediaUrl = supabase.storage.from('banner-images').getPublicUrl(path);
       }
       await supabase.from('promo_banners').insert({
         'title': _title.text.trim(),
         'subtitle': _subtitle.text.trim(),
-        'image_url': imageUrl,
+        'image_url': mediaUrl,
+        'media_type': _mediaType,
         'color_hex': _colorHex,
         'active': true,
       });
@@ -101,26 +130,22 @@ class _AddBannerScreenState extends State<AddBannerScreen> {
         children: [
           // Aperçu
           _preview(),
-          const SizedBox(height: 20),
-          GestureDetector(
-            onTap: _pickImage,
-            child: Container(
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(_imageBytes == null ? Icons.add_photo_alternate_outlined : Icons.check_circle, color: _purple, size: 32),
-                  const SizedBox(height: 8),
-                  Text(_imageBytes == null ? 'Choisir une image (optionnel)' : 'Image sélectionnée ✓', style: const TextStyle(color: Color(0xFF6B7280))),
-                ],
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(child: _mediaButton(Icons.add_photo_alternate_outlined, 'Photo', _pickImage, _mediaBytes != null && _mediaType == 'image')),
+              const SizedBox(width: 12),
+              Expanded(child: _mediaButton(Icons.videocam_outlined, 'Vidéo', _pickVideo, _mediaBytes != null && _mediaType == 'video')),
+            ],
+          ),
+          if (_mediaBytes != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                _mediaType == 'video' ? 'Vidéo sélectionnée ✓' : 'Image sélectionnée ✓',
+                style: const TextStyle(color: Color(0xFF1AA88F), fontWeight: FontWeight.w600),
               ),
             ),
-          ),
           const SizedBox(height: 20),
           _field('Titre', _title, 'Ex : Offre spéciale'),
           const SizedBox(height: 14),
@@ -167,6 +192,28 @@ class _AddBannerScreenState extends State<AddBannerScreen> {
     );
   }
 
+  Widget _mediaButton(IconData icon, String label, VoidCallback onTap, bool selected) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 90,
+        decoration: BoxDecoration(
+          color: selected ? _purple.withValues(alpha: 0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: selected ? _purple : const Color(0xFFE5E7EB), width: selected ? 2 : 1),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: _purple, size: 28),
+            const SizedBox(height: 6),
+            Text(label, style: const TextStyle(color: Color(0xFF6B7280), fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _preview() {
     final color = _colors[_colorHex] ?? _purple;
     return AspectRatio(
@@ -177,8 +224,10 @@ class _AddBannerScreenState extends State<AddBannerScreen> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (_imageBytes != null) Image.memory(_imageBytes!, fit: BoxFit.cover),
-          if (_imageBytes != null) Container(color: Colors.black.withValues(alpha: 0.3)),
+          if (_mediaBytes != null && _mediaType == 'image') Image.memory(_mediaBytes!, fit: BoxFit.cover),
+          if (_mediaBytes != null && _mediaType == 'video')
+            const Center(child: Icon(Icons.play_circle_fill, color: Colors.white70, size: 60)),
+          if (_mediaBytes != null && _mediaType == 'image') Container(color: Colors.black.withValues(alpha: 0.3)),
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
