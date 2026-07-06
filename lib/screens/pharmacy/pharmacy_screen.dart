@@ -215,7 +215,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
     return Column(
       children: [
         SizedBox(
-          height: 130,
+          height: 180,
           child: PageView.builder(
             controller: _bannerController,
             itemCount: count,
