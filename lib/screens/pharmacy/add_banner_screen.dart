@@ -170,7 +170,7 @@ class _AddBannerScreenState extends State<AddBannerScreen> {
   Widget _preview() {
     final color = _colors[_colorHex] ?? _purple;
     return Container(
-      height: 180,
+      height: 130,
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
       child: Stack(
