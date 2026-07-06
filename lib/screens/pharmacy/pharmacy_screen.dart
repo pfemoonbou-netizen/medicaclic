@@ -5,6 +5,7 @@ import '../../config/supabase_config.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/product_card.dart';
+import 'add_banner_screen.dart';
 
 class PharmacyScreen extends StatefulWidget {
   const PharmacyScreen({Key? key}) : super(key: key);
@@ -19,8 +20,11 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
 
   String _category = 'Tout';
   String _name = '';
+  String _role = '';
   final PageController _bannerController = PageController();
   int _bannerPage = 0;
+
+  bool get _isAdmin => _role == 'admin';
 
   static const List<_Ad> _ads = [
     _Ad('Offre spéciale', '-20% Orthopédie', 'Genouillères, attelles & ceintures', Color(0xFF6C5FE0), Color(0xFF5147C4), Icons.local_offer),
@@ -44,10 +48,25 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
     try {
       final uid = supabase.auth.currentUser?.id;
       if (uid == null) return;
-      final row = await supabase.from('profiles').select('name').eq('id', uid).maybeSingle();
+      final row = await supabase.from('profiles').select('name, role').eq('id', uid).maybeSingle();
+      if (!mounted) return;
       final n = (row?['name'] as String?)?.trim();
-      if (mounted && n != null && n.isNotEmpty) setState(() => _name = n);
+      final r = (row?['role'] as String?)?.trim();
+      setState(() {
+        if (n != null && n.isNotEmpty) _name = n;
+        if (r != null) _role = r;
+      });
     } catch (_) {}
+  }
+
+  Future<void> _openAddBanner() async {
+    final created = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => const AddBannerScreen()),
+    );
+    if (created == true && mounted) {
+      await context.read<ProductProvider>().fetchAll();
+    }
   }
 
   void _add(Product p) {
@@ -74,7 +93,19 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                   const SizedBox(height: 16),
                   _searchBar(),
                   const SizedBox(height: 18),
-                  _adCarousel(),
+                  _adCarousel(provider),
+                  if (_isAdmin) ...[
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _openAddBanner,
+                        icon: const Icon(Icons.add, color: _purple, size: 18),
+                        label: const Text('Ajouter une pub', style: TextStyle(color: _purple, fontWeight: FontWeight.w600)),
+                        style: OutlinedButton.styleFrom(side: const BorderSide(color: _purple), padding: const EdgeInsets.symmetric(vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 22),
                   if (featured.isNotEmpty) ...[
                     _sectionHeader('En vedette'),
@@ -177,23 +208,26 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
     );
   }
 
-  Widget _adCarousel() {
+  Widget _adCarousel(ProductProvider provider) {
+    // Bannières de l'admin (base) si présentes, sinon bannières par défaut.
+    final dbBanners = provider.banners;
+    final int count = dbBanners.isNotEmpty ? dbBanners.length : _ads.length;
     return Column(
       children: [
         SizedBox(
           height: 130,
           child: PageView.builder(
             controller: _bannerController,
-            itemCount: _ads.length,
+            itemCount: count,
             onPageChanged: (i) => setState(() => _bannerPage = i),
-            itemBuilder: (context, i) => _adSlide(_ads[i]),
+            itemBuilder: (context, i) => dbBanners.isNotEmpty ? _dbSlide(dbBanners[i]) : _adSlide(_ads[i]),
           ),
         ),
         const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
-            _ads.length,
+            count,
             (i) => AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -238,6 +272,37 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
             height: 64,
             decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), shape: BoxShape.circle),
             child: Icon(ad.icon, color: Colors.white, size: 30),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Bannière créée par l'admin (image optionnelle en fond + texte).
+  Widget _dbSlide(AdBanner b) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(color: b.color, borderRadius: BorderRadius.circular(20)),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (b.imageUrl != null)
+            Image.network(b.imageUrl!, fit: BoxFit.cover, errorBuilder: (c, e, s) => const SizedBox.shrink()),
+          if (b.imageUrl != null) Container(color: Colors.black.withValues(alpha: 0.35)),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (b.title.isNotEmpty)
+                  Text(b.title, style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                if (b.title.isNotEmpty) const SizedBox(height: 6),
+                if (b.subtitle.isNotEmpty)
+                  Text(b.subtitle, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800), maxLines: 2, overflow: TextOverflow.ellipsis),
+              ],
+            ),
           ),
         ],
       ),

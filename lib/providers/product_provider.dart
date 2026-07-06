@@ -64,9 +64,31 @@ class PromoOffer {
       );
 }
 
+/// Bannière publicitaire gérée par l'admin (table promo_banners).
+class AdBanner {
+  final String id;
+  final String title;
+  final String subtitle;
+  final String? imageUrl;
+  final Color color;
+  AdBanner({required this.id, required this.title, required this.subtitle, required this.imageUrl, required this.color});
+
+  factory AdBanner.fromMap(Map<String, dynamic> map) {
+    final hex = (map['color_hex'] as String?) ?? '#6C5FE0';
+    return AdBanner(
+      id: map['id'] as String,
+      title: (map['title'] as String?) ?? '',
+      subtitle: (map['subtitle'] as String?) ?? '',
+      imageUrl: map['image_url'] as String?,
+      color: Color(int.parse(hex.replaceFirst('#', '0xFF'))),
+    );
+  }
+}
+
 class ProductProvider extends ChangeNotifier {
   List<Product> _products = [];
   List<PromoOffer> promoOffers = [];
+  List<AdBanner> banners = [];
   bool _isLoading = false;
   String? _error;
 
@@ -97,10 +119,19 @@ class ProductProvider extends ChangeNotifier {
       promoOffers = (results[1] as List).map((row) => PromoOffer.fromMap(row as Map<String, dynamic>)).toList();
     } catch (e) {
       _error = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
+
+    // Bannières pub (table optionnelle) : isolé pour ne pas casser les
+    // produits si la table n'existe pas encore.
+    try {
+      final b = await supabase.from('promo_banners').select().eq('active', true).order('created_at', ascending: false);
+      banners = (b as List).map((row) => AdBanner.fromMap(row as Map<String, dynamic>)).toList();
+    } catch (_) {
+      banners = [];
+    }
+
+    _isLoading = false;
+    notifyListeners();
   }
 
   List<Product> byCategory(String category) => category == 'Tout' ? _products : _products.where((p) => p.category == category).toList();
