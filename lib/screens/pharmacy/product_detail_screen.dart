@@ -28,8 +28,9 @@ class ProductDetailScreen extends StatelessWidget {
               Container(
                 height: 220,
                 width: double.infinity,
+                clipBehavior: Clip.hardEdge,
                 decoration: BoxDecoration(color: BoutiqueColors.card, borderRadius: BorderRadius.circular(20), border: Border.all(color: BoutiqueColors.border)),
-                child: Center(child: Text(product.image ?? 'RX', style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: BoutiqueColors.accent))),
+                child: _productImage(product.image),
               ),
               if (discount != null)
                 Positioned(
@@ -134,4 +135,16 @@ class ProductDetailScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _productImage(String? img) {
+    if (img != null && img.startsWith('http')) {
+      return Image.network(img, height: 220, width: double.infinity, fit: BoxFit.cover, errorBuilder: (c, e, s) => _imgPlaceholder());
+    }
+    if (img != null && img.startsWith('assets/')) {
+      return Image.asset(img, height: 220, width: double.infinity, fit: BoxFit.cover, errorBuilder: (c, e, s) => _imgPlaceholder());
+    }
+    return _imgPlaceholder();
+  }
+
+  Widget _imgPlaceholder() => const Center(child: Icon(Icons.medical_services_outlined, size: 56, color: BoutiqueColors.accent));
 }
