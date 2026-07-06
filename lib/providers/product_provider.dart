@@ -74,7 +74,7 @@ class ProductProvider extends ChangeNotifier {
     fetchAll();
   }
 
-  List<String> get categories => ['Tout', 'Orthopédie', 'Mobilité', 'Diagnostic', 'Hygiène', 'Location'];
+  List<String> get categories => ['Tout', 'Orthopédie', 'Mobilité', 'Diagnostic', 'Hygiène', 'Bien-être', 'Location'];
 
   List<Product> get featured {
     final sorted = List<Product>.from(_products)..sort((a, b) => b.rating.compareTo(a.rating));
