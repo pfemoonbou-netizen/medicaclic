@@ -11,25 +11,30 @@ class PregnancyTab extends StatelessWidget {
     final yemma = context.watch<YemmaProvider>();
 
     if (!yemma.hasPregnancyInfo) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.pregnant_woman, color: YemmaColors.textFaint, size: 40),
-              const SizedBox(height: 12),
-              const Text('Aucune donnée de grossesse enregistrée pour le moment.', textAlign: TextAlign.center, style: TextStyle(color: YemmaColors.textSecondary, fontSize: 14)),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: () => _showCreatePregnancyInfoSheet(context),
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Renseigner ma grossesse'),
-                style: ElevatedButton.styleFrom(backgroundColor: YemmaColors.pink, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))),
-              ),
-            ],
+      return ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          const _DueDateCalculator(),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(color: YemmaColors.card, borderRadius: BorderRadius.circular(16), border: Border.all(color: YemmaColors.border)),
+            child: Column(
+              children: [
+                const Icon(Icons.pregnant_woman, color: YemmaColors.textFaint, size: 40),
+                const SizedBox(height: 12),
+                const Text('Aucune donnée de grossesse enregistrée pour le moment.', textAlign: TextAlign.center, style: TextStyle(color: YemmaColors.textSecondary, fontSize: 14)),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: () => _showCreatePregnancyInfoSheet(context),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Renseigner ma grossesse'),
+                  style: ElevatedButton.styleFrom(backgroundColor: YemmaColors.pink, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       );
     }
 
@@ -40,6 +45,8 @@ class PregnancyTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        const _DueDateCalculator(),
+        const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(color: YemmaColors.card, borderRadius: BorderRadius.circular(16), border: Border.all(color: YemmaColors.border)),
@@ -170,6 +177,127 @@ class PregnancyTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       barrierColor: const Color(0x99000000),
       builder: (context) => const _PregnancyInfoForm(),
+    );
+  }
+}
+
+/// Calculateur de date d'accouchement (palette corail/rose).
+/// Entre le 1er jour des dernières règles → calcule la date prévue (règle
+/// de Naegele : dernières règles + 280 jours) et la semaine de grossesse.
+class _DueDateCalculator extends StatefulWidget {
+  const _DueDateCalculator();
+  @override
+  State<_DueDateCalculator> createState() => _DueDateCalculatorState();
+}
+
+class _DueDateCalculatorState extends State<_DueDateCalculator> {
+  // Palette de la maquette
+  static const _coral = Color(0xFFF4716A);
+  static const _lightPink = Color(0xFFFFE3E1);
+  static const _slate = Color(0xFF4A5660);
+
+  DateTime? _lmp; // dernières règles
+  DateTime? _dueDate;
+  int? _weeks;
+
+  static const _months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
+  String _fmt(DateTime d) => '${d.day} ${_months[d.month - 1]} ${d.year}';
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _lmp ?? now.subtract(const Duration(days: 60)),
+      firstDate: now.subtract(const Duration(days: 300)),
+      lastDate: now,
+      helpText: 'Premier jour des dernières règles',
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(primary: _coral, onPrimary: Colors.white, onSurface: _slate),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked == null) return;
+    setState(() {
+      _lmp = picked;
+      _dueDate = picked.add(const Duration(days: 280));
+      _weeks = DateTime.now().difference(picked).inDays ~/ 7;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Colors.white, _lightPink]),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _coral.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(color: _coral.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
+                child: const Icon(Icons.child_friendly, color: _coral, size: 20),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text('Calcul de la date d\'accouchement', style: TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Entrez le premier jour de vos dernières règles pour estimer votre date d\'accouchement.',
+            style: TextStyle(color: _slate, fontSize: 12, height: 1.4),
+          ),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: _pickDate,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFEBD3D2))),
+              child: Row(
+                children: [
+                  const Icon(Icons.calendar_today_outlined, color: _coral, size: 18),
+                  const SizedBox(width: 10),
+                  Text(
+                    _lmp == null ? 'Choisir la date' : _fmt(_lmp!),
+                    style: TextStyle(color: _lmp == null ? const Color(0xFF8C8C8D) : Colors.black, fontSize: 14, fontWeight: _lmp == null ? FontWeight.normal : FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_dueDate != null) ...[
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(color: _coral, borderRadius: BorderRadius.circular(12)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Date d\'accouchement estimée', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  const SizedBox(height: 4),
+                  Text(_fmt(_dueDate!), style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Text('Vous êtes à environ ${_weeks ?? 0} semaines de grossesse.', style: const TextStyle(color: Colors.white, fontSize: 13)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text('ℹ️ Estimation indicative. Seul votre médecin peut confirmer la date.', style: TextStyle(color: _slate, fontSize: 11)),
+          ],
+        ],
+      ),
     );
   }
 }
