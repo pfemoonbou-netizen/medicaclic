@@ -41,8 +41,13 @@ class _YemmaScreenState extends State<YemmaScreen> with SingleTickerProviderStat
                   Container(
                     width: 48,
                     height: 48,
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(color: YemmaColors.pink.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14), border: Border.all(color: YemmaColors.pink.withValues(alpha: 0.5))),
-                    child: const Center(child: Text('😊', style: TextStyle(fontSize: 22))),
+                    child: Image.asset(
+                      'assets/images/services/yemma.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (c, e, s) => const Center(child: Text('😊', style: TextStyle(fontSize: 22))),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
