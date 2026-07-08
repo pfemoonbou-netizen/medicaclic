@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
 class YemmaColors {
-  static const background = Color(0xFF0D1714);
-  static const card = Color(0xFF132422);
-  static const border = Color(0xFF1F3733);
-  static const pink = Color(0xFFEC5A8D);
-  static const green = Color(0xFF4CAF50);
-  static const orange = Color(0xFFFFA726);
+  // Thème clair rose/corail (maquette maternité)
+  static const background = Color(0xFFFFF5F4);
+  static const card = Color(0xFFFFFFFF);
+  static const border = Color(0xFFF3D9D7);
+  static const pink = Color(0xFFF4716A); // corail
+  static const green = Color(0xFF3FB27F);
+  static const orange = Color(0xFFF2994A);
   static const red = Color(0xFFFF5C5C);
   static const blue = Color(0xFF5B8DEF);
-  static const textPrimary = Colors.white;
-  static const textSecondary = Colors.white60;
-  static const textFaint = Colors.white38;
+  static const textPrimary = Color(0xFF2E2A2B);
+  static const textSecondary = Color(0xFF6B5E5E);
+  static const textFaint = Color(0xFFA99C9C);
 
   static Color severityColor(int severity) {
     if (severity <= 4) return green;

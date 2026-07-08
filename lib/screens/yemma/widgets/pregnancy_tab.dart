@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/yemma_provider.dart';
 import '../yemma_theme.dart';
+import 'pregnancy_tracker.dart';
 
 class PregnancyTab extends StatelessWidget {
   const PregnancyTab({super.key});
@@ -38,64 +39,15 @@ class PregnancyTab extends StatelessWidget {
       );
     }
 
-    final progress = yemma.pregnancyWeek / 40;
     final date = yemma.nextAppointmentDate;
     final time = date == null ? '' : '${date.hour.toString().padLeft(2, '0')}h${date.minute.toString().padLeft(2, '0')}';
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const _DueDateCalculator(),
+        PregnancyTracker(currentWeek: yemma.pregnancyWeek),
         const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: YemmaColors.card, borderRadius: BorderRadius.circular(16), border: Border.all(color: YemmaColors.border)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Semaine de grossesse', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 14),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: YemmaColors.pink, width: 3)),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('${yemma.pregnancyWeek}', style: const TextStyle(color: YemmaColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
-                        const Text('sem.', style: TextStyle(color: YemmaColors.textFaint, fontSize: 11)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(yemma.pregnancyTrimester, style: const TextStyle(color: YemmaColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Votre bébé mesure ~${yemma.babySizeCm.toInt()}cm et pèse ${yemma.babyWeightKgEstimate}kg. Il peut entendre votre voix.',
-                          style: const TextStyle(color: YemmaColors.textSecondary, fontSize: 12, height: 1.3),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(value: progress, minHeight: 6, backgroundColor: YemmaColors.border, valueColor: const AlwaysStoppedAnimation(YemmaColors.pink)),
-              ),
-              const SizedBox(height: 6),
-              Text('${yemma.pregnancyWeek} / 40 semaines', style: const TextStyle(color: YemmaColors.textFaint, fontSize: 11)),
-            ],
-          ),
-        ),
+        const _DueDateCalculator(),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(16),

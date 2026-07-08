@@ -51,8 +51,8 @@ class _YemmaScreenState extends State<YemmaScreen> with SingleTickerProviderStat
                       children: [
                         Row(
                           children: const [
-                            Text('Yemma ', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-                            Text('يمّا', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                            Text('Yemma ', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
+                            Text('يمّا', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
                           ],
                         ),
                         const Text('Santé maternelle & infantile', style: TextStyle(color: YemmaColors.textSecondary, fontSize: 12)),
