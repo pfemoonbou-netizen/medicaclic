@@ -119,12 +119,18 @@ class _PregnancyTrackerState extends State<PregnancyTracker> {
                     SizedBox(
                       width: 110,
                       height: 120,
+                      // BlendMode.multiply : le fond blanc de l'image se fond
+                      // dans le corail (le blanc devient la couleur du fond).
                       child: Image.asset(
                         'assets/images/yemma/foetus.png',
                         fit: BoxFit.contain,
+                        color: const Color(0xFFFCC7B4),
+                        colorBlendMode: BlendMode.multiply,
                         errorBuilder: (c, e, s) => Image.asset(
                           'assets/images/foetus.png',
                           fit: BoxFit.contain,
+                          color: const Color(0xFFFCC7B4),
+                          colorBlendMode: BlendMode.multiply,
                           errorBuilder: (c, e, s) => const Icon(Icons.child_care, color: Colors.white, size: 64),
                         ),
                       ),
