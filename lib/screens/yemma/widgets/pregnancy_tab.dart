@@ -15,6 +15,8 @@ class PregnancyTab extends StatelessWidget {
       return ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          PregnancyTracker(currentWeek: yemma.pregnancyWeek),
+          const SizedBox(height: 16),
           const _DueDateCalculator(),
           const SizedBox(height: 20),
           Container(
