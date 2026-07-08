@@ -116,7 +116,15 @@ class _PregnancyTrackerState extends State<PregnancyTracker> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _statBadge('${info.weightG < 1000 ? info.weightG.toStringAsFixed(info.weightG < 10 ? 1 : 0) : (info.weightG / 1000).toStringAsFixed(1)}${info.weightG < 1000 ? ' g' : ' kg'}', 'poids'),
-                    const Icon(Icons.child_care, color: Colors.white, size: 56),
+                    SizedBox(
+                      width: 110,
+                      height: 120,
+                      child: Image.asset(
+                        'assets/images/yemma/foetus.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (c, e, s) => const Icon(Icons.child_care, color: Colors.white, size: 64),
+                      ),
+                    ),
                     _statBadge('${info.lengthCm.toStringAsFixed(1)} cm', 'taille'),
                   ],
                 ),
