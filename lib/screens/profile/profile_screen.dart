@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/app_colors.dart';
+import '../premium/premium_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -32,7 +33,36 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
+            // Carte Premium
+            GestureDetector(
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PremiumScreen())),
+              child: Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [Color(0xFFFA7474), Color(0xFFFAB474)]),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Row(
+                  children: [
+                    const Text('👑', style: TextStyle(fontSize: 26)),
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Passer à Premium', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 2),
+                          Text('Analyse IA · Rappels vaccins · Pro — 300 DA/mois', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right, color: Colors.white),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
