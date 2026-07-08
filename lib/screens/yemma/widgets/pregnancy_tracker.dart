@@ -122,7 +122,11 @@ class _PregnancyTrackerState extends State<PregnancyTracker> {
                       child: Image.asset(
                         'assets/images/yemma/foetus.png',
                         fit: BoxFit.contain,
-                        errorBuilder: (c, e, s) => const Icon(Icons.child_care, color: Colors.white, size: 64),
+                        errorBuilder: (c, e, s) => Image.asset(
+                          'assets/images/foetus.png',
+                          fit: BoxFit.contain,
+                          errorBuilder: (c, e, s) => const Icon(Icons.child_care, color: Colors.white, size: 64),
+                        ),
                       ),
                     ),
                     _statBadge('${info.lengthCm.toStringAsFixed(1)} cm', 'taille'),
