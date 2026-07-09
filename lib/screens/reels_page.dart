@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +6,8 @@ import '../config/app_colors.dart';
 import '../main.dart' show routeObserver;
 import '../widgets/app_bottom_nav.dart';
 import '../widgets/comment_sheet.dart';
+import '../widgets/web_video_player_stub.dart'
+    if (dart.library.html) '../widgets/web_video_player_web.dart';
 
 class ReelsPage extends StatefulWidget {
   const ReelsPage({super.key});
@@ -587,29 +588,7 @@ class _WebVideoPlayer extends StatelessWidget {
   const _WebVideoPlayer({required this.url});
 
   @override
-  Widget build(BuildContext context) {
-    if (kIsWeb) {
-      return HtmlElementView.fromTagName(
-        tagName: 'video',
-        onElementCreated: (element) {
-          element
-            ..setAttribute('src', url)
-            ..setAttribute('autoplay', 'true')
-            ..setAttribute('loop', 'true')
-            ..setAttribute('muted', 'true')
-            ..setAttribute('playsinline', 'true')
-            ..setAttribute('style',
-                'width:100%;height:100%;object-fit:cover;');
-        },
-      );
-    }
-    return Container(
-      color: Colors.black,
-      child: const Center(
-        child: Icon(Icons.play_circle_outline, color: Colors.white54, size: 64),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => buildWebVideoPlayer(url);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
