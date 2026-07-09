@@ -79,7 +79,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
           decoration: BoxDecoration(
             gradient: !_isDisabled && widget.useGradient && widget.color == null
                 ? const LinearGradient(
-                    colors: [AppColors.accent, AppColors.blue],
+                    colors: [AppColors.deepPurple, Color(0xFF5B21B6)],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   )
@@ -94,7 +94,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
                 : widget.useGradient && widget.color == null
                     ? [
                         BoxShadow(
-                          color: AppColors.accent.withValues(alpha: 0.30),
+                          color: AppColors.deepPurple.withValues(alpha: 0.30),
                           blurRadius: 20,
                           offset: const Offset(0, 6),
                           spreadRadius: -2,
@@ -117,7 +117,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
                     child: CircularProgressIndicator(
                       color: (_isDisabled
                               ? AppColors.gray
-                              : widget.textColor ?? AppColors.nearBlack)
+                              : widget.textColor ?? Colors.white)
                           .withValues(alpha: 0.7),
                       strokeWidth: 2.5,
                     ),
@@ -129,7 +129,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
                         Icon(widget.icon,
                             color: _isDisabled
                                 ? AppColors.gray
-                                : widget.textColor ?? AppColors.nearBlack,
+                                : widget.textColor ?? Colors.white,
                             size: 18),
                         const SizedBox(width: 8),
                       ],
@@ -138,7 +138,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
                         style: GoogleFonts.montserrat(
                           color: _isDisabled
                               ? AppColors.gray
-                              : widget.textColor ?? AppColors.nearBlack,
+                              : widget.textColor ?? Colors.white,
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.2,

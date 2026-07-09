@@ -87,7 +87,7 @@ class _LoginPageState extends State<LoginPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.heroBlue,
+      backgroundColor: AppColors.deepPurple,
       body: FadeTransition(
         opacity: _fade,
         child: SlideTransition(
@@ -185,7 +185,7 @@ class _LoginPageState extends State<LoginPage>
                                   horizontal: 4, vertical: 8)),
                           child: Text('Mot de passe oublié ?',
                               style: GoogleFonts.montserrat(
-                                  color: AppColors.blue,
+                                  color: AppColors.deepPurple,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600)),
                         ),
