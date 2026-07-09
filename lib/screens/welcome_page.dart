@@ -34,190 +34,198 @@ class _WelcomePageState extends State<WelcomePage>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.darkGradient),
-        child: Stack(children: [
-          // Glow orb — top right
-          Positioned(
-            top: -130, right: -90,
-            child: Container(
-              width: 380, height: 380,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(colors: [
-                  AppColors.accent.withValues(alpha: 0.13),
-                  Colors.transparent,
-                ]),
-              ),
-            ),
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFF5EEF0),
+              Color(0xFFEDE4E8),
+              Color(0xFFF0E8EC),
+              Color(0xFFF8F2F5),
+            ],
           ),
-          // Glow orb — bottom left
-          Positioned(
-            bottom: 40, left: -90,
-            child: Container(
-              width: 300, height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(colors: [
-                  AppColors.purple.withValues(alpha: 0.14),
-                  Colors.transparent,
-                ]),
-              ),
-            ),
-          ),
-          // Main content
-          SafeArea(
-            child: FadeTransition(
-              opacity: _fade,
-              child: SlideTransition(
-                position: _slide,
-                child: Padding(
+        ),
+        child: SafeArea(
+          child: FadeTransition(
+            opacity: _fade,
+            child: SlideTransition(
+              position: _slide,
+              child: Column(children: [
+                const SizedBox(height: 40),
+
+                // ── Logo LINCOO ──
+                _buildLogo(),
+
+                const SizedBox(height: 8),
+
+                // ── Slogan ──
+                Text(
+                  'Découvrez, connectez, achetez.',
+                  style: GoogleFonts.montserrat(
+                    color: const Color(0xFF6B5B6E),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ── 4 icônes ──
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _iconCircle(Icons.shopping_bag_outlined),
+                    const SizedBox(width: 16),
+                    _iconCircle(Icons.play_circle_outline),
+                    const SizedBox(width: 16),
+                    _iconCircle(Icons.favorite_outline),
+                    const SizedBox(width: 16),
+                    _iconCircle(Icons.chat_bubble_outline),
+                  ],
+                ),
+
+                const Spacer(),
+
+                // ── "Le commerce autrement." ──
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(children: [
+                    TextSpan(
+                      text: 'Le commerce\n',
+                      style: GoogleFonts.montserrat(
+                        color: const Color(0xFF2D1F3D),
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        height: 1.3,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'autrement.',
+                      style: GoogleFonts.dancingScript(
+                        color: AppColors.deepPurple,
+                        fontSize: 34,
+                        fontWeight: FontWeight.w700,
+                        height: 1.4,
+                      ),
+                    ),
+                  ]),
+                ),
+
+                const SizedBox(height: 32),
+
+                // ── Boutons CTA ──
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 28),
                   child: Column(children: [
-                    const Spacer(flex: 2),
-
-                    // Logo mark
-                    Container(
-                      width: 76, height: 76,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColors.accent, AppColors.blue],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(22),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.accent.withValues(alpha: 0.38),
-                            blurRadius: 36,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text('L',
-                            style: GoogleFonts.montserrat(
-                                color: AppColors.nearBlack,
-                                fontSize: 36,
-                                fontWeight: FontWeight.w900)),
-                      ),
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    Text('lincoo',
-                        style: GoogleFonts.montserrat(
-                            color: Colors.white,
-                            fontSize: 36,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 7)),
-
-                    const SizedBox(height: 6),
-
-                    ShaderMask(
-                      shaderCallback: (b) => const LinearGradient(
-                        colors: [AppColors.accent, AppColors.blue],
-                      ).createShader(b),
-                      child: Text('Connect. Learn. Grow.',
-                          style: GoogleFonts.montserrat(
-                              color: Colors.white,
-                              fontSize: 10,
-                              letterSpacing: 2.8,
-                              fontWeight: FontWeight.w600)),
-                    ),
-
-                    const Spacer(flex: 2),
-
-                    // Category pills
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 8,
-                      runSpacing: 8,
-                      children:
-                          ['Mode', 'Beauté', 'Lifestyle', 'Tendances'].map((t) =>
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.07),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.11),
-                                    width: 1),
-                              ),
-                              child: Text(t,
-                                  style: GoogleFonts.montserrat(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.70),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500)),
-                            ),
-                          ).toList(),
-                    ),
-
-                    const SizedBox(height: 28),
-
-                    // Hero headline
-                    Text(
-                      'Découvrez la mode\nalgérienne.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.montserrat(
-                          color: Colors.white,
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          height: 1.25,
-                          letterSpacing: -0.3),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    Text(
-                      'Achetez, vendez et inspirez\nvotre communauté.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.montserrat(
-                          color: Colors.white.withValues(alpha: 0.42),
-                          fontSize: 14,
-                          height: 1.65),
-                    ),
-
-                    const Spacer(flex: 3),
-
-                    // Primary CTA
                     _AnimatedCTA(
                       label: 'Créer un compte',
                       onTap: () => Navigator.pushNamed(context, '/signup'),
-                      useGradient: true,
+                      isPrimary: true,
                     ),
-
                     const SizedBox(height: 12),
-
-                    // Secondary CTA
                     _AnimatedCTA(
                       label: 'Se connecter',
                       onTap: () => Navigator.pushNamed(context, '/login'),
-                      useGradient: false,
+                      isPrimary: false,
                     ),
-
-                    const SizedBox(height: 22),
-
-                    Text(
-                      'En continuant, vous acceptez nos Conditions d\'utilisation',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.montserrat(
-                          color: Colors.white.withValues(alpha: 0.22),
-                          fontSize: 10,
-                          height: 1.6),
-                    ),
-
-                    const SizedBox(height: 16),
                   ]),
                 ),
-              ),
+
+                const SizedBox(height: 18),
+
+                Text(
+                  'En continuant, vous acceptez nos Conditions d\'utilisation',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.montserrat(
+                    color: const Color(0xFF9B8A9E),
+                    fontSize: 10,
+                    height: 1.6,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+              ]),
             ),
           ),
-        ]),
+        ),
       ),
+    );
+  }
+
+  Widget _buildLogo() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Icône sac
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.deepPurple, Color(0xFF5B21B6)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Icon(
+            Icons.shopping_bag_rounded,
+            color: Colors.white,
+            size: 28,
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Texte LINCOO
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              'LINC',
+              style: GoogleFonts.montserrat(
+                color: AppColors.deepPurple,
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 3,
+              ),
+            ),
+            // Double "O" stylisé
+            Text(
+              'OO',
+              style: GoogleFonts.montserrat(
+                color: AppColors.deepPurple,
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 3,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _iconCircle(IconData icon) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white.withValues(alpha: 0.6),
+        border: Border.all(
+          color: AppColors.deepPurple.withValues(alpha: 0.15),
+          width: 1,
+        ),
+      ),
+      child: Icon(icon, color: AppColors.deepPurple, size: 20),
     );
   }
 }
@@ -225,12 +233,12 @@ class _WelcomePageState extends State<WelcomePage>
 class _AnimatedCTA extends StatefulWidget {
   final String label;
   final VoidCallback onTap;
-  final bool useGradient;
+  final bool isPrimary;
 
   const _AnimatedCTA({
     required this.label,
     required this.onTap,
-    required this.useGradient,
+    required this.isPrimary,
   });
 
   @override
@@ -273,26 +281,23 @@ class _AnimatedCTAState extends State<_AnimatedCTA>
           width: double.infinity,
           height: 56,
           decoration: BoxDecoration(
-            gradient: widget.useGradient
+            gradient: widget.isPrimary
                 ? const LinearGradient(
-                    colors: [AppColors.accent, AppColors.blue],
+                    colors: [AppColors.deepPurple, Color(0xFF5B21B6)],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   )
                 : null,
-            color: widget.useGradient
-                ? null
-                : Colors.white.withValues(alpha: 0.07),
+            color: widget.isPrimary ? null : Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: widget.useGradient
+            border: widget.isPrimary
                 ? null
-                : Border.all(
-                    color: Colors.white.withValues(alpha: 0.16), width: 1.5),
-            boxShadow: widget.useGradient
+                : Border.all(color: AppColors.deepPurple.withValues(alpha: 0.3), width: 1.5),
+            boxShadow: widget.isPrimary
                 ? [
                     BoxShadow(
-                      color: AppColors.accent.withValues(alpha: 0.33),
-                      blurRadius: 24,
+                      color: AppColors.deepPurple.withValues(alpha: 0.3),
+                      blurRadius: 20,
                       offset: const Offset(0, 6),
                     ),
                   ]
@@ -302,12 +307,13 @@ class _AnimatedCTAState extends State<_AnimatedCTA>
             child: Text(
               widget.label,
               style: GoogleFonts.montserrat(
-                  color: widget.useGradient
-                      ? AppColors.nearBlack
-                      : Colors.white.withValues(alpha: 0.88),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.2),
+                color: widget.isPrimary
+                    ? Colors.white
+                    : AppColors.deepPurple,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.2,
+              ),
             ),
           ),
         ),
