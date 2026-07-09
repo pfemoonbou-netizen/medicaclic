@@ -6,7 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 const _bg     = Color(0xFF07080F);
 const _card   = Color(0xFF0E1020);
 const _border = Color(0xFF1A1D30);
-const _accent = Color(0xFF3D8BFF);
+const _accent = Color(0xFF7C3AED);
 const _green  = Color(0xFF06EFC5);
 const _red    = Color(0xFFEF4444);
 const _gold   = Color(0xFFFFB800);
@@ -1570,7 +1570,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
 
   Widget _gradientBox(String? gradientId, String title) {
     final colors = switch (gradientId) {
-      'gradient:neon'    => [const Color(0xFF00F6FF), const Color(0xFF00B2FF)],
+      'gradient:neon'    => [const Color(0xFFB06AFF), const Color(0xFF8B5CF6)],
       'gradient:crimson' => [const Color(0xFF292526), const Color(0xFF6E1128)],
       'gradient:purple'  => [const Color(0xFF8A2BE2), const Color(0xFF4B0082)],
       'gradient:orange'  => [const Color(0xFFFF512F), const Color(0xFFDD2476)],
@@ -1842,7 +1842,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(colors: isCreator
-                        ? [_purp, _accent] : [_accent, Colors.blue]),
+                        ? [_purp, _accent] : [_accent, _purp]),
                   ),
                   child: Center(child: Text(
                     u.name.isNotEmpty ? u.name[0].toUpperCase() : '?',

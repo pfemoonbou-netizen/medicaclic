@@ -11,11 +11,11 @@ import '../widgets/rewards_toast.dart';
 // ─── palette ───────────────────────────────────────────────────────────────────
 const _bg       = Color(0xFF04050E);
 const _card     = Color(0xFF0B0D1A);
-const _neonBlue = Color(0xFF3D8BFF);
+const _neonBlue = Color(0xFF7C3AED);
 const _neonPurp = Color(0xFF8B5CF6);
 const _neonTeal = Color(0xFF06EFC5);
 const _gold     = Color(0xFFFFB800);
-const _orb1     = Color(0x3D3D8BFF);
+const _orb1     = Color(0x3D7C3AED);
 const _orb2     = Color(0x2D8B5CF6);
 const _orb3     = Color(0x1D06EFC5);
 

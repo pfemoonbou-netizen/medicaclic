@@ -62,7 +62,7 @@ class _SettingsPageState extends State<SettingsPage> {
           _section('Compte', [
             _navTile(context, Icons.person_outline, 'Modifier le profil',
                 '/edit-profile',
-                iconBg: const Color(0xFFE3F2FD), iconColor: AppColors.blue),
+                iconBg: const Color(0xFFF3E5F5), iconColor: AppColors.blue),
             _navTile(context, Icons.lock_outline, 'Changer le mot de passe',
                 '/forgot-password',
                 iconBg: const Color(0xFFF3E5F5), iconColor: AppColors.purple),
@@ -77,7 +77,7 @@ class _SettingsPageState extends State<SettingsPage> {
           _section('Notifications', [
             _switchTile(Icons.notifications_outlined, 'Notifications push',
                 _notifications, (v) => setState(() => _notifications = v),
-                iconBg: const Color(0xFFE3F2FD), iconColor: AppColors.blue),
+                iconBg: const Color(0xFFF3E5F5), iconColor: AppColors.blue),
             _switchTile(Icons.email_outlined, 'Emails promotionnels',
                 _promoEmails, (v) => setState(() => _promoEmails = v),
                 iconBg: const Color(0xFFF3E5F5), iconColor: AppColors.purple),
@@ -97,7 +97,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ]),
           _section('Aide & Informations', [
             _navTile(context, Icons.help_outline, 'Centre d\'aide', '/help',
-                iconBg: const Color(0xFFE3F2FD), iconColor: AppColors.blue),
+                iconBg: const Color(0xFFF3E5F5), iconColor: AppColors.blue),
             _navTile(context, Icons.privacy_tip_outlined,
                 'Politique de confidentialité', null,
                 iconBg: const Color(0xFFF3E5F5), iconColor: AppColors.purple),
@@ -267,7 +267,7 @@ class _SettingsPageState extends State<SettingsPage> {
       leading: Container(
         width: 32, height: 32,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [Color(0xFF00F6FF), Color(0xFF1E90FF)]),
+          gradient: const LinearGradient(colors: [Color(0xFFB06AFF), Color(0xFF7C3AED)]),
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Icon(Icons.admin_panel_settings, color: Color(0xFF020024), size: 18),

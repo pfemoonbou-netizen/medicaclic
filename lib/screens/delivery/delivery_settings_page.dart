@@ -13,7 +13,7 @@ class _DeliverySettingsPageState extends State<DeliverySettingsPage> {
   static const _bg   = Color(0xFF07080F);
   static const _card = Color(0xFF0D0F1E);
   static const _bord = Color(0xFF1C1F35);
-  static const _acc  = Color(0xFF4F8EFF);
+  static const _acc  = Color(0xFF7C3AED);
   static const _green= Color(0xFF10E8B0);
 
   final _addressCtrl      = TextEditingController();

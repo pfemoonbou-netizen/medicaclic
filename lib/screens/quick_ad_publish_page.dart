@@ -36,7 +36,7 @@ class _QuickAdPublishPageState extends State<QuickAdPublishPage> {
   final List<Map<String, dynamic>> _gradients = [
     {
       'name': 'Glow Neon',
-      'colors': [const Color(0xFF00F6FF), const Color(0xFF00B2FF)],
+      'colors': [const Color(0xFFB06AFF), const Color(0xFF8B5CF6)],
       'id': 'gradient:neon',
     },
     {

@@ -6,13 +6,13 @@ abstract class AppColors {
   static const dark       = Color(0xFF0A0F2C);
 
   // ── Brand accents ─────────────────────────────────────────────────────────
-  static const accent     = Color(0xFF00D4FF);
-  static const blue       = Color(0xFF3B82F6);
+  static const accent     = Color(0xFFB06AFF);
+  static const blue       = Color(0xFF8B5CF6);
   static const purple     = Color(0xFFA855F7);
   static const deepPurple = Color(0xFF7C3AED);
 
-  // ── Solid hero blue (flat background, no pattern) ───────────────────────────
-  static const heroBlue = Color(0xFF2F5FF6);
+  // ── Solid hero purple (flat background) ─────────────────────────────────────
+  static const heroBlue = Color(0xFF6D28D9);
 
   // ── Surfaces ──────────────────────────────────────────────────────────────
   static const surface    = Color(0xFFFFFFFF);
@@ -35,9 +35,9 @@ abstract class AppColors {
   static const gold = Color(0xFFFFC107);
 
   // ── Gradients ─────────────────────────────────────────────────────────────
-  // Dégradé principal from the brand charte: cyan → purple
+  // Dégradé principal violet
   static const brandGradient = LinearGradient(
-    colors: [accent, purple],
+    colors: [purple, deepPurple],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -55,7 +55,7 @@ abstract class AppColors {
   );
 
   static const accentGlow = LinearGradient(
-    colors: [accent, blue],
+    colors: [accent, deepPurple],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

@@ -396,7 +396,7 @@ class _CompanyPageState extends State<CompanyPage> {
     final hasImage    = imageUrl != null && !imageUrl.startsWith('gradient:');
 
     final gradients = {
-      'gradient:neon':    [const Color(0xFF00F6FF), const Color(0xFF00B2FF)],
+      'gradient:neon':    [const Color(0xFFB06AFF), const Color(0xFF8B5CF6)],
       'gradient:crimson': [const Color(0xFF292526), const Color(0xFF6E1128)],
       'gradient:purple':  [const Color(0xFF8A2BE2), const Color(0xFF4B0082)],
       'gradient:orange':  [const Color(0xFFFF512F), const Color(0xFFDD2476)],

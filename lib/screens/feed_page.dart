@@ -537,7 +537,7 @@ class _FeedPageState extends State<FeedPage> {
   // ── Ad Carousel ───────────────────────────────────────────────────────────
 
   List<Color> _resolveAdColors(String? imageUrl) {
-    if (imageUrl == 'gradient:neon') return [const Color(0xFF00F6FF), const Color(0xFF00B2FF)];
+    if (imageUrl == 'gradient:neon') return [const Color(0xFFB06AFF), const Color(0xFF8B5CF6)];
     if (imageUrl == 'gradient:crimson') return [const Color(0xFF292526), const Color(0xFF6E1128)];
     if (imageUrl == 'gradient:purple') return [const Color(0xFF8A2BE2), const Color(0xFF4B0082)];
     if (imageUrl == 'gradient:orange') return [const Color(0xFFFF512F), const Color(0xFFDD2476)];
@@ -2198,7 +2198,7 @@ class _CollabPostCardState extends State<_CollabPostCard>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E90FF)
+                          color: const Color(0xFF7C3AED)
                               .withValues(alpha: 0.09),
                           borderRadius: BorderRadius.circular(6),
                         ),
@@ -2592,7 +2592,7 @@ class _ProfileSetupSheet extends StatelessWidget {
           icon: Icons.shopping_bag_outlined,
           label: 'Acheteur',
           subtitle: 'Je découvre et achète des produits',
-          gradientColors: [const Color(0xFF1A6DFF), AppColors.blue],
+          gradientColors: [AppColors.deepPurple, AppColors.blue],
           iconColor: AppColors.blue,
         ),
         const SizedBox(height: 12),

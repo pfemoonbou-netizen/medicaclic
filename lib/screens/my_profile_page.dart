@@ -1285,7 +1285,7 @@ class _MyProfilePageState extends State<MyProfilePage>
       PackType.pro      => const Color(0xFF8B5CF6),
       PackType.essentiel=> const Color(0xFFFFB800),
       PackType.lincooPlus=> const Color(0xFF8B5CF6),
-      PackType.starter  => const Color(0xFF3D8BFF),
+      PackType.starter  => const Color(0xFF7C3AED),
     };
 
     return Container(
@@ -1394,7 +1394,7 @@ class _MyProfilePageState extends State<MyProfilePage>
     int? selected;
     final packs = [
       {'name': 'Starter',  'price': 'Gratuit',    'color': 0xFF6B7080, 'sub': '10 produits · Tableau de bord basique'},
-      {'name': 'Pro',      'price': '1 500 DA/mois','color': 0xFF3D8BFF, 'sub': '50 produits · Coach IA · Statistiques'},
+      {'name': 'Pro',      'price': '1 500 DA/mois','color': 0xFF7C3AED, 'sub': '50 produits · Coach IA · Statistiques'},
       {'name': 'Business', 'price': '3 500 DA/mois','color': 0xFF8B5CF6, 'sub': '200 produits · Automatisations · CRM'},
       {'name': 'Elite',    'price': '7 000 DA/mois','color': 0xFFFFB800, 'sub': 'Produits illimités · API · Account manager'},
     ];
@@ -1414,7 +1414,7 @@ class _MyProfilePageState extends State<MyProfilePage>
               decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 20),
           ShaderMask(
-            shaderCallback: (r) => const LinearGradient(colors: [Color(0xFF3D8BFF), Color(0xFF8B5CF6)]).createShader(r),
+            shaderCallback: (r) => const LinearGradient(colors: [Color(0xFF7C3AED), Color(0xFF8B5CF6)]).createShader(r),
             child: Text('Lincoo+', style: GoogleFonts.montserrat(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 1)),
           ),
           const SizedBox(height: 4),
@@ -1464,7 +1464,7 @@ class _MyProfilePageState extends State<MyProfilePage>
                 if (selected == null) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text('Choisissez un plan d\'abord'),
-                    backgroundColor: Color(0xFF3D8BFF),
+                    backgroundColor: Color(0xFF7C3AED),
                   ));
                   return;
                 }
@@ -1474,7 +1474,7 @@ class _MyProfilePageState extends State<MyProfilePage>
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF3D8BFF), Color(0xFF8B5CF6)]),
+                  gradient: const LinearGradient(colors: [Color(0xFF7C3AED), Color(0xFF8B5CF6)]),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Text('Continuer', textAlign: TextAlign.center,
@@ -1518,16 +1518,16 @@ class _MyProfilePageState extends State<MyProfilePage>
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
                   decoration: BoxDecoration(
-                    color: method == e.key ? const Color(0xFF3D8BFF).withValues(alpha: 0.12) : const Color(0xFF12142A),
-                    border: Border.all(color: method == e.key ? const Color(0xFF3D8BFF) : const Color(0xFF1A1D38)),
+                    color: method == e.key ? const Color(0xFF7C3AED).withValues(alpha: 0.12) : const Color(0xFF12142A),
+                    border: Border.all(color: method == e.key ? const Color(0xFF7C3AED) : const Color(0xFF1A1D38)),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(children: [
                     Container(width: 9, height: 9,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: method == e.key ? const Color(0xFF3D8BFF) : Colors.transparent,
-                        border: Border.all(color: method == e.key ? const Color(0xFF3D8BFF) : Colors.white24, width: 1.5),
+                        color: method == e.key ? const Color(0xFF7C3AED) : Colors.transparent,
+                        border: Border.all(color: method == e.key ? const Color(0xFF7C3AED) : Colors.white24, width: 1.5),
                       ),
                     ),
                     const SizedBox(width: 12),

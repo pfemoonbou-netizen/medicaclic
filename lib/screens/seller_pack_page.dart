@@ -97,7 +97,7 @@ const _packs = [
     priceDzd: 20000,
     isAnnual: true,
     commissionRate: 0.03,
-    color: Color(0xFF3B82F6),
+    color: Color(0xFF7C3AED),
     features: [
       'Tout du Starter',
       '300 produits max',
@@ -267,7 +267,7 @@ class _SellerPackPageState extends State<SellerPackPage> {
           margin: const EdgeInsets.only(top: 2),
           height: 2, width: 40,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [Color(0xFF00D4FF), Color(0xFFA855F7)]),
+            gradient: const LinearGradient(colors: [Color(0xFFA855F7), Color(0xFF7C3AED)]),
             borderRadius: BorderRadius.circular(2),
           ),
         ),

@@ -7,7 +7,7 @@ enum NavTab { feed, shop, reels, cart, create, dashboard, profile }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Active item accent color
-const _kActive  = Color(0xFF3B82F6);
+const _kActive  = Color(0xFF7C3AED);
 const _kInactive = Color(0xFF9DB2CE);
 const _kBarBg   = Color(0xFF1C1C1E);
 // ─────────────────────────────────────────────────────────────────────────────

@@ -27,7 +27,7 @@ class _DeliveryCenterPageState extends State<DeliveryCenterPage> {
   static const _bgDark  = Color(0xFF07080F);
   static const _cardBg  = Color(0xFF0D0F1E);
   static const _border  = Color(0xFF1C1F35);
-  static const _accent  = Color(0xFF4F8EFF);
+  static const _accent  = Color(0xFF7C3AED);
   static const _green   = Color(0xFF10E8B0);
   static const _gold    = Color(0xFFFFB800);
   static const _purp    = Color(0xFF9B6CF7);

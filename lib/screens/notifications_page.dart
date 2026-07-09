@@ -239,7 +239,7 @@ enum _NotifType { order, like, review, promo, follow }
 
 extension _NotifTypeExt on _NotifType {
   Color get bgColor => switch (this) {
-        _NotifType.order  => const Color(0xFFE3F2FD),
+        _NotifType.order  => const Color(0xFFF3E5F5),
         _NotifType.like   => const Color(0xFFFFEBEE),
         _NotifType.review => const Color(0xFFFFF8E1),
         _NotifType.promo  => const Color(0xFFE8F5E9),
