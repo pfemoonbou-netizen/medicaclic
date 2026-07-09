@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/app_colors.dart';
@@ -39,7 +39,6 @@ class _SplashPageState extends State<SplashPage>
 
     final session = Supabase.instance.client.auth.currentSession;
 
-    // Pas connecté → écran d'accueil
     if (session == null) {
       Navigator.pushReplacementNamed(context, '/welcome');
       return;
@@ -69,7 +68,6 @@ class _SplashPageState extends State<SplashPage>
       body: Container(
         decoration: const BoxDecoration(gradient: AppColors.darkGradient),
         child: Stack(children: [
-          // Glow orbs (brand feel)
           Positioned(
             top: -80, left: -80,
             child: Container(
@@ -90,64 +88,32 @@ class _SplashPageState extends State<SplashPage>
               ),
             ),
           ),
-          // Center content
           Center(
             child: FadeTransition(
               opacity: _fade,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo container with brand gradient
-                  Container(
-                    width: 100, height: 100,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.accent, AppColors.purple],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.accent.withValues(alpha: 0.35),
-                          blurRadius: 32,
-                          offset: const Offset(0, 8),
+                  Image.asset(
+                    'assets/images/logo_lincoo.png',
+                    width: 180,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 100, height: 100,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppColors.accent, AppColors.purple],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Text(
-                        'L',
-                        style: GoogleFonts.montserrat(
-                            color: AppColors.nearBlack,
-                            fontSize: 46,
-                            fontWeight: FontWeight.w900),
+                        borderRadius: BorderRadius.circular(28),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 22),
-                  // Brand name
-                  Text(
-                    'lincoo',
-                    style: GoogleFonts.montserrat(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 3),
-                  ),
-                  const SizedBox(height: 6),
-                  // Brand tagline
-                  ShaderMask(
-                    shaderCallback: (bounds) => const LinearGradient(
-                      colors: [AppColors.accent, AppColors.blue],
-                    ).createShader(bounds),
-                    child: Text(
-                      'Connect. Learn. Grow.',
-                      style: GoogleFonts.montserrat(
-                          color: Colors.white,
-                          fontSize: 12,
-                          letterSpacing: 1.5,
-                          fontWeight: FontWeight.w600),
+                      child: Center(
+                        child: Text('L',
+                            style: GoogleFonts.montserrat(
+                                color: AppColors.nearBlack,
+                                fontSize: 46,
+                                fontWeight: FontWeight.w900)),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 60),
