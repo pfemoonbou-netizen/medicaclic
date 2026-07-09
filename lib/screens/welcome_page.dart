@@ -92,7 +92,21 @@ class _WelcomePageState extends State<WelcomePage>
                   ],
                 ),
 
-                const Spacer(),
+                // ── Photo de fond ──
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(0),
+                      child: Image.asset(
+                        'assets/images/welcome_bg.png',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                      ),
+                    ),
+                  ),
+                ),
 
                 // ── "Le commerce autrement." ──
                 RichText(
