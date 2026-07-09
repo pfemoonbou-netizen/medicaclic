@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lincoo — Connect. Learn. Grow.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cyan:   #00D4FF;
+      --blue:   #3B82F6;
+      --purple: #A855F7;
+      --dark:   #0D0B2D;
+      --dark2:  #0A0F2C;
+      --gray:   #9EA3B8;
+      --border: rgba(255,255,255,0.07);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--dark);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ── NAVBAR ───────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      padding: 0 60px;
+      height: 68px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(13,11,45,0.75);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-box {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 900; color: #fff;
+    }
+    .logo-name {
+      font-size: 20px; font-weight: 800;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      color: var(--gray); text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: #fff; }
+    .btn-login {
+      padding: 10px 22px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      border-radius: 12px; color: #fff; text-decoration: none;
+      font-size: 13px; font-weight: 700;
+      transition: opacity .2s, transform .2s;
+    }
+    .btn-login:hover { opacity: .88; transform: translateY(-1px); }
+
+    /* ── HERO ─────────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 40px 80px;
+      position: relative; overflow: hidden;
+    }
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(90px); pointer-events: none;
+    }
+    .orb-1 { width: 560px; height: 560px; background: var(--cyan);   opacity:.18; top:-120px; left:-120px; animation: drift 10s ease-in-out infinite; }
+    .orb-2 { width: 480px; height: 480px; background: var(--purple); opacity:.18; bottom:-80px; right:-80px; animation: drift 12s ease-in-out infinite reverse; }
+    .orb-3 { width: 320px; height: 320px; background: var(--blue);   opacity:.12; top:45%; left:48%; transform:translate(-50%,-50%); animation: drift 8s ease-in-out infinite 4s; }
+    @keyframes drift {
+      0%,100% { transform: translate(0,0); }
+      50%      { transform: translate(20px,-30px); }
+    }
+    .orb-3 { animation: drift3 8s ease-in-out infinite 4s; }
+    @keyframes drift3 {
+      0%,100% { transform: translate(-50%,-50%); }
+      50%      { transform: translate(calc(-50% + 20px), calc(-50% - 30px)); }
+    }
+    .hero-inner { position: relative; z-index: 1; max-width: 820px; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 18px;
+      background: rgba(0,212,255,.08);
+      border: 1px solid rgba(0,212,255,.28);
+      border-radius: 100px;
+      font-size: 12px; font-weight: 600; color: var(--cyan);
+      margin-bottom: 28px;
+    }
+    .pill::before { content:''; width:6px; height:6px; background:var(--cyan); border-radius:50%; }
+    h1 { font-size: clamp(36px,6vw,70px); font-weight: 900; line-height: 1.1; margin-bottom: 24px; }
+    .grad { background: linear-gradient(135deg,var(--cyan),var(--blue),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .hero p { font-size:17px; color:var(--gray); max-width:560px; margin:0 auto 40px; line-height:1.75; }
+    .ctas { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+    .btn-p {
+      padding:15px 30px;
+      background:linear-gradient(135deg,var(--cyan),var(--purple));
+      border-radius:14px; color:#fff; text-decoration:none;
+      font-size:14px; font-weight:700;
+      box-shadow: 0 8px 32px rgba(0,212,255,.28);
+      transition: all .22s;
+    }
+    .btn-p:hover { transform:translateY(-2px); box-shadow:0 12px 40px rgba(0,212,255,.4); }
+    .btn-s {
+      padding:15px 30px;
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:14px; color:#fff; text-decoration:none;
+      font-size:14px; font-weight:600; backdrop-filter:blur(10px);
+      transition:all .22s;
+    }
+    .btn-s:hover { background:rgba(255,255,255,.12); transform:translateY(-2px); }
+
+    /* ── STATS STRIP ──────────────────────────────────────────── */
+    .stats {
+      display:flex; justify-content:center; gap:56px; flex-wrap:wrap;
+      padding:36px 40px;
+      border-top:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+      background:rgba(0,0,0,.15);
+    }
+    .stat-n { font-size:38px; font-weight:900; background:linear-gradient(135deg,var(--cyan),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .stat-l { font-size:12px; color:var(--gray); font-weight:500; margin-top:4px; }
+
+    /* ── SECTIONS ─────────────────────────────────────────────── */
+    .sec { padding:100px 60px; max-width:1200px; margin:0 auto; }
+    .sec-badge {
+      display:inline-block; padding:6px 14px;
+      background:rgba(168,85,247,.1); border:1px solid rgba(168,85,247,.28);
+      border-radius:100px; font-size:11px; font-weight:700; color:var(--purple);
+      letter-spacing:1px; text-transform:uppercase; margin-bottom:16px;
+    }
+    .sec-h { font-size:clamp(26px,4vw,44px); font-weight:900; line-height:1.2; margin-bottom:14px; }
+    .sec-sub { font-size:15px; color:var(--gray); line-height:1.75; max-width:520px; }
+
+    /* ── ABOUT ────────────────────────────────────────────────── */
+    .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; }
+    .roles { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:32px; }
+    .role-chip {
+      display:flex; align-items:center; gap:12px; padding:16px;
+      background:rgba(255,255,255,.04); border:1px solid var(--border);
+      border-radius:14px;
+    }
+    .rc-ico { font-size:22px; }
+    .rc-t { font-size:13px; font-weight:600; }
+    .rc-s { font-size:11px; color:var(--gray); }
+    .about-card {
+      background:rgba(255,255,255,.04); border:1px solid var(--border);
+      border-radius:24px; padding:40px; backdrop-filter:blur(10px);
+    }
+    .ac-icon {
+      width:54px; height:54px; border-radius:16px;
+      background:linear-gradient(135deg,var(--cyan),var(--purple));
+      display:flex; align-items:center; justify-content:center;
+      font-size:24px; margin-bottom:20px;
+    }
+    .about-card h3 { font-size:20px; font-weight:800; margin-bottom:12px; }
+    .about-card p  { font-size:14px; color:var(--gray); line-height:1.7; }
+
+    /* ── SERVICES ─────────────────────────────────────────────── */
+    .srv-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+    .srv-card {
+      background:rgba(255,255,255,.03); border:1px solid var(--border);
+      border-radius:20px; padding:30px; position:relative; overflow:hidden;
+      transition:all .3s;
+    }
+    .srv-card::after {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg,var(--cyan),var(--purple));
+      opacity:0; transition:opacity .3s;
+    }
+    .srv-card:hover { transform:translateY(-5px); background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.12); }
+    .srv-card:hover::after { opacity:1; }
+    .srv-ico {
+      width:50px; height:50px; border-radius:14px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px; margin-bottom:18px;
+    }
+    .srv-card h3 { font-size:16px; font-weight:700; margin-bottom:8px; }
+    .srv-card p  { font-size:13px; color:var(--gray); line-height:1.65; }
+
+    /* ── PRICING ──────────────────────────────────────────────── */
+    #pricing { background:rgba(0,0,0,.22); padding:100px 0; }
+    .pricing-inner { max-width:1200px; margin:0 auto; padding:0 60px; }
+    .pricing-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-bottom:48px; }
+    .pc {
+      background:rgba(255,255,255,.03); border:1px solid var(--border);
+      border-radius:24px; padding:36px; position:relative; transition:all .3s;
+    }
+    .pc:hover { border-color:rgba(255,255,255,.14); background:rgba(255,255,255,.05); }
+    .pc.popular {
+      background:rgba(59,130,246,.06); border-color:rgba(59,130,246,.4);
+      transform:scale(1.03);
+    }
+    .pop-badge {
+      position:absolute; top:-13px; left:50%; transform:translateX(-50%);
+      padding:6px 20px;
+      background:linear-gradient(135deg,var(--blue),var(--purple));
+      border-radius:100px; font-size:11px; font-weight:800; color:#fff;
+      letter-spacing:.5px; white-space:nowrap;
+    }
+    .pc-emoji { font-size:34px; margin-bottom:10px; }
+    .pc-name  { font-size:22px; font-weight:900; margin-bottom:4px; }
+    .pc-tag   { font-size:12px; color:var(--gray); margin-bottom:22px; }
+    .pc-price { padding-bottom:22px; border-bottom:1px solid var(--border); margin-bottom:22px; }
+    .price-big { font-size:42px; font-weight:900; line-height:1; }
+    .price-free { background:linear-gradient(135deg,var(--cyan),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .price-mo { font-size:13px; color:var(--gray); margin-top:5px; }
+    .feat-list { list-style:none; margin-bottom:28px; }
+    .feat-list li { display:flex; align-items:flex-start; gap:9px; font-size:13px; font-weight:500; padding:5px 0; }
+    .feat-list li.dim { color:rgba(255,255,255,.28); }
+    .ic-ok  { color:var(--cyan); flex-shrink:0; margin-top:2px; font-size:13px; }
+    .ic-no  { color:rgba(255,255,255,.18); flex-shrink:0; margin-top:2px; font-size:13px; }
+    .pc-btn {
+      display:block; width:100%; padding:13px;
+      border-radius:13px; text-align:center;
+      font-size:14px; font-weight:700; text-decoration:none;
+      border:none; cursor:pointer; font-family:'Poppins',sans-serif;
+      transition:all .22s;
+    }
+    .pc-btn.free { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); color:#fff; }
+    .pc-btn.free:hover { background:rgba(255,255,255,.12); }
+    .pc-btn.pro  { background:linear-gradient(135deg,var(--blue),#6366f1); color:#fff; box-shadow:0 8px 24px rgba(59,130,246,.35); }
+    .pc-btn.pro:hover  { transform:translateY(-2px); box-shadow:0 12px 32px rgba(59,130,246,.45); }
+    .pc-btn.plus { background:linear-gradient(135deg,var(--purple),#7c3aed); color:#fff; box-shadow:0 8px 24px rgba(168,85,247,.35); }
+    .pc-btn.plus:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(168,85,247,.45); }
+
+    /* comparison toggle */
+    .cmp-wrap { text-align:center; margin-bottom:28px; }
+    .cmp-btn {
+      padding:10px 24px;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+      border-radius:100px; color:var(--gray);
+      font-size:13px; font-weight:600; cursor:pointer;
+      font-family:'Poppins',sans-serif; transition:all .2s;
+    }
+    .cmp-btn:hover { background:rgba(255,255,255,.1); color:#fff; }
+    .cmp-tbl { display:none; width:100%; border-collapse:collapse; font-size:13px; }
+    .cmp-tbl.on { display:table; }
+    .cmp-tbl th { padding:14px 18px; font-weight:800; font-size:13px; border-bottom:1px solid var(--border); }
+    .cmp-tbl th:not(:first-child) { text-align:center; }
+    .cmp-tbl td { padding:11px 18px; border-bottom:1px solid rgba(255,255,255,.03); color:var(--gray); }
+    .cmp-tbl td:not(:first-child) { text-align:center; }
+    .cmp-tbl .grp td { background:rgba(255,255,255,.03); color:#fff; font-weight:700; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:9px 18px; border-bottom:none; }
+    .cmp-tbl .ok  { color:var(--cyan); font-weight:700; }
+    .cmp-tbl .no  { color:rgba(255,255,255,.18); }
+    .cmp-tbl .v   { color:#fff; font-weight:600; }
+    .c-pro  { color:var(--blue)   !important; }
+    .c-plus { color:var(--purple) !important; }
+
+    /* ── CONTACT ──────────────────────────────────────────────── */
+    .cnt-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start; }
+    .cnt-info h3 { font-size:30px; font-weight:900; margin-bottom:18px; }
+    .cnt-info p  { color:var(--gray); font-size:14px; line-height:1.75; margin-bottom:32px; }
+    .cnt-items { display:flex; flex-direction:column; gap:14px; }
+    .cnt-item  { display:flex; align-items:center; gap:14px; }
+    .cnt-ico {
+      width:44px; height:44px; flex-shrink:0;
+      background:rgba(0,212,255,.08); border:1px solid rgba(0,212,255,.2);
+      border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px;
+    }
+    .cnt-t { font-size:14px; font-weight:600; }
+    .cnt-s { font-size:12px; color:var(--gray); }
+    .cnt-form {
+      background:rgba(255,255,255,.03); border:1px solid var(--border);
+      border-radius:24px; padding:36px;
+    }
+    .cnt-form h4 { font-size:17px; font-weight:800; margin-bottom:22px; }
+    .fg { margin-bottom:18px; }
+    .fg label { display:block; font-size:12px; font-weight:600; color:var(--gray); margin-bottom:7px; }
+    .fg input,.fg textarea,.fg select {
+      width:100%; padding:13px 15px;
+      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+      border-radius:12px; color:#fff; font-family:'Poppins',sans-serif;
+      font-size:13px; outline:none; transition:border-color .2s;
+    }
+    .fg input:focus,.fg textarea:focus,.fg select:focus { border-color:var(--cyan); }
+    .fg textarea { height:110px; resize:none; }
+    .fg select option { background:#1a1a3e; }
+
+    /* ── FOOTER ───────────────────────────────────────────────── */
+    footer { background:rgba(0,0,0,.3); border-top:1px solid var(--border); padding:60px; }
+    .ft-inner {
+      max-width:1200px; margin:0 auto;
+      display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:60px;
+      margin-bottom:36px;
+    }
+    .ft-brand p { color:var(--gray); font-size:13px; line-height:1.7; margin-top:14px; max-width:240px; }
+    .ft-col h4 { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--gray); margin-bottom:14px; }
+    .ft-col a { display:block; color:rgba(255,255,255,.7); text-decoration:none; font-size:13px; padding:3px 0; transition:color .2s; }
+    .ft-col a:hover { color:var(--cyan); }
+    .ft-bottom {
+      max-width:1200px; margin:0 auto;
+      padding-top:22px; border-top:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .ft-bottom p { color:var(--gray); font-size:12px; }
+    .ft-tagline { background:linear-gradient(135deg,var(--cyan),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:700; font-size:13px; }
+
+    /* ── RESPONSIVE ───────────────────────────────────────────── */
+    @media(max-width:960px) {
+      nav { padding:0 24px; }
+      .nav-links { display:none; }
+      .sec { padding:64px 24px; }
+      .about-grid,.cnt-grid { grid-template-columns:1fr; gap:36px; }
+      .srv-grid { grid-template-columns:1fr 1fr; }
+      .pricing-cards { grid-template-columns:1fr; gap:20px; }
+      .pc.popular { transform:none; }
+      footer { padding:40px 24px; }
+      .ft-inner { grid-template-columns:1fr 1fr; gap:28px; }
+      .stats { gap:28px; padding:32px 24px; }
+      #pricing { padding:64px 0; }
+      .pricing-inner { padding:0 24px; }
+    }
+    @media(max-width:560px) {
+      .srv-grid { grid-template-columns:1fr; }
+      .roles { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ NAVBAR ═══════════════════════════ -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="logo-box">L</div>
+    <span class="logo-name">lincoo</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">Qui sommes-nous</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#pricing">Tarifs</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="index.html" class="btn-login">Connexion Admin →</a>
+</nav>
+
+<!-- ═══════════════════════════ HERO ═════════════════════════════ -->
+<div class="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="hero-inner">
+    <div class="pill">La plateforme e-commerce algérienne</div>
+    <h1>
+      Connect.<br>
+      <span class="grad">Learn. Grow.</span>
+    </h1>
+    <p>Lincoo connecte vendeurs, acheteurs, créateurs et livreurs dans un écosystème e-commerce complet — sans commission sur vos ventes.</p>
+    <div class="ctas">
+      <a href="#pricing" class="btn-p">Voir les packs →</a>
+      <a href="#about"   class="btn-s">Découvrir Lincoo</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ STATS ════════════════════════════ -->
+<div class="stats">
+  <div>
+    <div class="stat-n">0%</div>
+    <div class="stat-l">Commission sur vos ventes</div>
+  </div>
+  <div>
+    <div class="stat-n">4</div>
+    <div class="stat-l">Rôles (Vendeur · Acheteur · Créateur · Livreur)</div>
+  </div>
+  <div>
+    <div class="stat-n">50+</div>
+    <div class="stat-l">Fonctionnalités intégrées</div>
+  </div>
+  <div>
+    <div class="stat-n">3</div>
+    <div class="stat-l">Packs vendeur dès 0 DA</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ WHO WE ARE ═══════════════════════════ -->
+<section class="sec" id="about">
+  <div class="about-grid">
+    <div>
+      <div class="sec-badge">Qui sommes-nous</div>
+      <h2 class="sec-h">Une plateforme pensée pour <span class="grad">l'Algérie</span></h2>
+      <p class="sec-sub">Lincoo est une plateforme e-commerce innovante qui connecte les utilisateurs aux produits, aux savoirs et aux opportunités. Notre mission : permettre à chaque entrepreneur algérien de vendre, grandir et réussir en ligne.</p>
+      <div class="roles">
+        <div class="role-chip"><span class="rc-ico">🛍️</span><div><div class="rc-t">Acheteurs</div><div class="rc-s">Shop &amp; Enjoy</div></div></div>
+        <div class="role-chip"><span class="rc-ico">🏪</span><div><div class="rc-t">Vendeurs</div><div class="rc-s">Sell &amp; Grow</div></div></div>
+        <div class="role-chip"><span class="rc-ico">🎬</span><div><div class="rc-t">Créateurs</div><div class="rc-s">Create &amp; Earn</div></div></div>
+        <div class="role-chip"><span class="rc-ico">🚚</span><div><div class="rc-t">Livreurs</div><div class="rc-s">Deliver &amp; Support</div></div></div>
+      </div>
+    </div>
+    <div class="about-card">
+      <div class="ac-icon">🎯</div>
+      <h3>Notre mission</h3>
+      <p>Démocratiser le commerce en ligne en Algérie en donnant à chaque vendeur les outils d'un grand e-commerce, sans prélever de commission sur ses ventes. Vous vendez, vous gardez tout.</p>
+      <div style="margin-top:28px; padding-top:20px; border-top:1px solid rgba(255,255,255,.07);">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <span style="font-size:18px;">🚀</span>
+          <span style="font-size:13px; font-weight:600;">Lancé en Algérie</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <span style="font-size:18px;">🔒</span>
+          <span style="font-size:13px; font-weight:600;">Paiement sécurisé (BaridiMob &amp; Edahabiya)</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:18px;">📱</span>
+          <span style="font-size:13px; font-weight:600;">App mobile + Dashboard web</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ SERVICES ═════════════════════════ -->
+<section class="sec" id="services" style="padding-top:0;">
+  <div style="text-align:center; margin-bottom:56px;">
+    <div class="sec-badge">Nos services</div>
+    <h2 class="sec-h">Tout ce dont vous avez besoin,<br><span class="grad">en une seule app</span></h2>
+  </div>
+  <div class="srv-grid">
+    <div class="srv-card">
+      <div class="srv-ico" style="background:rgba(0,212,255,.1);">🏪</div>
+      <h3>Boutique en ligne</h3>
+      <p>Créez et gérez votre boutique, uploadez vos produits, suivez vos commandes en temps réel depuis l'app ou le dashboard web Lincoo+.</p>
+    </div>
+    <div class="srv-card">
+      <div class="srv-ico" style="background:rgba(59,130,246,.1);">📦</div>
+      <h3>Smart Delivery</h3>
+      <p>Connectez-vous au réseau de livraison Lincoo. Gérez vos commandes, planifiez les enlèvements et imprimez vos étiquettes d'expédition.</p>
+    </div>
+    <div class="srv-card">
+      <div class="srv-ico" style="background:rgba(168,85,247,.1);">📣</div>
+      <h3>Campagnes publicitaires</h3>
+      <p>Boostez votre visibilité avec des campagnes ciblées dans le feed Lincoo. Touchez des milliers d'acheteurs avec vos bannières et annonces.</p>
+    </div>
+    <div class="srv-card">
+      <div class="srv-ico" style="background:rgba(0,212,255,.1);">🎬</div>
+      <h3>Reels &amp; Contenu</h3>
+      <p>Publiez des Reels, Stories et Posts liés à vos produits. Transformez votre boutique en une vraie expérience de shopping social.</p>
+    </div>
+    <div class="srv-card">
+      <div class="srv-ico" style="background:rgba(59,130,246,.1);">📊</div>
+      <h3>Analytics avancés</h3>
+      <p>Suivez vos revenus, commandes, meilleurs produits, rating et performance de livraison avec des tableaux de bord détaillés.</p>
+    </div>
+    <div class="srv-card">
+      <div class="srv-ico" style="background:rgba(168,85,247,.1);">🤝</div>
+      <h3>Programme Affilié</h3>
+      <p>Gagnez des commissions en rejoignant le programme d'affiliation. Collaborez avec des créateurs UGC, influenceurs et partenaires Lincoo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ PRICING ══════════════════════════ -->
+<div id="pricing">
+  <div class="pricing-inner">
+    <div style="text-align:center; margin-bottom:56px;">
+      <div class="sec-badge">Tarifs vendeurs</div>
+      <h2 class="sec-h">Des packs pensés pour <span class="grad">votre croissance</span></h2>
+      <p style="font-size:15px; color:var(--gray); max-width:560px; margin:0 auto; line-height:1.7;">
+        Commission transparente sur chaque vente. Choisissez le pack adapté à votre volume et vos ambitions.
+      </p>
+    </div>
+
+    <div class="pricing-cards">
+
+      <!-- STARTER -->
+      <div class="pc">
+        <div class="pc-emoji">🛍️</div>
+        <div class="pc-name">Starter</div>
+        <div class="pc-tag">Lancez votre boutique dès aujourd'hui</div>
+        <div class="pc-price">
+          <div class="price-big" style="color:var(--gray);">1 500</div>
+          <div class="price-mo">DZD / mois · 5% commission</div>
+        </div>
+        <ul class="feat-list">
+          <li><span class="ic-ok">✓</span> 1 boutique · <strong>15 produits max</strong></li>
+          <li><span class="ic-ok">✓</span> Gestion des commandes</li>
+          <li><span class="ic-ok">✓</span> Livraisons avec suivi</li>
+          <li><span class="ic-ok">✓</span> Ma Crédibilité — consultation</li>
+          <li class="dim"><span class="ic-no">✗</span> Messages clients</li>
+          <li class="dim"><span class="ic-no">✗</span> Stats &amp; Dashboard</li>
+          <li class="dim"><span class="ic-no">✗</span> Pickup Schedule &amp; Shipping Labels</li>
+          <li class="dim"><span class="ic-no">✗</span> Outils IA</li>
+        </ul>
+        <div class="pc-comm-badge" style="background:rgba(107,114,128,.15); color:#9ca3af; border-radius:8px; padding:6px 12px; font-size:12px; font-weight:600; margin-bottom:16px; text-align:center;">Commission 5%</div>
+        <a href="index.html" class="pc-btn free">Choisir Starter</a>
+      </div>
+
+      <!-- ESSENTIEL (popular) -->
+      <div class="pc popular">
+        <div class="pop-badge">⭐ PLUS POPULAIRE</div>
+        <div class="pc-emoji">⭐</div>
+        <div class="pc-name" style="color:var(--blue);">Essentiel</div>
+        <div class="pc-tag">Développez votre activité sereinement</div>
+        <div class="pc-price">
+          <div class="price-big" style="color:var(--blue);">20 000</div>
+          <div class="price-mo">DZD / an · 3% commission</div>
+          <div style="font-size:12px; color:var(--gray); margin-top:4px;">≈ 1 667 DA / mois</div>
+        </div>
+        <ul class="feat-list">
+          <li><span class="ic-ok">✓</span> 1 boutique · <strong>300 produits</strong></li>
+          <li><span class="ic-ok">✓</span> Messages clients</li>
+          <li><span class="ic-ok">✓</span> Stats basiques</li>
+          <li><span class="ic-ok">✓</span> Livraisons avec suivi</li>
+          <li><span class="ic-ok">✓</span> Pickup Schedule &amp; Shipping Labels</li>
+          <li><span class="ic-ok">✓</span> Boost placement Feed <em>(à l'unité)</em></li>
+          <li><span class="ic-ok">✓</span> Ma Crédibilité — consultation</li>
+          <li><span class="ic-ok">✓</span> Support Standard 48h</li>
+          <li class="dim"><span class="ic-no">✗</span> Dashboard avancé &amp; Delivery Analytics</li>
+          <li class="dim"><span class="ic-no">✗</span> Reels produits &amp; Outils IA</li>
+        </ul>
+        <div class="pc-comm-badge" style="background:rgba(59,130,246,.15); color:var(--blue); border-radius:8px; padding:6px 12px; font-size:12px; font-weight:600; margin-bottom:16px; text-align:center;">Commission 3%</div>
+        <a href="index.html" class="pc-btn pro">Choisir Essentiel</a>
+      </div>
+
+      <!-- PRO -->
+      <div class="pc">
+        <div class="pc-emoji">💎</div>
+        <div class="pc-name" style="color:var(--purple);">Pro</div>
+        <div class="pc-tag">L'expérience vendeur complète</div>
+        <div class="pc-price">
+          <div class="price-big" style="color:var(--purple);">40 000</div>
+          <div class="price-mo">DZD / an · 3% commission</div>
+          <div style="font-size:12px; color:var(--gray); margin-top:4px;">≈ 3 333 DA / mois</div>
+        </div>
+        <ul class="feat-list">
+          <li><span class="ic-ok">✓</span> <strong>Jusqu'à 3 boutiques</strong> · Produits illimités</li>
+          <li><span class="ic-ok">✓</span> Messages clients</li>
+          <li><span class="ic-ok">✓</span> Stats basiques + Dashboard avancé</li>
+          <li><span class="ic-ok">✓</span> Delivery Analytics</li>
+          <li><span class="ic-ok">✓</span> Reels produits</li>
+          <li><span class="ic-ok">✓</span> Boost placement Feed — <strong>3/mois inclus</strong></li>
+          <li><span class="ic-ok">✓</span> Outils IA (Coach &amp; Automatisations)</li>
+          <li><span class="ic-ok">✓</span> Livraisons · Pickup · Shipping Labels</li>
+          <li><span class="ic-ok">✓</span> Ma Crédibilité + <strong>Badge Pro vérifié</strong></li>
+          <li><span class="ic-ok">✓</span> Support Prioritaire 12h</li>
+        </ul>
+        <div class="pc-comm-badge" style="background:rgba(168,85,247,.15); color:var(--purple); border-radius:8px; padding:6px 12px; font-size:12px; font-weight:600; margin-bottom:16px; text-align:center;">Commission 3%</div>
+        <a href="index.html" class="pc-btn plus">Choisir Pro</a>
+      </div>
+
+    </div>
+
+    <!-- Tableau comparatif complet -->
+    <div class="cmp-wrap">
+      <button class="cmp-btn" onclick="toggleCmp(this)">Voir le tableau comparatif complet ↓</button>
+    </div>
+    <table class="cmp-tbl" id="cmpTbl">
+      <thead>
+        <tr>
+          <th style="width:44%;">Fonctionnalité</th>
+          <th style="color:var(--gray);">Starter</th>
+          <th class="c-pro">Essentiel</th>
+          <th class="c-plus">Pro</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="grp"><td colspan="4">FACTURATION &amp; COMMISSION</td></tr>
+        <tr><td>Facturation</td><td class="v">Mensuelle</td><td class="v c-pro">Annuelle</td><td class="v c-plus">Annuelle</td></tr>
+        <tr><td>Prix</td><td class="v">1 500 DZD/mois</td><td class="v c-pro">20 000 DZD/an</td><td class="v c-plus">40 000 DZD/an</td></tr>
+        <tr><td>Commission sur ventes</td><td class="v" style="color:#f59e0b;">5%</td><td class="v c-pro">3%</td><td class="v c-plus">3%</td></tr>
+        <tr class="grp"><td colspan="4">BOUTIQUE &amp; PRODUITS</td></tr>
+        <tr><td>Boutiques</td><td class="v">1</td><td class="v c-pro">1</td><td class="v c-plus">Jusqu'à 3</td></tr>
+        <tr><td>Produits</td><td class="v">15</td><td class="v c-pro">300</td><td class="v c-plus">Illimité</td></tr>
+        <tr><td>Gestion des commandes</td><td class="ok">✓</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+        <tr class="grp"><td colspan="4">COMMUNICATION &amp; ANALYTICS</td></tr>
+        <tr><td>Messages clients</td><td class="no">—</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+        <tr><td>Stats basiques</td><td class="no">—</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+        <tr><td>Dashboard avancé + Delivery Analytics</td><td class="no">—</td><td class="no">—</td><td class="ok">✓</td></tr>
+        <tr class="grp"><td colspan="4">CRÉDIBILITÉ &amp; CONTENU</td></tr>
+        <tr><td>Ma Crédibilité (Trust Score)</td><td class="v">Consultation</td><td class="v c-pro">Consultation</td><td class="v c-plus">Consultation + Badge Pro vérifié</td></tr>
+        <tr><td>Reels produits</td><td class="no">—</td><td class="no">—</td><td class="ok">✓</td></tr>
+        <tr class="grp"><td colspan="4">BOOST &amp; IA</td></tr>
+        <tr><td>Boost placement Feed</td><td class="no">—</td><td class="v c-pro">À l'unité</td><td class="v c-plus">3/mois inclus + à l'unité</td></tr>
+        <tr><td>Outils IA (Automatisations, Coach IA)</td><td class="no">—</td><td class="no">—</td><td class="ok">✓</td></tr>
+        <tr class="grp"><td colspan="4">LIVRAISONS</td></tr>
+        <tr><td>Livraisons (suivi)</td><td class="ok">✓</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+        <tr><td>Pickup Schedule</td><td class="no">—</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+        <tr><td>Shipping Labels</td><td class="no">—</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+        <tr class="grp"><td colspan="4">SUPPORT</td></tr>
+        <tr><td>Support</td><td class="v">FAQ</td><td class="v c-pro">Standard 48h</td><td class="v c-plus">Prioritaire 12h</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ CONTACT ══════════════════════════ -->
+<section class="sec" id="contact">
+  <div class="cnt-grid">
+    <div class="cnt-info">
+      <div class="sec-badge">Contact</div>
+      <h3>Parlons de votre <span class="grad">projet</span></h3>
+      <p>Une question sur les packs ? Besoin d'aide pour rejoindre Lincoo en tant que vendeur ? Notre équipe est là pour vous accompagner à chaque étape.</p>
+      <div class="cnt-items">
+        <div class="cnt-item">
+          <div class="cnt-ico">📧</div>
+          <div><div class="cnt-t">Email</div><div class="cnt-s">contact@lincoo.dz</div></div>
+        </div>
+        <div class="cnt-item">
+          <div class="cnt-ico">📍</div>
+          <div><div class="cnt-t">Localisation</div><div class="cnt-s">Algérie</div></div>
+        </div>
+        <div class="cnt-item">
+          <div class="cnt-ico">💬</div>
+          <div><div class="cnt-t">Support in-app</div><div class="cnt-s">Disponible dans l'application Lincoo</div></div>
+        </div>
+        <div class="cnt-item">
+          <div class="cnt-ico">⏱</div>
+          <div><div class="cnt-t">Activation pack</div><div class="cnt-s">24–48h après vérification paiement</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="cnt-form">
+      <h4>Envoyez-nous un message</h4>
+      <div class="fg"><label>Nom complet</label><input type="text" placeholder="Votre nom"></div>
+      <div class="fg"><label>Email</label><input type="email" placeholder="votre@email.com"></div>
+      <div class="fg">
+        <label>Sujet</label>
+        <select>
+          <option>Question sur les packs</option>
+          <option>Devenir vendeur</option>
+          <option>Smart Delivery</option>
+          <option>Partenariat</option>
+          <option>Autre</option>
+        </select>
+      </div>
+      <div class="fg"><label>Message</label><textarea placeholder="Votre message..."></textarea></div>
+      <button class="btn-p" style="width:100%; border:none; cursor:pointer; font-family:'Poppins',sans-serif; font-size:14px;">Envoyer le message →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+<footer>
+  <div class="ft-inner">
+    <div class="ft-brand">
+      <a href="#" class="nav-logo"><div class="logo-box">L</div><span class="logo-name">lincoo</span></a>
+      <p>Connect. Learn. Grow.<br>La plateforme e-commerce qui connecte vendeurs, acheteurs, créateurs et livreurs en Algérie.</p>
+    </div>
+    <div class="ft-col">
+      <h4>Plateforme</h4>
+      <a href="#about">Qui sommes-nous</a>
+      <a href="#services">Nos services</a>
+      <a href="#pricing">Tarifs</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="ft-col">
+      <h4>Packs</h4>
+      <a href="#pricing">Pack Free</a>
+      <a href="#pricing">Pack Pro</a>
+      <a href="#pricing">Lincoo+</a>
+      <a href="index.html">Admin Dashboard</a>
+    </div>
+    <div class="ft-col">
+      <h4>Légal</h4>
+      <a href="#">Conditions d'utilisation</a>
+      <a href="#">Politique de confidentialité</a>
+      <a href="#">Mentions légales</a>
+    </div>
+  </div>
+  <div class="ft-bottom">
+    <p>© 2025 Lincoo. Tous droits réservés.</p>
+    <span class="ft-tagline">Connect. Learn. Grow.</span>
+  </div>
+</footer>
+
+<script>
+  function toggleCmp(btn) {
+    const tbl = document.getElementById('cmpTbl');
+    const on  = tbl.classList.toggle('on');
+    btn.textContent = on ? 'Masquer le tableau ↑' : 'Voir le tableau comparatif complet ↓';
+  }
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) t.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  });
+</script>
+
+</body>
+</html>

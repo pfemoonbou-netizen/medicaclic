@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lincoo+ — Espace Vendeur Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:   #F6F8FC; --sb:  #FFFFFF; --card:#FFFFFF;
+  --brd:  #E7E9F3; --blue:#3B82F6; --purp:#A855F7;
+  --teal: #0891B2; --gold:#B45309; --red: #DC2626;
+  --green:#16A34A; --txt: #0D0B2D; --dim: #667085;
+  --shadow: 0 1px 2px rgba(16,24,40,.04), 0 8px 20px rgba(16,24,40,.05);
+}
+body { font-family:'Inter',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--txt); height:100vh; overflow:hidden; -webkit-font-smoothing:antialiased; }
+
+/* LOGIN */
+#login-screen {
+  display:flex; align-items:center; justify-content:center; min-height:100vh;
+  background:radial-gradient(ellipse at 25% 60%,rgba(59,130,246,.12),transparent 50%),
+             radial-gradient(ellipse at 75% 30%,rgba(168,85,247,.1),transparent 50%),var(--bg);
+}
+.lcard { background:var(--card); border:1px solid var(--brd); border-radius:24px; padding:48px 40px; width:420px; box-shadow:0 30px 60px rgba(16,24,40,.12), 0 8px 24px rgba(16,24,40,.08); }
+.lbrand { text-align:center; margin-bottom:36px; }
+.lbrand h1 { font-size:36px; font-weight:900; letter-spacing:2px; background:linear-gradient(135deg,var(--blue),var(--purp)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.lbrand p { color:var(--dim); font-size:13px; margin-top:4px; }
+.lfield { margin-bottom:16px; }
+.lfield label { display:block; font-size:11px; font-weight:700; color:var(--dim); text-transform:uppercase; letter-spacing:.7px; margin-bottom:6px; }
+.lfield input { width:100%; padding:13px 16px; background:var(--bg); border:1.5px solid var(--brd); border-radius:12px; color:var(--txt); font-size:14px; outline:none; transition:border-color .2s; font-family:inherit; }
+.lfield input:focus { border-color:var(--blue); }
+.lbtn { width:100%; padding:14px; background:linear-gradient(135deg,var(--blue),var(--purp)); color:#fff; border:none; border-radius:12px; font-size:14px; font-weight:800; cursor:pointer; margin-top:8px; transition:opacity .2s; font-family:inherit; }
+.lbtn:hover { opacity:.9; } .lbtn:disabled { opacity:.5; cursor:default; }
+#lerr { color:var(--red); font-size:12px; text-align:center; margin-top:10px; min-height:16px; }
+
+/* APP SHELL */
+#app { display:none; height:100vh; }
+#app.on { display:flex; }
+
+/* SIDEBAR */
+#sidebar { width:220px; min-width:220px; background:var(--sb); border-right:1px solid var(--brd); display:flex; flex-direction:column; height:100vh; overflow-y:auto; flex-shrink:0; }
+.sb-top { padding:20px; border-bottom:1px solid var(--brd); }
+.sb-logo { font-size:22px; font-weight:900; letter-spacing:1px; background:linear-gradient(135deg,var(--blue),var(--purp)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.sb-sub { font-size:10px; color:var(--dim); margin-top:2px; }
+.sb-nav { flex:1; padding:8px 0; }
+.nb-grp { font-size:9px; font-weight:700; color:var(--dim); text-transform:uppercase; letter-spacing:1px; padding:14px 18px 5px; }
+.ni { display:flex; align-items:center; gap:10px; padding:10px 18px; cursor:pointer; color:var(--dim); font-size:13px; font-weight:600; position:relative; transition:all .15s; user-select:none; }
+.ni:hover { color:var(--txt); background:rgba(13,11,45,.04); }
+.ni.on { color:var(--blue); background:rgba(59,130,246,.1); }
+.ni.on::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--blue); border-radius:0 3px 3px 0; }
+.ni-i { font-size:15px; width:20px; text-align:center; }
+.sb-foot { padding:14px 18px; border-top:1px solid var(--brd); }
+.sb-user { display:flex; align-items:center; gap:9px; margin-bottom:10px; }
+.sb-av { width:32px; height:32px; border-radius:9px; flex-shrink:0; background:linear-gradient(135deg,var(--blue),var(--purp)); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; color:#fff; }
+.sb-nm { font-size:12px; font-weight:700; }
+.sb-rl { font-size:10px; color:var(--dim); }
+.sb-out { width:100%; padding:7px; background:rgba(220,38,38,.1); border:1px solid rgba(220,38,38,.2); border-radius:8px; color:var(--red); font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; transition:background .2s; }
+.sb-out:hover { background:rgba(220,38,38,.2); }
+
+/* MAIN */
+#main { flex:1; overflow-y:auto; padding:28px; }
+.ph { margin-bottom:22px; }
+.pt { font-size:22px; font-weight:900; letter-spacing:-.5px; }
+.ps { font-size:12px; color:var(--dim); margin-top:4px; }
+
+/* KPI */
+.kg { display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:12px; margin-bottom:20px; }
+.kc { background:var(--card); border:1px solid var(--brd); border-radius:14px; padding:18px; position:relative; overflow:hidden; }
+.kl { font-size:10px; font-weight:700; color:var(--dim); text-transform:uppercase; letter-spacing:.6px; margin-bottom:7px; }
+.kv { font-size:26px; font-weight:900; letter-spacing:-1px; line-height:1; }
+.kd { font-size:10px; color:var(--dim); margin-top:5px; }
+.ki { position:absolute; top:14px; right:14px; font-size:20px; opacity:.5; }
+
+/* CHART CARD */
+.cc { background:var(--card); border:1px solid var(--brd); border-radius:14px; padding:20px; margin-bottom:20px; }
+.ch { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.ct { font-size:14px; font-weight:800; }
+
+/* TABLE CARD */
+.tc { background:var(--card); border:1px solid var(--brd); border-radius:14px; overflow:hidden; margin-bottom:20px; }
+.th { padding:14px 18px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--brd); }
+.tt { font-size:13px; font-weight:800; }
+.ta { font-size:11px; color:var(--blue); cursor:pointer; font-weight:700; }
+table { width:100%; border-collapse:collapse; }
+thead th { padding:10px 18px; text-align:left; font-size:9px; font-weight:700; color:var(--dim); text-transform:uppercase; letter-spacing:.6px; border-bottom:1px solid var(--brd); }
+tbody tr { border-bottom:1px solid rgba(13,11,45,.04); transition:background .15s; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:rgba(13,11,45,.025); }
+tbody td { padding:12px 18px; font-size:12px; }
+
+/* BADGES */
+.b { display:inline-block; padding:3px 9px; border-radius:100px; font-size:10px; font-weight:700; }
+.bbl { background:rgba(59,130,246,.15); color:var(--blue); }
+.bgn { background:rgba(22,163,74,.15); color:var(--green); }
+.bgo { background:rgba(180,83,9,.15); color:var(--gold); }
+.brd { background:rgba(220,38,38,.15); color:var(--red); }
+.bpu { background:rgba(168,85,247,.15); color:var(--purp); }
+.btl { background:rgba(8,145,178,.15); color:var(--teal); }
+.bdm { background:rgba(102,112,133,.15); color:var(--dim); }
+
+/* TOGGLE */
+.tog { position:relative; width:42px; height:22px; flex-shrink:0; }
+.tog input { display:none; }
+.tsl { position:absolute; inset:0; background:var(--brd); border-radius:100px; cursor:pointer; transition:background .2s; }
+.tsl::before { content:''; position:absolute; width:16px; height:16px; border-radius:50%; background:#fff; top:3px; left:3px; transition:transform .2s; }
+.tog input:checked+.tsl { background:var(--blue); }
+.tog input:checked+.tsl::before { transform:translateX(20px); }
+
+/* TOOLBAR */
+.bar { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+.srch { flex:1; max-width:300px; padding:9px 14px; background:var(--card); border:1px solid var(--brd); border-radius:10px; color:var(--txt); font-size:12px; font-family:inherit; outline:none; }
+.srch:focus { border-color:var(--blue); }
+.bp { padding:9px 18px; background:linear-gradient(135deg,var(--blue),var(--purp)); color:#fff; border:none; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit; transition:opacity .2s; }
+.bp:hover { opacity:.9; }
+
+/* PRODUCTS */
+.pg { display:grid; grid-template-columns:repeat(auto-fill,minmax(185px,1fr)); gap:12px; }
+.pcard { background:var(--card); border:1px solid var(--brd); border-radius:14px; overflow:hidden; box-shadow:var(--shadow); }
+.pimg { width:100%; height:150px; object-fit:cover; }
+.pfb { width:100%; height:150px; background:var(--brd); display:flex; align-items:center; justify-content:center; font-size:40px; }
+.pi { padding:11px 13px; }
+.pn { font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:3px; }
+.pp { font-size:14px; font-weight:900; color:var(--blue); }
+.ps2 { font-size:10px; color:var(--dim); margin-top:2px; }
+.pbs { display:flex; gap:6px; padding:9px 13px; border-top:1px solid var(--brd); }
+.pb { flex:1; padding:6px; border-radius:7px; border:1px solid var(--brd); background:transparent; color:var(--dim); font-size:10px; font-weight:700; cursor:pointer; transition:all .15s; font-family:inherit; }
+.pb:hover { background:var(--brd); color:var(--txt); }
+.pb.del:hover { background:rgba(220,38,38,.15); border-color:var(--red); color:var(--red); }
+
+/* CRED RING */
+.ring-wrap { width:160px; height:160px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
+.ring-in { width:118px; height:118px; border-radius:50%; background:var(--card); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.cg { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.cr { background:var(--card); border:1px solid var(--brd); border-radius:12px; padding:13px; }
+.cr-t { display:flex; justify-content:space-between; margin-bottom:7px; }
+.cr-n { font-size:12px; font-weight:700; }
+.cr-p { font-size:12px; font-weight:800; color:var(--teal); }
+.bar-bg { height:4px; background:var(--brd); border-radius:2px; overflow:hidden; }
+.bar-f { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--blue),var(--teal)); }
+
+/* AUTO */
+.ac { background:var(--card); border:1px solid var(--brd); border-radius:14px; padding:16px; display:flex; align-items:center; gap:14px; margin-bottom:10px; box-shadow:var(--shadow); }
+.ai { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.at { flex:1; }
+.at-t { font-size:13px; font-weight:800; margin-bottom:2px; }
+.at-d { font-size:11px; color:var(--dim); }
+
+/* COACH */
+.coach { background:linear-gradient(135deg,rgba(168,85,247,.22),rgba(236,72,153,.14)); border:1px solid rgba(168,85,247,.35); border-radius:16px; padding:24px; margin-bottom:18px; }
+.coach-h { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.coach-av { width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,var(--purp),#EC4899); display:flex; align-items:center; justify-content:center; font-size:22px; }
+.coach-msg { font-size:13px; line-height:1.75; color:rgba(13,11,45,.88); }
+.ctips { margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+.ctip { background:rgba(13,11,45,.07); border-radius:10px; padding:10px 14px; font-size:12px; display:flex; gap:8px; align-items:flex-start; }
+
+/* PACKS */
+.pkgrid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+.pk { background:var(--card); border:1px solid var(--brd); border-radius:16px; padding:22px 18px; text-align:center; position:relative; overflow:hidden; box-shadow:var(--shadow); }
+.pk.pop { border-color:var(--blue); }
+.pk-pop { position:absolute; top:10px; right:10px; background:var(--blue); color:#fff; font-size:9px; font-weight:800; padding:3px 8px; border-radius:6px; }
+.pk-cur { position:absolute; top:10px; left:10px; background:rgba(22,163,74,.2); color:var(--green); font-size:9px; font-weight:800; padding:3px 8px; border-radius:6px; }
+.pk-nm { font-size:15px; font-weight:900; margin-bottom:4px; }
+.pk-pr { font-size:26px; font-weight:900; margin:10px 0 3px; }
+.pk-pe { font-size:10px; color:var(--dim); margin-bottom:14px; }
+.pk-ul { list-style:none; text-align:left; margin-bottom:18px; }
+.pk-ul li { font-size:11px; color:rgba(13,11,45,.75); padding:4px 0; display:flex; align-items:center; gap:6px; }
+.pk-ul li::before { content:'✓'; color:var(--teal); font-weight:900; font-size:10px; }
+.pk-btn { width:100%; padding:10px; border-radius:10px; border:none; font-size:12px; font-weight:800; cursor:pointer; transition:opacity .2s; font-family:inherit; }
+.pk-btn:hover { opacity:.9; }
+
+/* HELPERS */
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.g3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.g31 { display:grid; grid-template-columns:1fr 300px; gap:16px; align-items:start; }
+.row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--brd); }
+.row:last-child { border-bottom:none; }
+.rl { font-size:11px; color:var(--dim); }
+.rv { font-size:12px; font-weight:800; }
+.wb { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+.wb-n { width:120px; font-size:11px; font-weight:700; flex-shrink:0; }
+.wb-bg { flex:1; height:8px; background:var(--brd); border-radius:4px; overflow:hidden; }
+.wb-f { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--blue),var(--purp)); }
+.wb-p { width:36px; text-align:right; font-size:11px; font-weight:700; color:var(--blue); }
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--txt); color:#fff; padding:12px 24px; border-radius:12px; font-size:13px; font-weight:700; transition:transform .3s; z-index:9999; white-space:nowrap; box-shadow:var(--shadow); }
+.toast.on { transform:translateX(-50%) translateY(0); }
+::-webkit-scrollbar { width:4px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:var(--brd); border-radius:4px; }
+
+/* LIVRAISONS TABS */
+.ltabs { display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
+.ltab { padding:7px 16px; border-radius:9px; border:1px solid var(--brd); background:transparent; color:var(--dim); font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .15s; }
+.ltab.on { background:rgba(59,130,246,.15); border-color:var(--blue); color:var(--blue); }
+/* COMPANY CARDS */
+.co-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-bottom:18px; }
+.co-card { background:var(--card); border:1.5px solid var(--brd); border-radius:14px; padding:16px; transition:border-color .15s; box-shadow:var(--shadow); }
+.co-card.on { border-color:var(--blue); }
+.co-head { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.co-logo { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.co-nm { font-size:13px; font-weight:800; }
+.co-st { font-size:10px; color:var(--dim); }
+.co-api { width:100%; padding:7px 10px; background:var(--bg); border:1px solid var(--brd); border-radius:8px; color:var(--txt); font-size:11px; font-family:monospace; outline:none; margin-top:6px; }
+.co-api:focus { border-color:var(--blue); }
+/* EXPEDITION CARDS */
+.exp-card { background:var(--card); border:1px solid var(--brd); border-radius:12px; padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow); }
+.exp-info { flex:1; }
+.exp-client { font-size:13px; font-weight:800; }
+.exp-meta { font-size:10px; color:var(--dim); margin-top:2px; }
+/* MODAL */
+.modal-ov { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:1000; }
+.modal { background:var(--card); border:1px solid var(--brd); border-radius:18px; padding:28px; width:500px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 24px 48px rgba(16,24,40,.16); }
+.modal-h { font-size:17px; font-weight:900; margin-bottom:20px; }
+.mfield { margin-bottom:14px; }
+.mfield label { display:block; font-size:10px; font-weight:700; color:var(--dim); text-transform:uppercase; letter-spacing:.6px; margin-bottom:5px; }
+.mfield input, .mfield select, .mfield textarea { width:100%; padding:9px 12px; background:var(--bg); border:1px solid var(--brd); border-radius:10px; color:var(--txt); font-size:12px; font-family:inherit; outline:none; }
+.mfield input:focus, .mfield select:focus, .mfield textarea:focus { border-color:var(--blue); }
+.mfield select option { background:var(--card); }
+.mrow { display:flex; gap:10px; }
+.mrow .mfield { flex:1; }
+.mbtn-row { display:flex; gap:10px; margin-top:20px; }
+.mbtn { flex:1; padding:11px; border-radius:10px; border:none; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit; transition:opacity .2s; }
+.mbtn:hover { opacity:.85; }
+.mbtn-p { background:linear-gradient(135deg,var(--blue),var(--purp)); color:#fff; }
+.mbtn-s { background:var(--bg); border:1px solid var(--brd); color:var(--txt); }
+/* TEAM */
+.team-tbl td, .team-tbl th { padding:11px 14px; font-size:12px; }
+.team-tbl thead th { font-size:9px; }
+.role-sel { background:var(--bg); border:1px solid var(--brd); border-radius:8px; color:var(--txt); padding:4px 8px; font-size:11px; font-family:inherit; outline:none; cursor:pointer; }
+.role-sel option { background:var(--card); }
+/* TARIFF INPUTS */
+.tariff-inp { width:78px; padding:5px 7px; background:var(--bg); border:1px solid var(--brd); border-radius:7px; color:var(--teal); font-size:11px; font-weight:700; font-family:inherit; outline:none; text-align:right; }
+.tariff-inp:focus { border-color:var(--blue); color:var(--txt); }
+.tariff-inp.mod { border-color:rgba(8,145,178,.4); background:rgba(8,145,178,.05); }
+
+/* ─── PRO UI OVERRIDES ─── */
+/* Sidebar */
+#sidebar { border-right:1px solid var(--brd); box-shadow:none; }
+.sb-top { padding:22px 18px 18px; }
+.sb-logo { font-size:18px; font-weight:800; letter-spacing:0.2px; }
+.sb-sub { font-size:10px; color:var(--dim); margin-top:3px; letter-spacing:0.3px; }
+.nb-grp { font-size:9px; letter-spacing:1.5px; padding:20px 16px 4px; color:rgba(102,112,133,.6); }
+.ni { margin:1px 10px; border-radius:8px; padding:9px 10px; font-size:12.5px; font-weight:500; gap:9px; }
+.ni:hover { background:rgba(13,11,45,.05); color:var(--txt); }
+.ni.on { background:rgba(59,130,246,.1); color:var(--blue); font-weight:600; }
+.ni.on::before { display:none; }
+.ni-i { width:15px; height:15px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.ni-i svg { width:15px; height:15px; stroke-width:1.75; }
+.sb-rl { font-size:10px; color:rgba(102,112,133,.85); font-weight:500; }
+.sb-nm { font-size:12.5px; font-weight:600; }
+.sb-av { width:30px; height:30px; border-radius:8px; font-size:11px; }
+.sb-foot { padding:12px 16px 16px; }
+.sb-out { border-radius:8px; font-size:11px; font-weight:600; padding:8px; letter-spacing:0.2px; }
+
+/* Main area */
+#main { padding:24px 28px; }
+.ph { margin-bottom:20px; }
+.pt { font-size:19px; font-weight:800; letter-spacing:-0.5px; }
+.ps { font-size:11.5px; color:var(--dim); margin-top:3px; font-weight:400; }
+
+/* Cards */
+.kc { border-radius:10px; border-color:var(--brd); box-shadow:var(--shadow); padding:16px; }
+.ki { display:none; }
+.kl { font-size:9.5px; font-weight:600; letter-spacing:0.8px; margin-bottom:8px; }
+.kv { font-size:22px; font-weight:800; letter-spacing:-0.5px; }
+.kd { font-size:10px; margin-top:6px; }
+.cc { border-radius:10px; border-color:var(--brd); box-shadow:var(--shadow); padding:18px; }
+.tc { border-radius:10px; border-color:var(--brd); box-shadow:var(--shadow); }
+.ch { margin-bottom:14px; }
+.ct { font-size:13px; font-weight:700; letter-spacing:-0.2px; }
+.th { padding:13px 16px; }
+.tt { font-size:12px; font-weight:700; }
+.ta { font-size:11px; font-weight:600; }
+
+/* Table */
+thead th { font-size:9px; font-weight:700; letter-spacing:0.9px; padding:9px 14px; color:rgba(102,112,133,.75); }
+tbody td { padding:11px 14px; font-size:12px; }
+
+/* Badges */
+.b { padding:2px 8px; border-radius:5px; font-size:10px; font-weight:600; letter-spacing:0.1px; }
+
+/* Buttons */
+.bp { background:var(--blue); border-radius:8px; font-size:12px; font-weight:600; letter-spacing:0.1px; padding:9px 16px; }
+.bp:hover { opacity:1; filter:brightness(1.12); }
+.lbtn { font-weight:600; border-radius:10px; font-size:12px; letter-spacing:0.1px; }
+.ltab { border-radius:8px; font-size:11px; font-weight:600; }
+
+/* Login card */
+.lcard { border-radius:18px; padding:44px 38px; }
+.lbrand h1 { font-size:32px; letter-spacing:1px; }
+.lfield label { font-size:10px; letter-spacing:0.8px; }
+.lfield input { border-radius:10px; font-size:13.5px; }
+.lbtn { border-radius:10px; font-size:13.5px; font-weight:700; }
+
+/* Modal */
+.modal { border-radius:14px; padding:24px; }
+.modal-h { font-size:15px; font-weight:700; letter-spacing:-0.2px; }
+.mfield label { font-size:9.5px; letter-spacing:0.7px; }
+.mfield input, .mfield select, .mfield textarea { border-radius:9px; font-size:12.5px; }
+.mbtn { border-radius:9px; font-size:12px; font-weight:600; }
+
+/* Toggle */
+.tog { width:38px; height:20px; }
+.tsl::before { width:14px; height:14px; top:3px; left:3px; }
+.tog input:checked+.tsl::before { transform:translateX(18px); }
+
+/* Pack cards */
+.pk { border-radius:14px; padding:20px 16px; }
+.pk-nm { font-size:14px; font-weight:800; letter-spacing:-0.2px; }
+.pk-pr { font-size:24px; font-weight:900; letter-spacing:-0.8px; }
+.pk-ul li { font-size:11px; padding:3.5px 0; }
+.pk-btn { border-radius:9px; font-size:12px; font-weight:600; padding:10px; }
+
+/* Coach */
+.coach { border-radius:14px; padding:22px; }
+.coach-msg { font-size:12.5px; line-height:1.8; }
+.ctip { font-size:11.5px; border-radius:9px; }
+
+/* Auto cards */
+.ac { border-radius:12px; padding:14px; }
+.at-t { font-size:13px; font-weight:700; }
+.at-d { font-size:11px; }
+
+/* Exp cards */
+.exp-card { border-radius:10px; }
+.exp-client { font-size:13px; font-weight:700; }
+.exp-meta { font-size:11px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="lcard">
+    <div class="lbrand">
+      <a href="home.html" style="text-decoration:none;"><h1>Lincoo+</h1></a>
+      <p>Espace vendeur professionnel · Connexion</p>
+    </div>
+    <div class="lfield">
+      <label>Email</label>
+      <input type="email" id="l-em" placeholder="votre@email.com" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <div class="lfield">
+      <label>Mot de passe</label>
+      <input type="password" id="l-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <button class="lbtn" id="l-btn" onclick="doLogin()">Se connecter</button>
+    <div id="lerr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <aside id="sidebar">
+    <div class="sb-top">
+      <a href="home.html" class="sb-logo" style="text-decoration:none;">Lincoo+</a>
+      <div class="sb-sub">Tableau de bord vendeur</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="nb-grp">Principal</div>
+      <div class="ni on" data-p="dash" onclick="go('dash')"><span class="ni-i"><i data-lucide="layout-dashboard"></i></span>Tableau de bord</div>
+      <div class="ni"    data-p="prod" onclick="go('prod')"><span class="ni-i"><i data-lucide="package"></i></span>Produits</div>
+      <div class="ni"    data-p="ordr" onclick="go('ordr')"><span class="ni-i"><i data-lucide="shopping-bag"></i></span>Commandes</div>
+      <div class="nb-grp">Performance</div>
+      <div class="ni"    data-p="cred" onclick="go('cred')"><span class="ni-i"><i data-lucide="shield-check"></i></span>Ma Crédibilité</div>
+      <div class="ni"    data-p="stat" onclick="go('stat')"><span class="ni-i"><i data-lucide="bar-chart-2"></i></span>Statistiques</div>
+      <div class="nb-grp">Outils IA</div>
+      <div class="ni"    data-p="auto" onclick="go('auto')"><span class="ni-i"><i data-lucide="cpu"></i></span>Automatisations</div>
+      <div class="ni"    data-p="coac" onclick="go('coac')"><span class="ni-i"><i data-lucide="sparkles"></i></span>Coach IA</div>
+      <div class="nb-grp">Gestion</div>
+      <div class="ni"    data-p="livr" onclick="go('livr')"><span class="ni-i"><i data-lucide="truck"></i></span>Livraisons</div>
+      <div class="ni"    data-p="equi" onclick="go('equi')"><span class="ni-i"><i data-lucide="users"></i></span>Équipe</div>
+      <div class="ni"    data-p="abon" onclick="go('abon')"><span class="ni-i"><i data-lucide="crown"></i></span>Abonnement</div>
+      <div class="ni"    data-p="sett" onclick="go('sett')"><span class="ni-i"><i data-lucide="settings"></i></span>Paramètres</div>
+    </nav>
+    <div class="sb-foot">
+      <div class="sb-user">
+        <div class="sb-av" id="u-av">V</div>
+        <div><div class="sb-nm" id="u-nm">Vendeur</div><div class="sb-rl" id="u-pack">Pack Essentiel ⭐</div></div>
+      </div>
+      <button class="sb-out" onclick="doLogout()">↩ Déconnexion</button>
+    </div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL = 'https://datgwhcrcptsxpysfstu.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhdGd3aGNyY3B0c3hweXNmc3R1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMTIyMzAsImV4cCI6MjA5NTc4ODIzMH0.ZGTvsVrzaNCgylbSnzZ0R6t8oVcnttomr6XH4rGXaTs';
+const { createClient } = supabase;
+const SB = createClient(SB_URL, SB_KEY);
+let CU = null, SID = null, CHART = null;
+
+/* ─── AUTH ─── */
+async function doLogin() {
+  const em = document.getElementById('l-em').value.trim();
+  const pw = document.getElementById('l-pw').value;
+  const btn = document.getElementById('l-btn');
+  const err = document.getElementById('lerr');
+  if (!em || !pw) { err.textContent = 'Remplissez tous les champs.'; return; }
+  btn.disabled = true; btn.textContent = 'Connexion...'; err.textContent = '';
+  const { data, error } = await SB.auth.signInWithPassword({ email: em, password: pw });
+  if (error) {
+    err.textContent = 'Email ou mot de passe incorrect.';
+    btn.disabled = false; btn.textContent = 'Se connecter'; return;
+  }
+  const { data: p } = await SB.from('profiles').select('pro_role,full_name,store_name').eq('id', data.user.id).single();
+  if (!p || !['seller','company'].includes(p.pro_role)) {
+    err.textContent = 'Accès réservé aux vendeurs Lincoo+.';
+    await SB.auth.signOut(); btn.disabled = false; btn.textContent = 'Se connecter'; return;
+  }
+  CU = { ...data.user, name: p.full_name || em.split('@')[0], store: p.store_name };
+  const { data: st } = await SB.from('stores').select('id').eq('owner_id', data.user.id).maybeSingle();
+  if (st) SID = st.id;
+  showApp();
+}
+
+async function doLogout() {
+  await SB.auth.signOut(); CU = null; SID = null;
+  document.getElementById('app').classList.remove('on');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('l-em').value = '';
+  document.getElementById('l-pw').value = '';
+  document.getElementById('l-btn').disabled = false;
+  document.getElementById('l-btn').textContent = 'Se connecter';
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('on');
+  document.getElementById('u-av').textContent = (CU.name||'V').substring(0,2).toUpperCase();
+  document.getElementById('u-nm').textContent = CU.name;
+  if (window.lucide) lucide.createIcons();
+  go('dash');
+}
+
+window.addEventListener('load', async () => {
+  const { data } = await SB.auth.getSession();
+  if (!data.session) { document.getElementById('login-screen').style.display = 'flex'; return; }
+  const { data: p } = await SB.from('profiles').select('pro_role,full_name,store_name').eq('id', data.session.user.id).single();
+  if (p && ['seller','company'].includes(p.pro_role)) {
+    CU = { ...data.session.user, name: p.full_name || data.session.user.email.split('@')[0], store: p.store_name };
+    const { data: st } = await SB.from('stores').select('id').eq('owner_id', data.session.user.id).maybeSingle();
+    if (st) SID = st.id;
+    showApp();
+  } else { document.getElementById('login-screen').style.display = 'flex'; }
+});
+
+/* ─── ROUTER ─── */
+function go(p) {
+  if (CHART) { try { CHART.destroy(); } catch(e){} CHART = null; }
+  document.querySelectorAll('.ni').forEach(el => el.classList.toggle('on', el.dataset.p === p));
+  ({ dash:pgDash, prod:pgProd, ordr:pgOrdr, cred:pgCred, stat:pgStat, auto:pgAuto, coac:pgCoac, livr:pgLivr, equi:pgEquipe, abon:pgAbon, sett:pgSett })[p]();
+}
+
+/* ─── DASHBOARD ─── */
+async function pgDash() {
+  const M = document.getElementById('main');
+  M.innerHTML = `<div class="ph"><div class="pt">Tableau de bord</div><div class="ps">Bonjour ${CU?.name||'Vendeur'}</div></div>
+    <div class="kg">${Array(6).fill('<div class="kc"><div class="kv" style="color:var(--dim);font-size:18px">—</div></div>').join('')}</div>`;
+  let prods = [], storeData = {};
+  if (SID) {
+    const [pr, sr] = await Promise.all([
+      SB.from('products').select('available,sold_count,price').eq('store_id', SID),
+      SB.from('stores').select('total_sales,rating,followers_count').eq('id', SID).single()
+    ]);
+    prods = pr.data || []; storeData = sr.data || {};
+  }
+  const act = prods.filter(p => p.available).length;
+  const rev = prods.reduce((s, p) => s + ((p.sold_count||0) * (p.price||0)), 0);
+  const sold = prods.reduce((s, p) => s + (p.sold_count||0), 0);
+  const kpis = [
+    { l:'CA du mois',      v: F(rev)+' DA',                c:'var(--teal)', d:'+12% vs mois passé',   i:'' },
+    { l:'Commandes',       v: sold,                         c:'var(--blue)', d:'commandes totales',    i:'' },
+    { l:'Produits actifs', v: act+'/'+prods.length,         c:'var(--purp)', d:'actifs / total',       i:'' },
+    { l:'Score crédibilité',v:'72/100',                     c:'var(--gold)', d:'Niveau Argent',        i:'' },
+    { l:'Taux conversion', v: '3.4%',                       c:'var(--green)',d:'+0.2% cette semaine',  i:'' },
+    { l:'Revenus nets',    v: F(Math.round(rev*.92))+' DA', c:'var(--teal)', d:'après commission 8%',  i:'' },
+  ];
+  M.innerHTML = `
+    <div class="ph"><div class="pt">Tableau de bord</div><div class="ps">Bonjour ${CU?.name||'Vendeur'} · ${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</div></div>
+    <div class="kg">${kpis.map(k=>`<div class="kc"><span class="ki">${k.i}</span><div class="kl">${k.l}</div><div class="kv" style="color:${k.c}">${k.v}</div><div class="kd">${k.d}</div></div>`).join('')}</div>
+    <div class="cc">
+      <div class="ch"><div class="ct">Ventes sur 30 jours</div><div style="font-size:10px;color:var(--dim)">Chiffre d'affaires en DA</div></div>
+      <canvas id="CH" height="70"></canvas>
+    </div>
+    <div class="tc">
+      <div class="th"><div class="tt">Dernières commandes</div><div class="ta" onclick="go('ordr')">Voir tout</div></div>
+      <table><thead><tr><th>#</th><th>Client</th><th>Montant</th><th>Wilaya</th><th>Statut</th><th>Smart</th></tr></thead>
+      <tbody id="dash-ordr-tbody"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--dim)">Chargement…</td></tr></tbody></table>
+    </div>`;
+  loadOrders();
+  setTimeout(() => {
+    const ctx = document.getElementById('CH')?.getContext('2d'); if (!ctx) return;
+    const lbs = Array.from({length:30},(_,i)=>{const d=new Date();d.setDate(d.getDate()-(29-i));return d.getDate()+'/'+(d.getMonth()+1);});
+    CHART = new Chart(ctx, {
+      type:'line',
+      data:{ labels:lbs, datasets:[{ data:lbs.map(()=>Math.round(8e3+Math.random()*5e4)), borderColor:'#3B82F6', backgroundColor:'rgba(59,130,246,.08)', borderWidth:2, fill:true, tension:.4, pointRadius:0 }] },
+      options:{ plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#0D0B2D', borderColor:'rgba(255,255,255,.08)', borderWidth:1, titleColor:'#9CA3AF', bodyColor:'#fff', bodyFont:{size:12,weight:'bold'}, callbacks:{label:v=>Number(v.raw).toLocaleString('fr-FR')+' DA'} } },
+        scales:{ x:{ grid:{color:'rgba(13,11,45,.06)'}, ticks:{color:'#667085',font:{size:9},maxTicksLimit:6} }, y:{ grid:{color:'rgba(13,11,45,.06)'}, ticks:{color:'#667085',font:{size:9},callback:v=>(v/1000).toFixed(0)+'k'} } } }
+    });
+  }, 60);
+}
+
+/* ─── PRODUCTS ─── */
+async function pgProd() {
+  const M = document.getElementById('main');
+  M.innerHTML = `<div class="ph"><div class="pt">Produits</div><div class="ps">Chargement...</div></div>`;
+  let prods = [];
+  if (SID) {
+    const { data } = await SB.from('products').select('id,name,price,promo_price,images,stock_qty,available,sold_count').eq('store_id', SID).order('created_at',{ascending:false}).limit(40);
+    prods = data || [];
+  }
+  M.innerHTML = `
+    <div class="ph"><div class="pt">Produits <span style="font-size:13px;font-weight:600;color:var(--dim)">(${prods.length})</span></div><div class="ps">Gérez votre catalogue</div></div>
+    <div class="bar"><input class="srch" placeholder="🔍  Rechercher..." oninput="FP(this.value)" /><button class="bp">+ Ajouter</button></div>
+    <div class="pg" id="PG">
+      ${prods.length ? prods.map(p => {
+        const img = Array.isArray(p.images) && p.images.length ? p.images[0] : null;
+        return `<div class="pcard" data-nm="${(p.name||'').toLowerCase()}">
+          ${img ? `<img class="pimg" src="${img}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="pfb" style="display:none">📦</div>` : `<div class="pfb">📦</div>`}
+          <div class="pi"><div class="pn">${p.name||'—'}</div><div class="pp">${F(p.promo_price||p.price)} DA</div><div class="ps2">Stock: ${p.stock_qty??'—'} · Vendus: ${p.sold_count??0}</div></div>
+          <div class="pbs"><button class="pb">✏️ Modifier</button><button class="pb del" onclick="DP('${p.id}',this)">🗑️ Suppr.</button></div>
+        </div>`;
+      }).join('') : `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--dim)">Aucun produit dans votre boutique.</div>`}
+    </div>`;
+}
+function FP(q) { document.querySelectorAll('#PG .pcard').forEach(el => el.style.display = el.dataset.nm.includes(q.toLowerCase()) ? '' : 'none'); }
+async function DP(id, btn) {
+  if (!confirm('Supprimer ce produit ?')) return;
+  btn.closest('.pcard').style.opacity = '.4';
+  const { error } = await SB.from('products').delete().eq('id', id);
+  if (!error) btn.closest('.pcard').remove();
+  else { btn.closest('.pcard').style.opacity = '1'; toast('Erreur suppression.'); }
+}
+
+/* ─── ORDERS ─── */
+function pgOrdr() {
+  document.getElementById('main').innerHTML = `
+    <div class="ph"><div class="pt">Commandes</div><div class="ps">Suivi & gestion des commandes</div></div>
+    <div class="bar"><input class="srch" placeholder="Rechercher client, commande…" /><span class="b bbl" style="padding:7px 12px;font-size:10px;font-weight:600">Smart Delivery actif</span></div>
+    <div class="tc">
+      <div class="th"><div class="tt" id="ordr-count">Toutes les commandes…</div><div style="font-size:11px;color:var(--dim)" id="ordr-pending"></div></div>
+      <table><thead><tr><th>#</th><th>Client</th><th>Produit</th><th>Montant</th><th>Wilaya</th><th>Remise</th><th>Statut</th><th>Mode livraison</th><th>Changer statut</th><th></th></tr></thead>
+      <tbody id="ordr-tbody"><tr><td colspan="9" style="text-align:center;padding:30px;color:var(--dim)">Chargement…</td></tr></tbody></table>
+    </div>
+    <div class="cc">
+      <div class="ch"><div class="ct">⚡ Smart Delivery — Comment ça marche</div></div>
+      <div class="g3">${[
+        {i:'🗺️',t:'Analyse wilaya',d:'Calcule la meilleure route selon la wilaya et le transporteur disponible dans la zone'},
+        {i:'⏱️',t:'Délai optimisé', d:'Sélectionne la livraison la plus rapide : 24h–48h pour Alger et wilayas proches'},
+        {i:'💰',t:'Tarif le moins cher',d:'Compare Yalidine, Zaki, Ecotrack et choisit le transporteur le moins cher en temps réel'}
+      ].map(f=>`<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:12px;padding:15px">
+        <div style="font-size:26px;margin-bottom:8px">${f.i}</div>
+        <div style="font-size:12px;font-weight:800;margin-bottom:4px">${f.t}</div>
+        <div style="font-size:11px;color:var(--dim)">${f.d}</div>
+      </div>`).join('')}</div>
+    </div>`;
+  loadOrders();
+}
+function orderShortId(id) { return String(id).slice(0,8).toUpperCase(); }
+
+function orderRow(o) {
+  return `<tr id="orow-${o.id}">
+    <td style="font-weight:800;color:var(--blue)">#${orderShortId(o.id)}</td>
+    <td><div style="font-weight:700">${o.cl}</div><div style="font-size:10px;color:var(--dim)">${o.ph}</div></td>
+    <td style="font-size:11px;color:var(--dim);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.pr}</td>
+    <td style="font-weight:800;color:var(--teal);white-space:nowrap">${F(o.amt)} DA</td>
+    <td>${o.wil}</td>
+    <td style="font-size:11px">${o.dt==='Dom'?'🏠 Domicile':'📫 Stop Desk'}</td>
+    <td>${BS(o.st)}</td>
+    <td>${BM(o.mode)}</td>
+    <td><select onchange="UO('${o.id}',this.value)" style="background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:4px 7px;font-size:10px;font-family:inherit;outline:none;cursor:pointer">
+      ${['En attente','Confirmée','Expédiée','Livrée','Retournée'].map(s=>`<option ${s===o.st?'selected':''}>${s}</option>`).join('')}
+    </select></td>
+    <td><button onclick="openOrderEdit('${o.id}')" title="Modifier les détails" style="background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);border-radius:8px;color:var(--blue);padding:5px 9px;font-size:13px;cursor:pointer;line-height:1">✏️</button></td>
+  </tr>`;
+}
+
+async function UO(id, st) {
+  if (st === 'Expédiée') { openExpedModal(id); return; }
+  const o = ORDERS.find(o=>o.id===id);
+  if (!o) return;
+  const dbStatus = ST_FR_TO_DB[st] || 'pending';
+  try {
+    const { error } = await SB.from('orders').update({ status: dbStatus }).eq('id', id);
+    if (error) throw error;
+    o.st = st;
+    const row = document.getElementById('orow-'+id);
+    if (row) row.outerHTML = orderRow(o);
+    toast('Statut mis à jour ✓');
+  } catch (e) {
+    toast('⚠️ Erreur lors de la mise à jour du statut');
+  }
+}
+
+function openOrderEdit(ordId) {
+  const o = ORDERS.find(x=>x.id===ordId);
+  if (!o) return;
+  document.getElementById('order-edit-modal')?.remove();
+  const ov = document.createElement('div');
+  ov.className = 'modal-ov'; ov.id = 'order-edit-modal';
+  ov.innerHTML = `
+    <div class="modal">
+      <div class="modal-h">✏️ Modifier commande <span style="color:var(--blue)">#${orderShortId(o.id)}</span></div>
+      <div class="mrow">
+        <div class="mfield">
+          <label>Nom du client</label>
+          <input type="text" id="oe-cl" value="${o.cl}" />
+        </div>
+        <div class="mfield">
+          <label>Téléphone</label>
+          <input type="tel" id="oe-ph" value="${o.ph}" />
+        </div>
+      </div>
+      <div class="mrow">
+        <div class="mfield">
+          <label>Wilaya</label>
+          <input type="text" id="oe-wil" value="${o.wil}" />
+        </div>
+        <div class="mfield">
+          <label>Point de remise</label>
+          <select id="oe-dt" class="role-sel" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px">
+            <option value="Dom" ${o.dt==='Dom'?'selected':''}>🏠 Domicile</option>
+            <option value="Stop" ${o.dt!=='Dom'?'selected':''}>📫 Stop Desk</option>
+          </select>
+        </div>
+      </div>
+      <div class="mrow">
+        <div class="mfield">
+          <label>Mode de livraison</label>
+          <select id="oe-mode" class="role-sel" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px">
+            <option value="standard" ${(o.mode||'standard')==='standard'?'selected':''}>📦 Standard</option>
+            <option value="express"  ${o.mode==='express' ?'selected':''}>🚀 Express</option>
+            <option value="smart"    ${o.mode==='smart'   ?'selected':''}>⚡ Smart (auto-sélection société)</option>
+          </select>
+        </div>
+        <div class="mfield">
+          <label>Adresse complète</label>
+          <input type="text" id="oe-addr" placeholder="N° rue, cité, commune…" value="${o.addr||''}" />
+        </div>
+      </div>
+      <div class="mrow">
+        <div class="mfield">
+          <label>Produit(s)</label>
+          <input type="text" id="oe-pr" value="${o.pr}" />
+        </div>
+        <div class="mfield">
+          <label>Montant (DA)</label>
+          <input type="number" id="oe-amt" value="${o.amt}" />
+        </div>
+      </div>
+      <div class="mfield">
+        <label>Statut</label>
+        <select id="oe-st" class="role-sel" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px">
+          ${['En attente','Confirmée','Expédiée','Livrée','Retournée'].map(s=>`<option ${s===o.st?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="mfield">
+        <label>Note interne</label>
+        <textarea id="oe-note" rows="2" style="resize:none" placeholder="Remarques, instructions spéciales…">${o.note||''}</textarea>
+      </div>
+      <div class="mbtn-row">
+        <button class="mbtn mbtn-s" onclick="document.getElementById('order-edit-modal').remove()">Annuler</button>
+        <button class="mbtn mbtn-p" onclick="saveOrderEdit('${o.id}')">💾 Enregistrer</button>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+}
+
+async function saveOrderEdit(ordId) {
+  const o = ORDERS.find(x=>x.id===ordId);
+  if (!o) return;
+  const newSt = document.getElementById('oe-st').value;
+  const wasConfirmed = o.st === 'Confirmée';
+  const cl   = document.getElementById('oe-cl').value.trim()   || o.cl;
+  const ph   = document.getElementById('oe-ph').value.trim()   || o.ph;
+  const wil  = document.getElementById('oe-wil').value.trim()  || o.wil;
+  const addr = document.getElementById('oe-addr').value.trim();
+  const dt   = document.getElementById('oe-dt').value;
+  const mode = document.getElementById('oe-mode').value || 'standard';
+  const note = document.getElementById('oe-note').value.trim();
+  const pr   = document.getElementById('oe-pr').value.trim()   || o.pr;
+  const amt  = +document.getElementById('oe-amt').value        || o.amt;
+
+  try {
+    const { error } = await SB.from('orders').update({
+      status:        ST_FR_TO_DB[newSt] || 'pending',
+      buyer_name:    cl,
+      buyer_phone:   ph,
+      wilaya:        wil,
+      address:       addr,
+      delivery_type: dt === 'Dom' ? 'home' : 'stopdesk',
+      delivery_mode: mode,
+      notes:         note,
+    }).eq('id', ordId);
+    if (error) throw error;
+  } catch (e) {
+    toast('⚠️ Erreur lors de la sauvegarde');
+    return;
+  }
+
+  o.cl = cl; o.ph = ph; o.wil = wil; o.addr = addr;
+  o.dt = dt; o.mode = mode; o.note = note; o.pr = pr; o.amt = amt;
+  o.st = newSt;
+  document.getElementById('order-edit-modal')?.remove();
+  const row = document.getElementById('orow-'+ordId);
+  if (row) row.outerHTML = orderRow(o);
+  if (newSt === 'Expédiée' && wasConfirmed) { openExpedModal(ordId); return; }
+  toast('✅ Commande #'+orderShortId(ordId)+' mise à jour');
+}
+
+/* ─── CRÉDIBILITÉ ─── */
+function pgCred() {
+  const crits = [
+    {n:'Taux de livraison',  pts:18,max:20,tip:'Confirmez les commandes rapidement'},
+    {n:'Taux de retour',     pts:11,max:15,tip:'Améliorez la qualité des envois'},
+    {n:'Qualité des photos', pts:7, max:10,tip:'Ajoutez 3+ photos HD par produit'},
+    {n:'Profil complet',     pts:8, max:10,tip:'Complétez adresse et description'},
+    {n:'Temps de réponse',   pts:13,max:15,tip:'Répondez aux clients en < 2h'},
+    {n:'Avis clients',       pts:8, max:15,tip:'Demandez des avis après livraison'},
+    {n:'Ancienneté',         pts:3, max:5, tip:'Continuez à utiliser Lincoo'},
+    {n:'Activité récente',   pts:4, max:10,tip:'Publiez de nouveaux produits régulièrement'},
+  ];
+  const score = crits.reduce((s,c)=>s+c.pts,0);
+  const level = score>=85?'Or':score>=65?'Argent':'Bronze';
+  const lc    = score>=85?'var(--gold)':score>=65?'#64748B':'#92400E';
+  document.getElementById('main').innerHTML = `
+    <div class="ph"><div class="pt">Ma Crédibilité</div><div class="ps">Score sur 8 critères — mis à jour automatiquement</div></div>
+    <div style="display:grid;grid-template-columns:280px 1fr;gap:18px;align-items:start">
+      <div class="cc" style="text-align:center">
+        <div class="ring-wrap" style="background:conic-gradient(var(--teal) ${Math.round(score*3.6)}deg,var(--brd) 0)">
+          <div class="ring-in"><div style="font-size:38px;font-weight:900;color:var(--teal)">${score}</div><div style="font-size:10px;color:var(--dim)">/100</div></div>
+        </div>
+        <div style="font-size:18px;font-weight:900;color:${lc};margin-bottom:4px">Niveau ${level}</div>
+        <div style="font-size:11px;color:var(--dim);margin-bottom:16px">${score>=85?'Excellent ! Continuez.':score>=65?'Bon niveau, encore un effort.':'Améliorez votre score.'}</div>
+        ${[{i:'👁️',l:'Visibilité',v:score>=85?'+300%':'+150%'},{i:'📌',l:'Priorité',v:score>=85?'Top 3':'Top 10'},{i:'🏷️',l:'Badge',v:'Badge '+level}]
+          .map(x=>`<div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border-radius:9px;padding:9px 12px;margin-bottom:6px">
+            <div style="font-size:11px">${x.i} ${x.l}</div><div style="font-size:11px;font-weight:800;color:${lc}">${x.v}</div>
+          </div>`).join('')}
+      </div>
+      <div class="cg">${crits.map(c=>`<div class="cr">
+        <div class="cr-t"><div class="cr-n">${c.n}</div><div class="cr-p">${c.pts}/${c.max}</div></div>
+        <div class="bar-bg"><div class="bar-f" style="width:${(c.pts/c.max*100).toFixed(0)}%"></div></div>
+        <div style="font-size:10px;color:var(--dim);margin-top:5px">💡 ${c.tip}</div>
+      </div>`).join('')}</div>
+    </div>`;
+}
+
+/* ─── STATS ─── */
+function pgStat() {
+  const ws = [{n:'Alger',p:28},{n:'Oran',p:18},{n:'Constantine',p:12},{n:'Annaba',p:9},{n:'Blida',p:7},{n:'Sétif',p:6},{n:'Tlemcen',p:5},{n:'Autres',p:15}];
+  const top = [{n:'Parfum Oriental 50ml',s:203,r:'60 900'},{n:'Sac en cuir marron',s:147,r:'44 100'},{n:'Montre vintage or',s:89,r:'89 000'},{n:'Portefeuille slim',s:91,r:'27 300'},{n:'Ceinture en cuir',s:67,r:'13 400'}];
+  document.getElementById('main').innerHTML = `
+    <div class="ph"><div class="pt">Statistiques</div><div class="ps">Analyses détaillées de votre activité</div></div>
+    <div class="g2" style="margin-bottom:16px">
+      <div class="cc">
+        <div class="ch"><div class="ct">Ventes par wilaya</div></div>
+        ${ws.map(w=>`<div class="wb"><div class="wb-n">${w.n}</div><div class="wb-bg"><div class="wb-f" style="width:${Math.round(w.p*3.4)}px"></div></div><div class="wb-p">${w.p}%</div></div>`).join('')}
+      </div>
+      <div class="cc">
+        <div class="ch"><div class="ct">Top 5 produits</div></div>
+        ${top.map((p,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--brd)">
+          <div style="width:22px;height:22px;border-radius:7px;background:${['var(--gold)','#C0C0C0','#CD7F32','var(--brd)','var(--brd)'][i]};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:${i<3?'#000':'var(--dim)'};flex-shrink:0">${i+1}</div>
+          <div style="flex:1"><div style="font-size:11px;font-weight:700">${p.n}</div><div style="font-size:10px;color:var(--dim)">${p.s} ventes</div></div>
+          <div style="font-size:11px;font-weight:800;color:var(--teal)">${p.r} DA</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="cc">
+      <div class="ch"><div class="ct">Entonnoir de conversion</div></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:16px 0">
+        ${[{l:'Vues produits',c:'12 450',p:100,col:'var(--blue)'},{l:'Ajout panier',c:'1 867',p:15,col:'var(--purp)'},{l:'Paiement initié',c:'624',p:5,col:'var(--gold)'},{l:'Commande validée',c:'423',p:3.4,col:'var(--teal)'}]
+          .map((f,i,a)=>`<div style="text-align:center"><div style="font-size:18px;font-weight:900;color:${f.col}">${f.c}</div>
+          <div style="font-size:10px;color:var(--dim);margin:3px 0">${f.l}</div>
+          <div style="width:${Math.max(36,130-i*24)}px;height:38px;background:${f.col};opacity:${1-i*.18};border-radius:6px;margin:0 auto"></div>
+          <div style="font-size:10px;color:${f.col};font-weight:700;margin-top:3px">${f.p}%</div></div>
+          ${i<a.length-1?'<div style="font-size:20px;color:var(--dim)">→</div>':''}`).join('')}
+      </div>
+    </div>`;
+}
+
+/* ─── AUTOMATISATIONS ─── */
+function pgAuto() {
+  const autos = [
+    {i:'📉',bg:'rgba(220,38,38,.12)',   t:'Alerte rupture de stock',      d:'Si stock < 5 → Notification WhatsApp immédiate',   on:true},
+    {i:'🛒',bg:'rgba(180,83,9,.1)',    t:'Relance panier abandonné',      d:'Si panier abandonné > 2h → Envoyer rappel client', on:true},
+    {i:'⭐',bg:'rgba(8,145,178,.1)',    t:"Demande d'avis automatique",   d:'Si commande livrée → Demander avis 24h après',     on:false},
+    {i:'🤖',bg:'rgba(168,85,247,.12)',  t:'Description IA',               d:'Si produit sans description → Générer avec IA',    on:true},
+    {i:'💸',bg:'rgba(59,130,246,.1)',   t:'Alerte prix concurrents',       d:'Si concurrent moins cher → Alerter le vendeur',    on:false},
+    {i:'📣',bg:'rgba(236,72,153,.1)',   t:'Booster de ventes',            d:'Si produit sans vente 7j → Suggérer une promo',    on:false},
+    {i:'🔄',bg:'rgba(22,163,74,.1)',    t:'Réapprovisionnement auto',     d:'Si stock épuisé → Créer demande fournisseur',      on:false},
+    {i:'📊',bg:'rgba(180,83,9,.08)',   t:'Rapport hebdomadaire',         d:'Chaque lundi → Résumé de semaine par email',       on:true},
+  ];
+  document.getElementById('main').innerHTML = `
+    <div class="ph"><div class="pt">Automatisations</div><div class="ps">Règles SI / ALORS — pilotage automatique de votre boutique</div></div>
+    <div class="g2">${autos.map(a=>`<div class="ac">
+      <div class="ai" style="background:${a.bg}">${a.i}</div>
+      <div class="at"><div class="at-t">${a.t}</div><div class="at-d">${a.d}</div></div>
+      <label class="tog"><input type="checkbox" ${a.on?'checked':''} onchange="toast(this.checked?'✅ Activé':'⏸️ Désactivé')"><span class="tsl"></span></label>
+    </div>`).join('')}</div>`;
+}
+
+/* ─── COACH IA ─── */
+function pgCoac() {
+  document.getElementById('main').innerHTML = `
+    <div class="ph"><div class="pt">Coach IA</div><div class="ps">Analyse intelligente · Conseils personnalisés</div></div>
+    <div class="coach">
+      <div class="coach-h">
+        <div class="coach-av">🤖</div>
+        <div><div style="font-size:15px;font-weight:900">Lincoo AI · Analyse complète</div><div style="font-size:10px;color:rgba(13,11,45,.5)">Mis à jour le ${new Date().toLocaleDateString('fr-FR')}</div></div>
+      </div>
+      <div class="coach-msg">Bonjour <strong>${CU?.name||'Vendeur'}</strong> ! J'ai analysé votre boutique en profondeur. Votre <strong>taux de conversion (3.4%)</strong> dépasse la moyenne du secteur (2.1%) — félicitations ! J'ai identifié <strong>3 opportunités clés</strong> qui pourraient augmenter votre CA de <strong style="color:var(--teal)">+35% en 30 jours</strong>.</div>
+      <div class="ctips">
+        <div class="ctip">💡 <span><strong>Photos produits</strong> — 4 de vos produits n'ont qu'une seule photo. Les produits avec 3+ photos convertissent 2.8× mieux.</span></div>
+        <div class="ctip">💡 <span><strong>Paniers abandonnés</strong> — 46 paniers cette semaine = ~85 000 DA de CA non converti. Activez la relance automatique.</span></div>
+        <div class="ctip">💡 <span><strong>Smart Delivery Oran</strong> — Votre 2ème marché a un délai moyen de 4.2j. Smart Delivery le réduit à 2.1j.</span></div>
+      </div>
+    </div>
+    <div class="g3" style="margin-bottom:18px">${[
+      {i:'📸',t:'Photos produits',s:62,c:'var(--gold)', a:'Ajouter des photos'},
+      {i:'📝',t:'Descriptions',   s:78,c:'var(--blue)', a:'Optimiser avec IA'},
+      {i:'💬',t:'Réponse clients',s:91,c:'var(--teal)', a:'Excellent !'},
+      {i:'🏷️',t:'Prix vs marché', s:84,c:'var(--blue)', a:'Bien positionné'},
+      {i:'📦',t:'Stock & dispo',  s:71,c:'var(--purp)', a:'Réapprovisionner'},
+      {i:'⭐',t:'Réputation',     s:69,c:'var(--gold)', a:'Demandez des avis'},
+    ].map(s=>`<div class="kc" style="text-align:center">
+      <div style="font-size:24px;margin-bottom:7px">${s.i}</div>
+      <div class="kl">${s.t}</div>
+      <div class="kv" style="color:${s.c}">${s.s}<span style="font-size:13px;opacity:.5">/100</span></div>
+      <div style="font-size:10px;color:var(--dim);margin-top:3px">${s.a}</div>
+    </div>`).join('')}</div>
+    <div class="cc">
+      <div class="ch"><div class="ct">🎯 Actions recommandées cette semaine</div></div>
+      ${[
+        {p:'Urgent',   c:'var(--red)',  a:'Réapprovisionner "Sac en cuir marron" (stock: 1)', imp:'+22 000 DA/sem'},
+        {p:'Important',c:'var(--gold)', a:'Activer la relance paniers abandonnés',            imp:'+15 000 DA/sem'},
+        {p:'Conseil',  c:'var(--blue)', a:'Ajouter photos HD pour 4 produits prioritaires',  imp:'+8% conversion'},
+        {p:'Conseil',  c:'var(--purp)', a:'Répondre aux 3 avis en attente',                  imp:'+5 pts crédib.'},
+      ].map(a=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--brd)">
+        <span class="b" style="background:${a.c}22;color:${a.c};flex-shrink:0">${a.p}</span>
+        <div style="flex:1;font-size:12px">${a.a}</div>
+        <div style="font-size:11px;font-weight:700;color:var(--teal);flex-shrink:0">${a.imp}</div>
+      </div>`).join('')}
+    </div>`;
+}
+
+/* ─── LIVRAISONS ─── */
+const DELIV_COS = JSON.parse(localStorage.getItem('lincoo_deliv_cos') || 'null') || [
+  {id:'yalidine', nm:'Yalidine',    emoji:'🟡', api:'', active:true,  home_base:450, desk_base:350, express_mult:1.4},
+  {id:'zr',       nm:'ZR Express',  emoji:'🔵', api:'', active:true,  home_base:480, desk_base:380, express_mult:1.3},
+  {id:'maystro',  nm:'Maystro',     emoji:'🟢', api:'', active:false, home_base:420, desk_base:320, express_mult:1.5},
+  {id:'amx',      nm:'AMX',         emoji:'🔴', api:'', active:false, home_base:500, desk_base:400, express_mult:1.3},
+  {id:'procolis', nm:'Procolis',     emoji:'🟣', api:'', active:true,  home_base:460, desk_base:360, express_mult:1.4},
+];
+function saveDelivCos() { localStorage.setItem('lincoo_deliv_cos', JSON.stringify(DELIV_COS)); }
+
+const DELIV_TARIFFS = JSON.parse(localStorage.getItem('lincoo_tariffs') || '{}');
+function saveTariffs() { localStorage.setItem('lincoo_tariffs', JSON.stringify(DELIV_TARIFFS)); }
+function getTariff(coId, wilCode, type) {
+  if (DELIV_TARIFFS[coId]?.[wilCode]?.[type] != null) return DELIV_TARIFFS[coId][wilCode][type];
+  const co = DELIV_COS.find(c=>c.id===coId);
+  const zone = parseInt(wilCode)<=10?1:parseInt(wilCode)<=25?1.1:parseInt(wilCode)<=40?1.2:1.4;
+  return Math.round((type==='home'?co.home_base:co.desk_base)*zone);
+}
+function setTariff(coId, wilCode, type, val) {
+  if (!DELIV_TARIFFS[coId]) DELIV_TARIFFS[coId]={};
+  if (!DELIV_TARIFFS[coId][wilCode]) DELIV_TARIFFS[coId][wilCode]={};
+  DELIV_TARIFFS[coId][wilCode][type] = +val;
+  saveTariffs();
+}
+function resetTariff(coId, wilCode) {
+  if (DELIV_TARIFFS[coId]) delete DELIV_TARIFFS[coId][wilCode];
+  saveTariffs(); renderLivrTarifs();
+}
+function resetAllTariffs(coId) {
+  if (confirm('Réinitialiser tous les tarifs de cette société ?')) {
+    delete DELIV_TARIFFS[coId]; saveTariffs(); renderLivrTarifs(); toast('Tarifs réinitialisés');
+  }
+}
+function toggleCo(i, el) {
+  if (el.checked && DELIV_COS.filter(c=>c.active).length >= 2) {
+    el.checked = false;
+    toast('⚠️ Maximum 2 sociétés standard actives autorisées');
+    return;
+  }
+  DELIV_COS[i].active = el.checked;
+  saveDelivCos();
+  renderLivrSocietes();
+}
+
+let LV_TAB = 'soc';
+
+function pgLivr() {
+  document.getElementById('main').innerHTML = `
+    <div class="ph"><div class="pt">Livraisons</div><div class="ps">Sociétés & API · Tarifs · Expéditions</div></div>
+    <div class="ltabs">
+      <button class="ltab on" id="lbt-soc" onclick="switchLivrTab('soc')">🏢 Sociétés & API</button>
+      <button class="ltab"    id="lbt-tar" onclick="switchLivrTab('tar')">💰 Tarifs</button>
+      <button class="ltab"    id="lbt-exp" onclick="switchLivrTab('exp')">📦 Expéditions</button>
+      <button class="ltab"    id="lbt-smt" onclick="switchLivrTab('smt')">⚡ Smart Delivery</button>
+    </div>
+    <div id="lv-content"></div>`;
+  LV_TAB = 'soc';
+  renderLivrSocietes();
+}
+
+function switchLivrTab(t) {
+  LV_TAB = t;
+  document.querySelectorAll('.ltab').forEach(el => el.classList.remove('on'));
+  document.getElementById('lbt-'+t)?.classList.add('on');
+  if (t==='soc') renderLivrSocietes();
+  else if (t==='tar') renderLivrTarifs();
+  else if (t==='exp') renderLivrExpeds();
+  else renderLivrSmart();
+}
+
+function renderLivrSocietes() {
+  const activeCount = DELIV_COS.filter(c=>c.active).length;
+  document.getElementById('lv-content').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="flex:1;font-size:12px;color:var(--dim)">Sélectionnez <strong style="color:var(--txt)">jusqu'à 2 sociétés</strong> standard actives. Lincoo choisira automatiquement la moins chère pour chaque commande.</div>
+      <div style="background:${activeCount>=2?'rgba(8,145,178,.12)':'rgba(180,83,9,.1)'};border:1px solid ${activeCount>=2?'rgba(8,145,178,.3)':'rgba(180,83,9,.3)'};border-radius:10px;padding:7px 14px;font-size:12px;font-weight:800;color:${activeCount>=2?'var(--teal)':'var(--gold)'};flex-shrink:0">
+        ${activeCount}/2 actives
+      </div>
+    </div>
+    <div class="co-grid">
+      ${DELIV_COS.map((co,i) => `
+        <div class="co-card ${co.active?'on':''}">
+          <div class="co-head">
+            <div class="co-logo" style="background:rgba(13,11,45,.07)">${co.emoji}</div>
+            <div><div class="co-nm">${co.nm}</div><div class="co-st">${co.active?'✅ Actif':'⏸️ Inactif'}</div></div>
+            <label class="tog" style="margin-left:auto"><input type="checkbox" ${co.active?'checked':''} onchange="toggleCo(${i},this)"><span class="tsl"></span></label>
+          </div>
+          <div class="mfield">
+            <label>Clé API</label>
+            <input class="co-api" type="password" placeholder="Entrez votre clé API ${co.nm}…" value="${co.api}" oninput="DELIV_COS[${i}].api=this.value;saveDelivCos()" />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+            <div class="mfield" style="margin-bottom:0">
+              <label>🏠 Domicile base (DA)</label>
+              <input style="width:100%;padding:6px 9px;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);font-size:11px;font-family:inherit;outline:none" type="number" value="${co.home_base}" oninput="DELIV_COS[${i}].home_base=+this.value;saveDelivCos()" />
+            </div>
+            <div class="mfield" style="margin-bottom:0">
+              <label>📫 Stop Desk base (DA)</label>
+              <input style="width:100%;padding:6px 9px;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);font-size:11px;font-family:inherit;outline:none" type="number" value="${co.desk_base}" oninput="DELIV_COS[${i}].desk_base=+this.value;saveDelivCos()" />
+            </div>
+          </div>
+          <div style="margin-top:8px;padding:8px 10px;background:rgba(13,11,45,.04);border-radius:8px;font-size:10px;color:var(--dim)">
+            Express ×${co.express_mult} · Smart auto-sélectionné si actif
+          </div>
+        </div>`).join('')}
+    </div>
+    <div class="cc">
+      <div class="ch"><div class="ct">ℹ️ Comment fonctionne la sélection automatique</div></div>
+      <div class="g3">
+        ${[
+          {i:'📦',t:'Standard',d:'Société active avec le tarif domicile/stop-desk le plus bas pour la wilaya du client'},
+          {i:'⚡',t:'Express',d:'Société active la plus rapide avec multiplicateur express appliqué au tarif de base'},
+          {i:'🤖',t:'Smart',d:'Analyse wilayas, délais, tarifs et disponibilité en temps réel pour choisir le meilleur'},
+        ].map(f=>`<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:12px;padding:14px">
+          <div style="font-size:24px;margin-bottom:7px">${f.i}</div>
+          <div style="font-size:12px;font-weight:800;margin-bottom:4px">${f.t}</div>
+          <div style="font-size:11px;color:var(--dim)">${f.d}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function renderLivrTarifs() {
+  const wils = [['Adrar','01'],['Chlef','02'],['Laghouat','03'],['Oum Bouaghi','04'],['Batna','05'],['Béjaïa','06'],['Biskra','07'],['Béchar','08'],['Blida','09'],['Bouira','10'],['Tamanrasset','11'],['Tébessa','12'],['Tlemcen','13'],['Tiaret','14'],['Tizi Ouzou','15'],['Alger','16'],['Djelfa','17'],['Jijel','18'],['Sétif','19'],['Saïda','20'],['Skikda','21'],['Sidi Bel Abbès','22'],['Annaba','23'],['Guelma','24'],['Constantine','25'],['Médéa','26'],['Mostaganem','27'],["M'Sila",'28'],['Mascara','29'],['Ouargla','30'],['Oran','31'],['El Bayadh','32'],['Illizi','33'],['Bordj Bou Arréridj','34'],['Boumerdès','35'],['El Tarf','36'],['Tindouf','37'],['Tissemsilt','38'],['El Oued','39'],['Khenchela','40'],['Souk Ahras','41'],['Tipaza','42'],['Mila','43'],['Aïn Defla','44'],['Naâma','45'],['Aïn Témouchent','46'],['Ghardaïa','47'],['Relizane','48']];
+  const activeCos = DELIV_COS.filter(c=>c.active);
+  if (!activeCos.length) {
+    document.getElementById('lv-content').innerHTML = `<div class="cc" style="text-align:center;padding:40px"><div style="font-size:40px;margin-bottom:10px">🏢</div><div style="font-weight:700">Aucune société active</div><div style="font-size:11px;color:var(--dim);margin-top:5px">Activez au moins une société dans l'onglet Sociétés & API</div></div>`;
+    return;
+  }
+  const hasOverride = (coId) => !!(DELIV_TARIFFS[coId] && Object.keys(DELIV_TARIFFS[coId]).length);
+  document.getElementById('lv-content').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="flex:1;font-size:12px;color:var(--dim)">Modifiez directement les tarifs par wilaya. Les valeurs en <span style="color:var(--teal)">vert</span> sont calculées automatiquement ; celles modifiées s'affichent avec une bordure colorée.</div>
+      <div style="display:flex;gap:8px">
+        ${activeCos.map(co=>`<button class="ltab" style="${hasOverride(co.id)?'border-color:var(--teal);color:var(--teal)':''}" onclick="resetAllTariffs('${co.id}')">↺ ${co.nm}</button>`).join('')}
+      </div>
+    </div>
+    <div class="tc">
+      <div class="th">
+        <div class="tt">Tarifs par wilaya <span style="font-size:10px;font-weight:400;color:var(--dim)">(DA)</span></div>
+        <div style="font-size:10px;color:var(--dim)">${activeCos.length}/2 sociétés · <span style="color:var(--teal)">Cliquez pour modifier</span></div>
+      </div>
+      <div style="overflow-x:auto">
+      <table class="team-tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>Wilaya</th>
+            ${activeCos.map(co=>`<th colspan="2" style="text-align:center">${co.emoji} ${co.nm}</th>`).join('')}
+          </tr>
+          <tr>
+            <th></th><th></th>
+            ${activeCos.map(()=>'<th style="font-size:8px;color:var(--dim)">🏠 Domicile</th><th style="font-size:8px;color:var(--dim)">📫 Stop Desk</th>').join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${wils.map(([w,c])=>`<tr>
+            <td style="color:var(--dim);font-size:10px">${c}</td>
+            <td style="font-weight:700;font-size:12px;white-space:nowrap">${w}</td>
+            ${activeCos.map(co=>{
+              const hmVal = getTariff(co.id,c,'home');
+              const dmVal = getTariff(co.id,c,'desk');
+              const hmMod = DELIV_TARIFFS[co.id]?.[c]?.home != null;
+              const dmMod = DELIV_TARIFFS[co.id]?.[c]?.desk != null;
+              return `<td style="padding:6px 8px">
+                        <input class="tariff-inp${hmMod?' mod':''}" type="number" value="${hmVal}"
+                          onchange="setTariff('${co.id}','${c}','home',this.value);this.classList.add('mod')"
+                          title="🏠 ${w} — ${co.nm}" />
+                      </td>
+                      <td style="padding:6px 8px">
+                        <input class="tariff-inp${dmMod?' mod':''}" type="number" value="${dmVal}"
+                          onchange="setTariff('${co.id}','${c}','desk',this.value);this.classList.add('mod')"
+                          title="📫 ${w} — ${co.nm}" />
+                      </td>`;
+            }).join('')}
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>
+    </div>`;
+}
+
+function renderLivrExpeds() {
+  const toShip = ORDERS.filter(o => o.st === 'Confirmée');
+  document.getElementById('lv-content').innerHTML = `
+    <div style="margin-bottom:16px;display:flex;align-items:center;gap:10px">
+      <div style="flex:1"><div style="font-size:14px;font-weight:800">${toShip.length} commande${toShip.length!==1?'s':''} prête${toShip.length!==1?'s':''} à expédier</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:2px">Confirmez les détails avant l'envoi vers la société de livraison</div></div>
+    </div>
+    ${toShip.length === 0
+      ? `<div class="cc" style="text-align:center;padding:40px"><div style="font-size:40px;margin-bottom:10px">✅</div><div style="font-weight:700">Aucune commande en attente d'expédition</div><div style="font-size:11px;color:var(--dim);margin-top:5px">Toutes les commandes confirmées ont été expédiées</div></div>`
+      : toShip.map(o => {
+          const co = DELIV_COS.filter(c=>c.active)[0];
+          const coName = co ? co.nm : '—';
+          const modeIcon = o.mode==='smart'?'⚡':o.mode==='express'?'🚀':'📦';
+          return `<div class="exp-card">
+            <div style="font-size:28px">${modeIcon}</div>
+            <div class="exp-info">
+              <div class="exp-client">${o.cl} · #${orderShortId(o.id)}</div>
+              <div class="exp-meta">${o.wil} · ${o.dt==='Dom'?'🏠 Domicile':'📫 Stop Desk'} · ${F(o.amt)} DA · ${o.pr}</div>
+              <div style="margin-top:5px"><span class="b bbl" style="font-size:10px">📦 ${coName}</span> ${BM(o.mode)}</div>
+            </div>
+            <button class="bp" style="padding:8px 16px;font-size:11px;flex-shrink:0" onclick="openExpedModal('${o.id}')">Expédier →</button>
+          </div>`;
+        }).join('')}
+    <div class="cc" style="margin-top:16px">
+      <div class="ch"><div class="ct">📊 Ce mois</div></div>
+      ${[{l:'Livraisons réussies',v:'94.2%',c:'var(--teal)'},{l:'Délai moyen',v:'2.8 jours',c:'var(--blue)'},{l:'Taux retour',v:'3.1%',c:'var(--red)'},{l:'Économies Smart',v:'12 400 DA',c:'var(--gold)'}]
+        .map(s=>`<div class="row"><span class="rl">${s.l}</span><span class="rv" style="color:${s.c}">${s.v}</span></div>`).join('')}
+    </div>`;
+}
+
+function openExpedModal(ordId) {
+  const o = ORDERS.find(x=>x.id===ordId);
+  if (!o) return;
+  const activeCo = DELIV_COS.filter(c=>c.active);
+  const defaultCo = activeCo[0];
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-ov';
+  overlay.id = 'exped-modal';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-h">📦 Expédier commande #${orderShortId(o.id)}</div>
+      <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:12px;margin-bottom:18px;font-size:12px">
+        <div style="font-weight:800;margin-bottom:4px">${o.cl} · ${F(o.amt)} DA</div>
+        <div style="color:var(--dim)">${o.pr} · ${o.wil} · ${o.dt==='Dom'?'🏠 Domicile':'📫 Stop Desk'}</div>
+      </div>
+      <div class="mfield">
+        <label>Société de livraison</label>
+        <select class="role-sel" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px" id="exped-co">
+          ${activeCo.map(c=>`<option value="${c.id}">${c.emoji} ${c.nm}</option>`).join('')}
+        </select>
+      </div>
+      <div class="mrow">
+        <div class="mfield">
+          <label>Nom du destinataire</label>
+          <input type="text" value="${o.cl}" id="exped-nm" />
+        </div>
+        <div class="mfield">
+          <label>Téléphone</label>
+          <input type="tel" value="${o.ph}" id="exped-ph" />
+        </div>
+      </div>
+      <div class="mrow">
+        <div class="mfield">
+          <label>Wilaya</label>
+          <input type="text" value="${o.wil}" id="exped-wil" />
+        </div>
+        <div class="mfield">
+          <label>Type livraison</label>
+          <select class="role-sel" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px" id="exped-type">
+            <option value="home" ${o.dt==='Dom'?'selected':''}>🏠 Domicile</option>
+            <option value="desk" ${o.dt!=='Dom'?'selected':''}>📫 Stop Desk</option>
+          </select>
+        </div>
+      </div>
+      <div class="mfield">
+        <label>Adresse complète</label>
+        <input type="text" id="exped-addr" placeholder="N° rue, cité, commune…" />
+      </div>
+      <div class="mfield">
+        <label>Note livreur (optionnel)</label>
+        <textarea id="exped-note" rows="2" placeholder="Instructions particulières…" style="resize:none"></textarea>
+      </div>
+      <div class="mbtn-row">
+        <button class="mbtn mbtn-s" onclick="document.getElementById('exped-modal').remove()">Annuler</button>
+        <button class="mbtn mbtn-p" onclick="confirmExped('${o.id}')">📦 Confirmer l'expédition</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function confirmExped(ordId) {
+  const coId = document.getElementById('exped-co')?.value;
+  const co = DELIV_COS.find(c=>c.id===coId) || DELIV_COS.find(c=>c.active);
+  const o = ORDERS.find(x=>x.id===ordId);
+  if (!o) return;
+  try {
+    const { error } = await SB.from('orders').update({ status: 'shipped' }).eq('id', ordId);
+    if (error) throw error;
+  } catch (e) {
+    toast('⚠️ Erreur lors de la mise à jour du statut');
+    return;
+  }
+  o.st = 'Expédiée';
+  document.getElementById('exped-modal')?.remove();
+  const row = document.getElementById('orow-'+ordId);
+  if (row) row.outerHTML = orderRow(o);
+  toast(`✅ Commande #${orderShortId(ordId)} envoyée vers ${co?.nm||'société de livraison'}`);
+  renderLivrExpeds();
+}
+
+function renderLivrSmart() {
+  document.getElementById('lv-content').innerHTML = `
+    <div class="cc">
+      <div class="ch"><div class="ct">⚡ Smart Delivery — Paramètres</div></div>
+      ${[{l:'Optimisation auto',d:'Choisit la meilleure société selon wilaya, délai et tarif',on:true},{l:'Regroupement colis',d:'Groupe les commandes de la même zone pour réduire les coûts',on:true},{l:'SMS tracking client',d:'Envoie un SMS de suivi automatiquement à la création de colis',on:false},{l:'Assurance colis',d:'+50 DA/colis — couverture en cas de perte ou dommage',on:false},{l:'Relance retours auto',d:'Si retour prévu → contacte le client pour confirmer 2ème tentative',on:true}]
+        .map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--brd)">
+          <div style="flex:1"><div style="font-size:12px;font-weight:700">${s.l}</div><div style="font-size:10px;color:var(--dim);margin-top:2px">${s.d}</div></div>
+          <label class="tog"><input type="checkbox" ${s.on?'checked':''} onchange="toast(this.checked?'✅ Activé':'⏸️ Désactivé')"><span class="tsl"></span></label>
+        </div>`).join('')}
+    </div>
+    <div class="g3" style="margin-top:16px">
+      ${[{i:'🗺️',t:'Analyse wilaya',d:'Calcule la meilleure route selon la wilaya et le transporteur disponible dans la zone'},{i:'⏱️',t:'Délai optimisé',d:'Sélectionne la livraison la plus rapide : 24h–48h pour Alger et wilayas proches'},{i:'💰',t:'Tarif le moins cher',d:'Compare toutes vos sociétés actives et choisit la moins chère en temps réel'}]
+        .map(f=>`<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:12px;padding:15px">
+          <div style="font-size:26px;margin-bottom:8px">${f.i}</div>
+          <div style="font-size:12px;font-weight:800;margin-bottom:4px">${f.t}</div>
+          <div style="font-size:11px;color:var(--dim)">${f.d}</div>
+        </div>`).join('')}
+    </div>`;
+}
+
+/* ─── ABONNEMENT ─── */
+function pgAbon() {
+  const packs = [
+    {
+      n:'Starter', emoji:'🛍️', pr:'1 500 DA', pe:'/mois', annual:false,
+      c:'var(--dim)', cur:false, comm:'5% commission',
+      feats:['1 boutique · 15 produits max','Gestion des commandes','Livraisons avec suivi','Ma Crédibilité — consultation','Support FAQ'],
+      locked:['Messages clients','Stats & Dashboard','Pickup Schedule / Shipping Labels','Outils IA']
+    },
+    {
+      n:'Essentiel', emoji:'⭐', pr:'20 000 DA', pe:'/an', annual:true, equiv:'≈ 1 667 DA/mois',
+      c:'var(--blue)', cur:true, pop:true, comm:'3% commission',
+      feats:['1 boutique · 300 produits','Messages clients','Stats basiques','Livraisons avec suivi','Pickup Schedule & Shipping Labels','Boost Feed (à l\'unité)','Ma Crédibilité — consultation','Support Standard 48h'],
+      locked:['Dashboard avancé & Delivery Analytics','Reels produits','Outils IA']
+    },
+    {
+      n:'Pro', emoji:'💎', pr:'40 000 DA', pe:'/an', annual:true, equiv:'≈ 3 333 DA/mois',
+      c:'var(--purp)', cur:false, comm:'3% commission',
+      feats:['Jusqu\'à 3 boutiques · Produits illimités','Messages clients','Stats basiques + Dashboard avancé','Delivery Analytics','Reels produits','Boost Feed — 3/mois inclus','Outils IA (Coach & Automatisations)','Livraisons · Pickup · Shipping Labels','Badge Pro vérifié','Support Prioritaire 12h'],
+      locked:[]
+    },
+  ];
+  document.getElementById('main').innerHTML = `
+    <div class="ph">
+      <div class="pt">Abonnement</div>
+      <div class="ps">Plan actuel : <span style="color:var(--blue);font-weight:800">Essentiel</span> · Renouvellement annuel · 20 000 DA/an</div>
+    </div>
+    <div class="pkgrid" style="grid-template-columns:repeat(3,1fr)">${packs.map(p=>`<div class="pk ${p.pop?'pop':''}">
+      ${p.pop?'<div class="pk-pop">⭐ POPULAIRE</div>':''}
+      ${p.cur?'<div class="pk-cur">✓ ACTUEL</div>':''}
+      <div style="font-size:28px;margin-bottom:6px">${p.emoji}</div>
+      <div class="pk-nm" style="color:${p.c}">${p.n}</div>
+      <div class="pk-pr" style="color:${p.c}">${p.pr}</div>
+      <div class="pk-pe">${p.pe}${p.equiv?` <span style="font-size:10px;color:var(--dim);display:block;margin-top:2px">${p.equiv}</span>`:''}</div>
+      <div style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;margin:8px 0 10px;background:${p.c}22;color:${p.c}">${p.comm}</div>
+      <ul class="pk-ul">${p.feats.map(f=>`<li>✓ ${f}</li>`).join('')}${p.locked.map(f=>`<li style="opacity:.4">✗ ${f}</li>`).join('')}</ul>
+      <button class="pk-btn" style="${p.cur?`background:rgba(22,163,74,.12);color:var(--green);border:1px solid rgba(22,163,74,.3)`:`background:linear-gradient(135deg,${p.c},${p.c}99);color:#fff;border:none`}" ${p.cur?'disabled':''} onclick="${p.cur?'':` toast('Redirection vers le paiement ${p.n}…')`}">
+        ${p.cur?'Plan actuel':'Passer au '+p.n}
+      </button>
+    </div>`).join('')}`;
+}
+
+/* ─── ÉQUIPE ─── */
+const ROLE_LABELS = {
+  prioritaire: { l:'Prioritaire', c:'var(--gold)',  d:'Accès complet + priorité support' },
+  gerant:      { l:'Gérant',      c:'var(--purp)',  d:'Tout sauf facturation et suppression compte' },
+  admin:       { l:'Admin',       c:'var(--blue)',  d:'Commandes, produits, livraisons, stats' },
+  support:     { l:'Support',     c:'var(--teal)',  d:'Commandes et messages clients uniquement' },
+  lecture:     { l:'Lecture seule', c:'var(--dim)', d:'Consultation uniquement, aucune action' },
+};
+const TEAM = JSON.parse(localStorage.getItem('lincoo_team') || 'null') || [
+  {id:1, nm:'Propriétaire', em: '', role:'prioritaire', valid:true},
+];
+function saveTeam() { localStorage.setItem('lincoo_team', JSON.stringify(TEAM)); }
+
+function pgEquipe() {
+  document.getElementById('main').innerHTML = `
+    <div class="ph"><div class="pt">Équipe</div><div class="ps">Gestion des rôles et accès · <span id="eq-count">${TEAM.length}</span> membre(s)</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="g3" style="flex:1;margin-bottom:0">
+        ${Object.values(ROLE_LABELS).map(r=>`<div style="background:rgba(13,11,45,.04);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <span class="b" style="background:${r.c}22;color:${r.c}">${r.l}</span>
+          <span style="font-size:10px;color:var(--dim)">${r.d}</span>
+        </div>`).join('')}
+      </div>
+      <button class="bp" style="margin-left:16px;flex-shrink:0" onclick="openAddMember()">+ Ajouter membre</button>
+    </div>
+    <div class="tc">
+      <div class="th"><div class="tt">Membres de l'équipe</div></div>
+      <table class="team-tbl">
+        <thead><tr><th>Membre</th><th>Email</th><th>Rôle</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody id="team-tbody"></tbody>
+      </table>
+    </div>`;
+  renderTeam();
+}
+
+function renderTeam() {
+  const tbody = document.getElementById('team-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = TEAM.map((m,i) => {
+    const r = ROLE_LABELS[m.role] || ROLE_LABELS.lecture;
+    const isSelf = i === 0;
+    return `<tr>
+      <td style="font-weight:700">${m.nm || '—'}</td>
+      <td style="color:var(--dim);font-size:11px">${m.em || (isSelf?CU?.email||'—':'—')}</td>
+      <td>
+        ${isSelf
+          ? `<span class="b" style="background:${r.c}22;color:${r.c}">${r.l}</span>`
+          : `<select class="role-sel" onchange="updateTeamRole(${i},this.value)">
+              ${Object.entries(ROLE_LABELS).map(([k,v])=>`<option value="${k}" ${m.role===k?'selected':''}>${v.l}</option>`).join('')}
+             </select>`}
+      </td>
+      <td>${m.valid
+        ? `<span class="b bgn">✅ Validé</span>`
+        : `<span class="b bgo">⏳ En attente</span>`}
+      </td>
+      <td style="display:flex;gap:6px;align-items:center">
+        ${!m.valid && !isSelf ? `<button class="bp" style="padding:5px 12px;font-size:10px" onclick="validateMember(${i})">Valider</button>` : ''}
+        ${!isSelf ? `<button class="mbtn" style="flex:none;padding:5px 12px;background:rgba(220,38,38,.12);color:var(--red);border:1px solid rgba(220,38,38,.25);border-radius:8px;font-size:10px;cursor:pointer" onclick="deleteMember(${i})">Supprimer</button>` : ''}
+        ${isSelf ? '<span style="font-size:10px;color:var(--dim)">Propriétaire</span>' : ''}
+      </td>
+    </tr>`;
+  }).join('');
+  const cnt = document.getElementById('eq-count');
+  if (cnt) cnt.textContent = TEAM.length;
+}
+
+function updateTeamRole(i, role) { TEAM[i].role = role; saveTeam(); toast(`Rôle mis à jour : ${ROLE_LABELS[role]?.l}`); }
+function validateMember(i) { TEAM[i].valid = true; saveTeam(); renderTeam(); toast('✅ Membre validé'); }
+function deleteMember(i) {
+  if (!confirm(`Supprimer ${TEAM[i].nm||TEAM[i].em} de l'équipe ?`)) return;
+  TEAM.splice(i, 1); saveTeam(); renderTeam(); toast('Membre supprimé');
+}
+
+function openAddMember() {
+  const ov = document.createElement('div');
+  ov.className = 'modal-ov'; ov.id = 'add-member-modal';
+  ov.innerHTML = `
+    <div class="modal">
+      <div class="modal-h">👤 Ajouter un membre</div>
+      <div class="mfield"><label>Nom complet</label><input type="text" id="am-nm" placeholder="Prénom Nom" /></div>
+      <div class="mfield"><label>Email</label><input type="email" id="am-em" placeholder="membre@email.com" /></div>
+      <div class="mfield">
+        <label>Rôle</label>
+        <select id="am-role" class="role-sel" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px">
+          ${Object.entries(ROLE_LABELS).map(([k,v])=>`<option value="${k}">${v.l} — ${v.d}</option>`).join('')}
+        </select>
+      </div>
+      <div style="background:rgba(180,83,9,.08);border:1px solid rgba(180,83,9,.2);border-radius:10px;padding:12px;font-size:11px;color:var(--gold);margin-bottom:4px">
+        ⚠️ Un email d'invitation sera envoyé. Le membre devra créer un compte Lincoo.
+      </div>
+      <div class="mbtn-row">
+        <button class="mbtn mbtn-s" onclick="document.getElementById('add-member-modal').remove()">Annuler</button>
+        <button class="mbtn mbtn-p" onclick="confirmAddMember()">Envoyer l'invitation</button>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+}
+
+function confirmAddMember() {
+  const nm = document.getElementById('am-nm')?.value.trim();
+  const em = document.getElementById('am-em')?.value.trim();
+  const role = document.getElementById('am-role')?.value || 'lecture';
+  if (!nm || !em) { toast('⚠️ Remplissez le nom et l\'email'); return; }
+  TEAM.push({id: Date.now(), nm, em, role, valid:false});
+  saveTeam();
+  document.getElementById('add-member-modal')?.remove();
+  renderTeam();
+  toast(`✉️ Invitation envoyée à ${em}`);
+}
+
+/* ─── PARAMÈTRES ─── */
+function pgSett() {
+  document.getElementById('main').innerHTML = `
+    <div class="ph"><div class="pt">Paramètres</div><div class="ps">Boutique · Notifications · Sécurité</div></div>
+    <div class="g2">
+      <div class="cc">
+        <div class="ch"><div class="ct">Informations boutique</div></div>
+        ${['Nom de la boutique','Wilaya','Catégorie','Description','Site web','WhatsApp'].map(f=>`<div style="margin-bottom:14px">
+          <label style="display:block;font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">${f}</label>
+          <input style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--brd);border-radius:10px;color:var(--txt);font-size:12px;font-family:inherit;outline:none" placeholder="${f}..." />
+        </div>`).join('')}
+        <button class="bp" style="width:100%;padding:11px" onclick="toast('Informations enregistrées ✓')">Enregistrer</button>
+      </div>
+      <div class="cc">
+        <div class="ch"><div class="ct">Notifications</div></div>
+        ${['Nouvelle commande','Rupture de stock','Nouvel avis client','Message client','Rapport hebdomadaire','Conseils Coach IA','Alertes paiement','Promotions Lincoo'].map(f=>`<div class="row">
+          <div style="font-size:12px;font-weight:600">${f}</div>
+          <label class="tog"><input type="checkbox" checked><span class="tsl"></span></label>
+        </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+/* ─── ORDERS (live from Supabase) ─── */
+let ORDERS = [];
+let ordersChannel = null;
+
+const ST_DB_TO_FR = {
+  pending:   'En attente',
+  confirmed: 'Confirmée',
+  shipped:   'Expédiée',
+  delivered: 'Livrée',
+  cancelled: 'Annulée',
+  refunded:  'Retournée',
+};
+const ST_FR_TO_DB = {
+  'En attente': 'pending',
+  'Confirmée':  'confirmed',
+  'Expédiée':   'shipped',
+  'Livrée':     'delivered',
+  'Annulée':    'cancelled',
+  'Retournée':  'refunded',
+};
+
+function mapOrderRow(o) {
+  const items = Array.isArray(o.items) ? o.items : [];
+  return {
+    id:   o.id,
+    cl:   o.buyer_name  || '—',
+    ph:   o.buyer_phone || '—',
+    pr:   items.length ? items.map(i => `${i.name || 'Produit'} × ${i.qty || 1}`).join(', ') : '—',
+    amt:  o.total || 0,
+    wil:  o.wilaya || '—',
+    dt:   o.delivery_type === 'stopdesk' ? 'Stop' : 'Dom',
+    st:   ST_DB_TO_FR[o.status] || 'En attente',
+    mode: o.delivery_mode || 'standard',
+    addr: o.address || '',
+    note: o.notes || '',
+  };
+}
+
+async function loadOrders() {
+  if (!CU) return;
+  try {
+    const { data, error } = await SB.from('orders')
+      .select('*')
+      .eq('seller_id', CU.id)
+      .order('created_at', { ascending: false })
+      .limit(100);
+    if (error) throw error;
+    ORDERS = (data || []).map(mapOrderRow);
+  } catch (e) {
+    ORDERS = [];
+  }
+  renderOrdersTable();
+  subscribeOrders();
+}
+
+function renderOrdersTable() {
+  const tbody = document.getElementById('ordr-tbody');
+  if (tbody) {
+    tbody.innerHTML = ORDERS.length
+      ? ORDERS.map(o => orderRow(o)).join('')
+      : `<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--dim)">Aucune commande pour le moment.</td></tr>`;
+  }
+  const countEl = document.getElementById('ordr-count');
+  if (countEl) countEl.textContent = `Toutes les commandes (${ORDERS.length})`;
+  const pendEl = document.getElementById('ordr-pending');
+  if (pendEl) pendEl.textContent = `${ORDERS.filter(o => o.st === 'En attente').length} en attente`;
+
+  const dashTbody = document.getElementById('dash-ordr-tbody');
+  if (dashTbody) {
+    dashTbody.innerHTML = ORDERS.length
+      ? ORDERS.slice(0, 5).map(o => `<tr>
+          <td style="color:var(--dim);font-size:10px">#${orderShortId(o.id)}</td>
+          <td style="font-weight:700">${o.cl}</td>
+          <td style="color:var(--teal);font-weight:800">${F(o.amt)} DA</td>
+          <td>${o.wil}</td><td>${BS(o.st)}</td>
+          <td>${BM(o.mode)}</td>
+        </tr>`).join('')
+      : `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--dim)">Aucune commande pour le moment.</td></tr>`;
+  }
+}
+
+function subscribeOrders() {
+  if (!CU) return;
+  if (ordersChannel) { SB.removeChannel(ordersChannel); ordersChannel = null; }
+  ordersChannel = SB.channel('seller-orders-' + CU.id)
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'orders', filter: `seller_id=eq.${CU.id}` },
+      () => loadOrders())
+    .subscribe();
+}
+
+/* ─── HELPERS ─── */
+function F(n) { if (!n && n!==0) return '0'; return Math.round(n).toLocaleString('fr-FR'); }
+function BS(s) {
+  const m = {'En attente':'bgo','Confirmée':'bbl','Expédiée':'bpu','Livrée':'bgn','Retournée':'brd'};
+  return `<span class="b ${m[s]||'bdm'}">${s}</span>`;
+}
+function BM(mode) {
+  if (mode==='smart')    return `<span class="b bbl">⚡ Smart</span>`;
+  if (mode==='express')  return `<span class="b bgo">🚀 Express</span>`;
+  return `<span class="b bdm">📦 Standard</span>`;
+}
+function toast(msg, dur=3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  setTimeout(() => t.classList.remove('on'), dur);
+}
+</script>
+</body>
+</html>

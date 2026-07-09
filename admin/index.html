@@ -1,0 +1,2403 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LINCOO — Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#F5F4F0;--card:#FFFFFF;--card2:#F0EEE9;--border:#E5E3DD;
+      --accent:#5B8A5A;--green:#3A8B3A;--red:#DC3535;--gold:#CC8A00;
+      --purp:#7B5CF5;--orange:#E5671A;--muted:rgba(0,0,0,0.40);
+    }
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1A1A1A;min-height:100vh}
+
+    /* ── LOGIN ─────────────────────────────────────────────────── */
+    #login-screen{
+      min-height:100vh;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,#F5F4F0 0%,#E8E6DF 100%);
+    }
+    .login-card{
+      background:var(--card);border:1px solid var(--border);border-radius:24px;
+      padding:44px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.10);
+    }
+    .login-brand{text-align:center;margin-bottom:36px}
+    .login-brand h1{
+      font-size:32px;font-weight:900;letter-spacing:4px;
+      background:linear-gradient(90deg,var(--accent),var(--purp));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .login-brand p{color:var(--muted);font-size:13px;margin-top:6px}
+    .lf{margin-bottom:18px}
+    .lf label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+    .lf input{
+      width:100%;padding:14px 16px;background:var(--bg);
+      border:1.5px solid var(--border);border-radius:12px;color:#1A1A1A;font-size:14px;outline:none;transition:border-color .2s;
+    }
+    .lf input:focus{border-color:var(--accent)}
+    .lf input::placeholder{color:rgba(0,0,0,.25)}
+    .login-btn{
+      width:100%;padding:15px;background:linear-gradient(90deg,var(--accent),var(--purp));
+      border:none;border-radius:14px;color:#fff;font-size:14px;font-weight:800;
+      cursor:pointer;margin-top:6px;transition:opacity .2s;letter-spacing:.5px;
+    }
+    .login-btn:hover{opacity:.9}.login-btn:disabled{opacity:.5;cursor:not-allowed}
+    #login-error{
+      color:var(--red);font-size:13px;margin-top:14px;text-align:center;display:none;
+      padding:10px;background:rgba(240,64,64,.08);border-radius:10px;border:1px solid rgba(240,64,64,.2);
+    }
+
+    /* ── APP SHELL ─────────────────────────────────────────────── */
+    #app-screen{display:none;height:100vh;overflow:hidden}
+    .app-layout{display:flex;height:100vh}
+
+    /* ── SIDEBAR ───────────────────────────────────────────────── */
+    .sidebar{
+      width:220px;background:var(--card);border-right:1px solid var(--border);
+      display:flex;flex-direction:column;flex-shrink:0;
+    }
+    .sb-brand{padding:26px 20px 20px;border-bottom:1px solid var(--border)}
+    .sb-logo{
+      font-size:22px;font-weight:900;letter-spacing:3px;
+      background:linear-gradient(90deg,var(--accent),var(--purp));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .sb-sub{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
+    .sb-nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:3px;overflow-y:auto}
+    .nav-item{
+      display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;
+      cursor:pointer;transition:all .15s;border:1px solid transparent;
+      font-size:13px;font-weight:600;color:rgba(0,0,0,.45);
+    }
+    .nav-item:hover{background:rgba(0,0,0,.04);color:rgba(0,0,0,.75)}
+    .nav-item.active{background:var(--accent);border-color:var(--accent);color:#fff}
+    .ni-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center}
+    .ni-label{flex:1}
+    .ni-badge{
+      background:var(--gold);color:#fff;font-size:10px;font-weight:900;
+      padding:2px 7px;border-radius:10px;min-width:20px;text-align:center;
+    }
+    .ni-badge.p{background:var(--purp);color:#fff}
+    .ni-badge.r{background:var(--red);color:#fff}
+    .ni-badge.g{background:var(--green);color:#fff}
+    .sb-footer{padding:14px 10px;border-top:1px solid var(--border)}
+    .sb-email{font-size:11px;color:var(--muted);margin-bottom:10px;padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .sb-logout{
+      width:100%;padding:10px;background:rgba(220,53,53,.07);border:1px solid rgba(220,53,53,.2);
+      border-radius:10px;color:var(--red);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;
+    }
+    .sb-logout:hover{background:rgba(220,53,53,.13)}
+
+    /* ── CONTENT AREA ──────────────────────────────────────────── */
+    .content-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    .sec-header{
+      background:var(--card);border-bottom:1px solid var(--border);
+      padding:20px 28px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+    }
+    .sec-title{font-size:20px;font-weight:900}
+    .sec-sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .sec-body{flex:1;overflow-y:auto;padding:24px 28px}
+    .sec-body.no-pad{padding:0}
+
+    /* ── TAB BAR ───────────────────────────────────────────────── */
+    .tab-bar{
+      background:var(--card);border-bottom:1px solid var(--border);
+      padding:0 28px;display:flex;flex-shrink:0;
+    }
+    .tab-item{
+      padding:14px 18px;font-size:13px;font-weight:600;color:var(--muted);
+      cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;
+    }
+    .tab-item:hover{color:rgba(0,0,0,.75)}
+    .tab-item.active{color:#1A1A1A;border-bottom-color:var(--accent)}
+    .tab-item.tg.active{border-bottom-color:var(--green)}
+    .tab-item.tp.active{border-bottom-color:var(--purp)}
+    .tab-item.tr.active{border-bottom-color:var(--red)}
+
+    /* ── KPI ───────────────────────────────────────────────────── */
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:26px}
+    .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px}
+    .kpi-icon{font-size:22px;margin-bottom:12px}
+    .kpi-val{font-size:28px;font-weight:900;line-height:1}
+    .kpi-label{font-size:11px;color:var(--muted);margin-top:5px}
+
+    /* ── REVENUE SECTION ───────────────────────────────────────── */
+    .rev-grid{display:grid;grid-template-columns:240px 1fr;gap:12px;margin-bottom:26px}
+    .rev-total-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px}
+    .rev-total-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;margin-bottom:8px}
+    .rev-total-val{font-size:30px;font-weight:900;color:#1A1A1A;letter-spacing:-1px;line-height:1}
+    .rev-month{font-size:11px;color:var(--muted);margin-top:4px}
+    .rev-stacked{height:7px;background:#F1F3F9;border-radius:4px;overflow:hidden;display:flex;margin-top:16px}
+    .rev-stacked div{height:100%;transition:width .6s ease}
+    .rev-legend-row{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+    .rev-leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);font-weight:600}
+    .rev-leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+    .rev-breakdown{display:flex;flex-direction:column;gap:8px}
+    .rev-item{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:14px 16px;display:flex;align-items:center;gap:13px}
+    .rev-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+    .rev-item-lbl{font-size:11.5px;font-weight:700;color:#1A1A1A}
+    .rev-item-val{font-size:18px;font-weight:900;color:#1A1A1A;letter-spacing:-.4px;line-height:1.1}
+    .rev-item-sub{font-size:10px;color:var(--muted);margin-top:2px}
+    .rev-pct{margin-left:auto;font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px}
+
+    /* ── OVERVIEW ACTIONS ──────────────────────────────────────── */
+    .ov-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+    .ov-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .ov-card{
+      background:var(--card);border:1px solid var(--border);border-radius:14px;
+      padding:16px;cursor:pointer;transition:border-color .2s;display:flex;align-items:center;gap:12px;
+    }
+    .ov-card:hover{border-color:rgba(0,0,0,.18)}
+    .ov-ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .ov-name{font-size:13px;font-weight:700}
+    .ov-cnt{font-size:11px;margin-top:3px}
+
+    /* ── ITEM CARDS (users / creators) ────────────────────────── */
+    .item-card{background:var(--card);border:1px solid var(--border);border-radius:18px;margin-bottom:12px;overflow:hidden}
+    .item-header{display:flex;align-items:center;gap:12px;padding:16px 16px 12px}
+    .item-avatar{
+      width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;font-size:17px;font-weight:900;flex-shrink:0;
+    }
+    .item-info{flex:1;min-width:0}
+    .item-name{font-size:14px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .item-email{font-size:11px;color:var(--muted);margin-top:2px}
+    .chips-row{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px}
+    .chip{
+      display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;
+      font-size:11px;font-weight:600;background:rgba(0,0,0,.06);color:rgba(0,0,0,.45);
+    }
+    .chip.gold  {background:rgba(200,140,0,.1);color:var(--gold)}
+    .chip.green {background:rgba(58,139,58,.1);color:var(--green)}
+    .chip.red   {background:rgba(220,53,53,.1);color:var(--red)}
+    .chip.purp  {background:rgba(123,92,245,.1);color:var(--purp)}
+    .chip.accent{background:rgba(91,138,90,.1);color:var(--accent)}
+    .chip.orange{background:rgba(229,103,26,.1);color:var(--orange)}
+
+    /* ── STATUS PILL ───────────────────────────────────────────── */
+    .pill{padding:5px 11px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0}
+    .pill-pending  {background:rgba(200,140,0,.1);color:var(--gold);border:1px solid rgba(200,140,0,.3)}
+    .pill-verified,.pill-active,.pill-approved{background:rgba(58,139,58,.1);color:var(--green);border:1px solid rgba(58,139,58,.3)}
+    .pill-rejected,.pill-cancelled{background:rgba(220,53,53,.1);color:var(--red);border:1px solid rgba(220,53,53,.3)}
+    .pill-paid     {background:rgba(200,140,0,.1);color:var(--gold);border:1px solid rgba(200,140,0,.3)}
+
+    /* ── KYC DOCS ──────────────────────────────────────────────── */
+    .kyc-row{display:flex;gap:10px;padding:0 16px 12px}
+    .kyc-doc p{font-size:10px;color:var(--muted);margin-bottom:5px}
+    .kyc-doc img{width:80px;height:80px;border-radius:10px;object-fit:cover;border:1px solid var(--border);cursor:pointer;transition:transform .2s}
+    .kyc-doc img:hover{transform:scale(1.05)}
+
+    /* ── ACTION BAR ────────────────────────────────────────────── */
+    .action-bar{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border)}
+    .btn-approve{
+      flex:2;padding:11px;background:linear-gradient(90deg,var(--green),var(--accent));
+      border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;transition:opacity .2s;
+    }
+    .btn-approve:hover{opacity:.85}
+    .btn-reject{
+      flex:1;padding:11px;background:transparent;border:1px solid rgba(220,53,53,.35);
+      border-radius:10px;color:var(--red);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;
+    }
+    .btn-reject:hover{background:rgba(220,53,53,.07)}
+    .btn-detail{
+      padding:11px 14px;background:rgba(0,0,0,.04);border:1px solid var(--border);
+      border-radius:10px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;
+    }
+    .btn-detail:hover{color:#1A1A1A;border-color:rgba(0,0,0,.2)}
+
+    /* ── POST/CONTENT CARDS ────────────────────────────────────── */
+    .post-card{
+      background:var(--card);border:1px solid var(--border);border-radius:16px;
+      margin-bottom:10px;overflow:hidden;display:flex;
+    }
+    .post-thumb{
+      width:96px;min-height:96px;background:rgba(0,0,0,.05);
+      flex-shrink:0;position:relative;overflow:hidden;
+    }
+    .post-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .post-thumb-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px}
+    .post-play{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-size:26px}
+    .post-body{flex:1;padding:13px 14px;display:flex;flex-direction:column;gap:6px}
+    .post-meta{display:flex;align-items:center;gap:8px}
+    .post-type{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px}
+    .post-store{font-size:13px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .post-caption{font-size:12px;color:var(--muted);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;flex:1}
+    .post-acts{display:flex;gap:7px;margin-top:4px}
+    .psm{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:none;transition:opacity .2s}
+    .psm:hover{opacity:.8}
+    .psm-ok {background:rgba(58,139,58,.1);color:var(--green);border:1px solid rgba(58,139,58,.2)}
+    .psm-rej{background:rgba(200,140,0,.08);color:var(--gold);border:1px solid rgba(200,140,0,.2)}
+    .psm-del{background:rgba(220,53,53,.08);color:var(--red);border:1px solid rgba(220,53,53,.2)}
+
+    /* ── FILTER CHIPS ──────────────────────────────────────────── */
+    .filter-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+    .fchip{
+      padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;
+      border:1px solid var(--border);background:rgba(0,0,0,.03);color:var(--muted);transition:all .2s;
+    }
+    .fchip:hover{border-color:rgba(0,0,0,.2);color:rgba(0,0,0,.7)}
+    .fchip.active{background:rgba(91,138,90,.12);border-color:rgba(91,138,90,.4);color:var(--accent)}
+
+    /* ── AD CARDS ──────────────────────────────────────────────── */
+    .ad-card{background:var(--card);border:1px solid var(--border);border-radius:18px;margin-bottom:14px;overflow:hidden}
+    .ad-header{display:flex;align-items:center;gap:12px;padding:16px 16px 12px}
+    .ad-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;flex-shrink:0;background:linear-gradient(135deg,var(--gold),var(--orange))}
+    .ad-info{flex:1;min-width:0}
+    .ad-name{font-size:14px;font-weight:800}
+    .ad-company{font-size:11px;color:var(--purp);font-weight:600;margin-top:1px}
+    .ad-email{font-size:11px;color:var(--muted)}
+    .ad-previews{display:grid;grid-template-columns:1fr 200px;gap:12px;padding:0 16px 12px;align-items:start}
+    .preview-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+    .ad-visual-wrap{width:100%;aspect-ratio:8/5;border-radius:12px;overflow:hidden;background:var(--card2);border:1px solid var(--border)}
+    .ad-visual{width:100%;height:100%;object-fit:cover;display:block}
+    .ad-grad{width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;padding:16px}
+    .ad-grad-title{font-size:15px;font-weight:900}
+    .ad-grad-desc{font-size:10px;color:var(--muted);margin-top:4px}
+    .receipt-wrap{width:100%;height:130px;border-radius:12px;overflow:hidden;border:1px solid var(--border);cursor:pointer}
+    .receipt-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .2s}
+    .receipt-wrap img:hover{transform:scale(1.03)}
+    .receipt-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:rgba(0,0,0,.03);color:var(--muted);font-size:11px}
+    .receipt-ph span:first-child{font-size:26px}
+    .ad-action-bar{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border)}
+    .btn-approve-ad{
+      flex:2;padding:12px;background:linear-gradient(90deg,var(--green),var(--accent));
+      border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;transition:opacity .2s;
+    }
+    .btn-approve-ad:hover{opacity:.85}
+    .btn-reject-ad{
+      flex:1;padding:12px;background:transparent;border:1px solid rgba(220,53,53,.35);
+      border-radius:10px;color:var(--red);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;
+    }
+    .btn-reject-ad:hover{background:rgba(220,53,53,.07)}
+
+    /* ── PACK PLAN CARDS ───────────────────────────────────────── */
+    .pack-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+    .pack-kpi{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px}
+    .pack-kpi-val{font-size:26px;font-weight:900;color:#1A1A1A}
+    .pack-kpi-lbl{font-size:11px;color:var(--muted);margin-top:4px}
+    .pack-plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;margin-bottom:28px}
+    .pack-plan-card{background:var(--card);border-radius:20px;padding:24px;border:1.5px solid var(--border);position:relative;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+    .pack-plan-card.popular{border-color:var(--accent);box-shadow:0 4px 20px rgba(91,138,90,.12)}
+    .pack-popular-badge{position:absolute;top:16px;right:16px;background:var(--accent);color:#fff;font-size:9px;font-weight:900;padding:4px 10px;border-radius:20px;letter-spacing:.5px}
+    .pack-plan-header{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+    .pack-plan-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+    .pack-plan-name{font-size:16px;font-weight:900;color:#1A1A1A;margin-bottom:3px}
+    .pack-plan-price{font-size:22px;font-weight:900;line-height:1}
+    .pack-plan-period{font-size:12px;font-weight:500;color:var(--muted)}
+    .pack-plan-features{margin-bottom:16px;border-top:1px solid var(--border);padding-top:14px}
+    .pack-plan-feat{font-size:12px;color:#555;padding:3px 0;display:flex;align-items:center;gap:7px}
+    .pack-plan-stats{display:flex;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px}
+    .pack-plan-stat{flex:1;padding:12px;text-align:center}
+    .pack-plan-stat:not(:last-child){border-right:1px solid var(--border)}
+    .ppstat-val{font-size:18px;font-weight:900;color:#1A1A1A}
+    .ppstat-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+    .pack-plan-actions{display:flex;gap:8px}
+    .pack-btn-view{width:100%;padding:11px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s}
+    .pack-btn-view:hover{opacity:.85}
+    .pack-section-title{font-size:15px;font-weight:800;color:#1A1A1A;margin:24px 0 14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+    .pp-badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.2px}
+    .pack-plan-feat.locked{opacity:.38}
+    .pack-billing-tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+    .pack-comp-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+    .pack-comp-table th,.pack-comp-table td{padding:9px 14px;border-bottom:1px solid var(--border);text-align:center}
+    .pack-comp-table th{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.6px;text-transform:uppercase}
+    .pack-comp-table td:first-child{text-align:left;color:#374151;font-weight:500}
+    .pack-comp-table tr:last-child td{border-bottom:none}
+    .chk{color:#22C55E;font-weight:800;font-size:13px}
+    .cross{color:#D1D5DB;font-size:13px}
+    /* ── SUBSCRIBERS MODAL ──────────────────────────────────────── */
+    .subs-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center}
+    .subs-modal-overlay.open{display:flex}
+    .subs-modal{background:var(--card);border-radius:20px;width:100%;max-width:520px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.15);overflow:hidden}
+    .subs-modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .subs-modal-title{font-size:16px;font-weight:800;color:#1A1A1A}
+    .subs-modal-close{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.05);border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+    .subs-modal-body{overflow-y:auto;padding:16px 24px 24px}
+    .sub-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+    .sub-row:last-child{border-bottom:none}
+    .sub-av{width:36px;height:36px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#333;flex-shrink:0}
+    .sub-info{flex:1;min-width:0}
+    .sub-name{font-size:13px;font-weight:700;color:#1A1A1A}
+    .sub-email{font-size:11px;color:var(--muted)}
+    .sub-expire{font-size:10px;color:var(--muted);white-space:nowrap}
+
+    /* ── TOOLBAR ───────────────────────────────────────────────── */
+    .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .toolbar-title{font-size:14px;font-weight:700;color:rgba(0,0,0,.5)}
+    .refresh-btn{
+      padding:8px 16px;background:rgba(0,0,0,.04);border:1px solid var(--border);
+      border-radius:10px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;
+    }
+    .refresh-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+    /* ── EMPTY / LOADING ───────────────────────────────────────── */
+    .empty{text-align:center;padding:60px 20px}
+    .empty-icon{font-size:48px;margin-bottom:14px}
+    .empty-text{font-size:14px;color:rgba(0,0,0,.25)}
+    .loading-state{text-align:center;padding:40px;color:var(--muted);font-size:14px}
+
+    /* ── IMAGE MODAL ───────────────────────────────────────────── */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal-img{max-width:90vw;max-height:88vh;border-radius:16px;object-fit:contain}
+    .modal-close{position:absolute;top:20px;right:20px;width:38px;height:38px;background:var(--card);border:1px solid var(--border);border-radius:50%;color:#1A1A1A;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+    /* ── DIALOGS ───────────────────────────────────────────────── */
+    .dialog-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center}
+    .dialog-overlay.open{display:flex}
+    .dialog{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+    .dialog h3{font-size:16px;font-weight:800;margin-bottom:6px;color:#1A1A1A}
+    .dialog p{font-size:13px;color:var(--muted);margin-bottom:16px}
+    .dialog textarea{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:#1A1A1A;font-size:13px;resize:vertical;min-height:80px;outline:none;font-family:inherit}
+    .dialog textarea:focus{border-color:var(--accent)}
+    .dialog-actions{display:flex;gap:10px;margin-top:16px}
+    .btn-cancel{flex:1;padding:12px;background:rgba(0,0,0,.05);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer}
+    .btn-confirm-red{flex:1;padding:12px;background:var(--red);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer}
+    .btn-confirm-green{flex:2;padding:12px;background:linear-gradient(90deg,var(--purp),var(--green));border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer}
+
+    /* ── TOAST ─────────────────────────────────────────────────── */
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--border);color:#1A1A1A;padding:12px 24px;border-radius:14px;font-size:13px;font-weight:600;box-shadow:0 10px 40px rgba(0,0,0,.12);z-index:9999;white-space:nowrap;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+    .toast.show{transform:translateX(-50%) translateY(0)}
+
+    /* ── DELIVERY CARDS (shared flex card layout) ──────────────── */
+    .ic-header{display:flex;align-items:flex-start;gap:12px}
+    .ic-avatar{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .ic-info{flex:1;min-width:0}
+    .ic-name{font-size:13px;font-weight:800;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ic-sub{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ic-actions{display:flex;gap:8px}
+    .status-badge{
+      font-size:9px;font-weight:900;padding:4px 9px;border-radius:8px;
+      border:1px solid;white-space:nowrap;align-self:flex-start;flex-shrink:0;
+    }
+    .fc{
+      display:inline-block;font-size:10px;padding:3px 8px;
+      border-radius:7px;background:rgba(0,0,0,.04);
+      border:1px solid rgba(0,0,0,.08);color:rgba(0,0,0,.45);
+    }
+
+    /* ── DELIVERY COMPANIES ─────────────────────────────────────── */
+    .co-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+    .co-card{background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:20px}
+    .co-card.active-co{border-color:var(--accent)}
+    .co-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+    .co-logo{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--bg);flex-shrink:0}
+    .co-name{font-size:15px;font-weight:900;color:#1A1A1A}
+    .co-url{font-size:10px;color:var(--muted);margin-top:2px}
+    .co-toggle{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700}
+    input[type=checkbox].tog-sw{
+      appearance:none;width:36px;height:20px;border-radius:20px;
+      background:#ccc;cursor:pointer;position:relative;transition:.2s;flex-shrink:0;
+    }
+    input[type=checkbox].tog-sw:checked{background:var(--accent)}
+    input[type=checkbox].tog-sw::after{
+      content:'';position:absolute;left:3px;top:3px;width:14px;height:14px;
+      border-radius:50%;background:#fff;transition:.2s;
+    }
+    input[type=checkbox].tog-sw:checked::after{left:19px}
+    .tariff-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+    .tariff-cell label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
+    .tariff-cell input{
+      width:100%;padding:8px 10px;background:var(--bg);border:1.5px solid var(--border);
+      border-radius:9px;font-size:13px;font-weight:700;color:#1A1A1A;outline:none;transition:border-color .2s;
+    }
+    .tariff-cell input:focus{border-color:var(--accent)}
+    .api-row{margin-bottom:14px}
+    .api-row label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px}
+    .api-row input{
+      width:100%;padding:9px 12px;background:var(--bg);border:1.5px solid var(--border);
+      border-radius:9px;font-size:12px;color:#1A1A1A;font-family:monospace;outline:none;transition:border-color .2s;
+    }
+    .api-row input:focus{border-color:var(--purp)}
+    .btn-save-co{
+      width:100%;padding:10px;background:linear-gradient(90deg,var(--accent),var(--green));
+      border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;
+    }
+
+    /* ── EXPÉDITIONS ────────────────────────────────────────────── */
+    .exp-card{background:var(--card);border:1.5px solid var(--border);border-radius:18px;margin-bottom:14px;overflow:hidden}
+    .exp-head{display:flex;align-items:center;gap:12px;padding:16px 16px 10px}
+    .exp-id{font-size:13px;font-weight:900;color:#1A1A1A}
+    .exp-buyer{font-size:12px;color:var(--muted);margin-top:2px}
+    .exp-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 10px}
+    .exp-items{padding:0 16px 10px;font-size:12px;color:rgba(0,0,0,.6)}
+    .exp-actions{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border)}
+    .btn-edit-order{padding:10px 16px;background:var(--bg);border:1px solid var(--border);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;color:#1A1A1A}
+    .btn-dispatch{flex:1;padding:10px;background:linear-gradient(90deg,var(--purp),var(--accent));border:none;border-radius:9px;color:#fff;font-size:12px;font-weight:800;cursor:pointer}
+
+    /* ── ORDER EDIT MODAL ───────────────────────────────────────── */
+    .oe-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1001;align-items:center;justify-content:center}
+    .oe-modal-overlay.open{display:flex}
+    .oe-modal{background:var(--card);border-radius:22px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.18)}
+    .oe-header{padding:22px 26px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .oe-title{font-size:16px;font-weight:900;color:#1A1A1A}
+    .oe-body{padding:20px 26px 26px}
+    .oe-section{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 8px}
+    .oe-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .oe-field label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px}
+    .oe-field input,.oe-field select{
+      width:100%;padding:9px 12px;background:var(--bg);border:1.5px solid var(--border);
+      border-radius:10px;font-size:13px;color:#1A1A1A;outline:none;transition:border-color .2s;
+    }
+    .oe-field input:focus,.oe-field select:focus{border-color:var(--accent)}
+    .deliv-type-btns{display:flex;gap:8px;margin-bottom:14px}
+    .dt-btn{flex:1;padding:10px;border:2px solid var(--border);border-radius:10px;background:var(--bg);font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .2s}
+    .dt-btn.sel{border-color:var(--accent);background:rgba(91,138,90,.08);color:var(--accent)}
+    .co-select{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+    .co-sel-btn{padding:9px 6px;border:2px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:var(--muted);background:var(--bg);transition:all .2s}
+    .co-sel-btn.sel{border-color:var(--purp);background:rgba(123,92,245,.08);color:var(--purp)}
+    .oe-footer{display:flex;gap:10px;padding-top:14px;border-top:1px solid var(--border)}
+    .btn-oe-cancel{flex:1;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
+    .btn-oe-confirm{flex:2;padding:12px;background:linear-gradient(90deg,var(--purp),var(--accent));border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer}
+
+    /* ── ADMINS ─────────────────────────────────────────────────── */
+    .admin-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    .btn-add-admin{padding:10px 20px;background:linear-gradient(90deg,var(--purp),var(--accent));border:none;border-radius:11px;color:#fff;font-size:13px;font-weight:800;cursor:pointer}
+    .admin-table{width:100%;border-collapse:separate;border-spacing:0}
+    .admin-table th{background:var(--bg);font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:10px 14px;text-align:left}
+    .admin-table th:first-child{border-radius:10px 0 0 10px}
+    .admin-table th:last-child{border-radius:0 10px 10px 0}
+    .admin-table td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px}
+    .admin-table tr:last-child td{border-bottom:none}
+    .role-badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800;border:1px solid}
+    .role-super{background:rgba(220,53,53,.1);color:var(--red);border-color:rgba(220,53,53,.3)}
+    .role-gerant{background:rgba(200,140,0,.1);color:var(--gold);border-color:rgba(200,140,0,.3)}
+    .role-admin{background:rgba(91,138,90,.1);color:var(--accent);border-color:rgba(91,138,90,.3)}
+    .role-support{background:rgba(79,142,255,.1);color:var(--purp);border-color:rgba(79,142,255,.3)}
+    .role-readonly{background:rgba(0,0,0,.05);color:var(--muted);border-color:var(--border)}
+    .btn-sm{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid;transition:all .2s}
+    .btn-sm-role{background:rgba(123,92,245,.08);color:var(--purp);border-color:rgba(123,92,245,.25)}
+    .btn-sm-del{background:rgba(220,53,53,.07);color:var(--red);border-color:rgba(220,53,53,.2)}
+    .btn-sm-validate{background:rgba(58,139,58,.08);color:var(--green);border-color:rgba(58,139,58,.25)}
+    /* add admin modal */
+    .aa-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1002;align-items:center;justify-content:center}
+    .aa-modal-overlay.open{display:flex}
+    .aa-modal{background:var(--card);border-radius:20px;width:100%;max-width:440px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+    .aa-title{font-size:16px;font-weight:900;margin-bottom:18px;color:#1A1A1A}
+    .aa-field{margin-bottom:14px}
+    .aa-field label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+    .aa-field input,.aa-field select{width:100%;padding:11px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:11px;font-size:13px;color:#1A1A1A;outline:none}
+    .aa-field input:focus,.aa-field select:focus{border-color:var(--purp)}
+    .aa-footer{display:flex;gap:10px;margin-top:18px}
+    .btn-aa-cancel{flex:1;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
+    .btn-aa-add{flex:2;padding:12px;background:linear-gradient(90deg,var(--purp),var(--accent));border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer}
+
+    @media(max-width:900px){
+      .sidebar{width:62px}.ni-label,.ni-badge,.sb-sub,.sb-email{display:none}
+      .sb-logo{font-size:16px;letter-spacing:1px}.ad-previews{grid-template-columns:1fr}
+      .pack-kpi-row{grid-template-columns:repeat(2,1fr)}.pack-plans-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ───────────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-brand">
+      <h1>LINCOO</h1>
+      <p>Panneau d'administration</p>
+    </div>
+    <div class="lf"><label>Email</label><input type="email" id="email" placeholder="admin@lincoo.dz" /></div>
+    <div class="lf"><label>Mot de passe</label><input type="password" id="password" placeholder="••••••••" /></div>
+    <button class="login-btn" id="login-btn" onclick="login()">Se connecter</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- ── APP ─────────────────────────────────────────────────────── -->
+<div id="app-screen">
+  <div class="app-layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sb-brand">
+        <div class="sb-logo">LINCOO</div>
+        <div class="sb-sub">Administration</div>
+      </div>
+      <div class="sb-nav">
+        <div class="nav-item active" id="ni-overview" onclick="showSection('overview')">
+          <span class="ni-icon">📊</span><span class="ni-label">Vue d'ensemble</span>
+        </div>
+        <div class="nav-item" id="ni-comptes" onclick="showSection('comptes')">
+          <span class="ni-icon">👥</span><span class="ni-label">Comptes</span>
+          <span class="ni-badge" id="nb-comptes" style="display:none">0</span>
+        </div>
+        <div class="nav-item" id="ni-creators" onclick="showSection('creators')">
+          <span class="ni-icon">🎬</span><span class="ni-label">Creators</span>
+          <span class="ni-badge p" id="nb-creators" style="display:none">0</span>
+        </div>
+        <div class="nav-item" id="ni-contenu" onclick="showSection('contenu')">
+          <span class="ni-icon">📸</span><span class="ni-label">Contenu</span>
+          <span class="ni-badge r" id="nb-contenu" style="display:none">0</span>
+        </div>
+        <div class="nav-item" id="ni-paiements" onclick="showSection('paiements')">
+          <span class="ni-icon">💳</span><span class="ni-label">Paiements</span>
+          <span class="ni-badge" id="nb-paiements" style="display:none">0</span>
+        </div>
+        <div class="nav-item" id="ni-packs" onclick="showSection('packs')">
+          <span class="ni-icon">📦</span><span class="ni-label">Packs</span>
+          <span class="ni-badge p" id="nb-packs" style="display:none">0</span>
+        </div>
+        <div class="nav-item" id="ni-delivery" onclick="showSection('delivery')">
+          <span class="ni-icon">🚚</span><span class="ni-label">Livraison</span>
+          <span class="ni-badge r" id="nb-delivery" style="display:none">0</span>
+        </div>
+        <div class="nav-item" id="ni-admins" onclick="showSection('admins')">
+          <span class="ni-icon">🔐</span><span class="ni-label">Admins</span>
+        </div>
+      </div>
+      <div class="sb-footer">
+        <div class="sb-email" id="sb-email"></div>
+        <button class="sb-logout" onclick="logout()">⏻ Déconnexion</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content-area">
+
+      <!-- OVERVIEW -->
+      <div id="sec-overview" style="display:flex;flex-direction:column;height:100%">
+        <div class="sec-header">
+          <div><div class="sec-title">Vue d'ensemble</div><div class="sec-sub">Métriques clés de la plateforme</div></div>
+          <button class="refresh-btn" onclick="loadAll()">↻ Actualiser</button>
+        </div>
+        <div class="sec-body">
+          <div class="kpi-grid">
+            <div class="kpi-card"><div class="kpi-icon">👥</div><div class="kpi-val" id="ov-users">—</div><div class="kpi-label">Utilisateurs</div></div>
+            <div class="kpi-card"><div class="kpi-icon">🏪</div><div class="kpi-val" id="ov-sellers">—</div><div class="kpi-label">Vendeurs</div></div>
+            <div class="kpi-card"><div class="kpi-icon">🎬</div><div class="kpi-val" id="ov-creators">—</div><div class="kpi-label">Creators</div></div>
+            <div class="kpi-card"><div class="kpi-icon">📸</div><div class="kpi-val" id="ov-posts">—</div><div class="kpi-label">Posts</div></div>
+            <div class="kpi-card"><div class="kpi-icon">🎥</div><div class="kpi-val" id="ov-reels">—</div><div class="kpi-label">Reels</div></div>
+            <div class="kpi-card"><div class="kpi-icon">⏳</div><div class="kpi-val" id="ov-pending">—</div><div class="kpi-label">En attente</div></div>
+            <div class="kpi-card"><div class="kpi-icon">📦</div><div class="kpi-val" id="ov-packs">—</div><div class="kpi-label">Packs actifs</div></div>
+            <div class="kpi-card"><div class="kpi-icon">💳</div><div class="kpi-val" id="ov-ads">—</div><div class="kpi-label">Pubs actives</div></div>
+          </div>
+          <!-- ── REVENUS CE MOIS ── -->
+          <div class="ov-label">Revenus Lincoo — <span id="rev-month-label" style="color:#1A1A1A;font-weight:800;text-transform:none;letter-spacing:0"></span></div>
+          <div class="rev-grid">
+            <!-- Total + bar -->
+            <div class="rev-total-card">
+              <div class="rev-total-lbl">Total ce mois</div>
+              <div class="rev-total-val" id="rev-total">—</div>
+              <div class="rev-month">Packs + Pub + Commissions</div>
+              <div class="rev-stacked">
+                <div id="rev-bar-packs" style="background:#3B82F6;width:0%"></div>
+                <div id="rev-bar-ads"   style="background:#8B5CF6;width:0%"></div>
+                <div id="rev-bar-comm"  style="background:#10B981;width:0%"></div>
+              </div>
+              <div class="rev-legend-row">
+                <span class="rev-leg"><span class="rev-leg-dot" style="background:#3B82F6"></span>Packs</span>
+                <span class="rev-leg"><span class="rev-leg-dot" style="background:#8B5CF6"></span>Pub</span>
+                <span class="rev-leg"><span class="rev-leg-dot" style="background:#10B981"></span>Commission</span>
+              </div>
+            </div>
+            <!-- 3 breakdown rows -->
+            <div class="rev-breakdown">
+              <div class="rev-item">
+                <div class="rev-icon" style="background:#3B82F615;color:#3B82F6">📦</div>
+                <div style="flex:1;min-width:0">
+                  <div class="rev-item-lbl">Abonnements Packs</div>
+                  <div class="rev-item-val" id="rev-packs">—</div>
+                  <div class="rev-item-sub">Starter · Essentiel · Pro</div>
+                </div>
+                <div class="rev-pct" id="rev-pct-packs" style="background:#3B82F615;color:#3B82F6">—%</div>
+              </div>
+              <div class="rev-item">
+                <div class="rev-icon" style="background:#8B5CF615;color:#8B5CF6">📣</div>
+                <div style="flex:1;min-width:0">
+                  <div class="rev-item-lbl">Publicités & Boost</div>
+                  <div class="rev-item-val" id="rev-ads">—</div>
+                  <div class="rev-item-sub">Campagnes ad_campaigns approuvées</div>
+                </div>
+                <div class="rev-pct" id="rev-pct-ads" style="background:#8B5CF615;color:#8B5CF6">—%</div>
+              </div>
+              <div class="rev-item">
+                <div class="rev-icon" style="background:#10B98115;color:#10B981">💸</div>
+                <div style="flex:1;min-width:0">
+                  <div class="rev-item-lbl">Commissions ventes</div>
+                  <div class="rev-item-val" id="rev-comm">—</div>
+                  <div class="rev-item-sub">3% – 5% prélevé par commande</div>
+                </div>
+                <div class="rev-pct" id="rev-pct-comm" style="background:#10B98115;color:#10B981">—%</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ov-label">Actions rapides</div>
+          <div class="ov-grid">
+            <div class="ov-card" onclick="showSection('comptes')">
+              <div class="ov-ic" style="background:rgba(255,184,0,.1)">⏳</div>
+              <div class="ov-info"><div class="ov-name">Comptes en attente</div><div class="ov-cnt" style="color:var(--gold)" id="ov-act-comptes">— comptes</div></div>
+            </div>
+            <div class="ov-card" onclick="showSection('creators')">
+              <div class="ov-ic" style="background:rgba(155,108,247,.1)">🎬</div>
+              <div class="ov-info"><div class="ov-name">Creators en attente</div><div class="ov-cnt" style="color:var(--purp)" id="ov-act-creators">— demandes</div></div>
+            </div>
+            <div class="ov-card" onclick="showSection('packs')">
+              <div class="ov-ic" style="background:rgba(155,108,247,.1)">📦</div>
+              <div class="ov-info"><div class="ov-name">Packs à activer</div><div class="ov-cnt" style="color:var(--purp)" id="ov-act-packs">— packs</div></div>
+            </div>
+            <div class="ov-card" onclick="showSection('paiements')">
+              <div class="ov-ic" style="background:rgba(16,232,176,.1)">💳</div>
+              <div class="ov-info"><div class="ov-name">Paiements à valider</div><div class="ov-cnt" style="color:var(--green)" id="ov-act-ads">— paiements</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPTES -->
+      <div id="sec-comptes" style="display:none;flex-direction:column;height:100%">
+        <div class="sec-header">
+          <div><div class="sec-title">Comptes</div><div class="sec-sub">Validation des vendeurs & acheteurs</div></div>
+          <button class="refresh-btn" onclick="loadAccounts()">↻</button>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active" id="ct-pending"  onclick="switchTab('comptes','pending')">⏳ En attente</div>
+          <div class="tab-item tg"     id="ct-verified" onclick="switchTab('comptes','verified')">✅ Vérifiés</div>
+          <div class="tab-item tr"     id="ct-rejected" onclick="switchTab('comptes','rejected')">❌ Rejetés</div>
+        </div>
+        <div class="sec-body"><div id="comptes-list"><div class="loading-state">Chargement...</div></div></div>
+      </div>
+
+      <!-- CREATORS -->
+      <div id="sec-creators" style="display:none;flex-direction:column;height:100%">
+        <div class="sec-header">
+          <div><div class="sec-title">Creators</div><div class="sec-sub">Validation des demandes Lincoo Creator</div></div>
+          <button class="refresh-btn" onclick="loadCreators()">↻</button>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active" id="crt-pending"  onclick="switchTab('creators','pending')">⏳ En attente</div>
+          <div class="tab-item tg"     id="crt-verified" onclick="switchTab('creators','verified')">✅ Vérifiés</div>
+        </div>
+        <div class="sec-body"><div id="creators-list"><div class="loading-state">Chargement...</div></div></div>
+      </div>
+
+      <!-- CONTENU -->
+      <div id="sec-contenu" style="display:none;flex-direction:column;height:100%">
+        <div class="sec-header">
+          <div><div class="sec-title">Modération du contenu</div><div class="sec-sub">Posts et Reels des vendeurs & creators</div></div>
+          <button class="refresh-btn" onclick="loadContent()">↻</button>
+        </div>
+        <div class="sec-body">
+          <div class="filter-row">
+            <div class="fchip active" id="fc-all"       onclick="setContentFilter('all')">🌐 Tout</div>
+            <div class="fchip"        id="fc-reel"      onclick="setContentFilter('reel')">🎬 Reels</div>
+            <div class="fchip"        id="fc-classic"   onclick="setContentFilter('classic')">📸 Posts</div>
+            <div class="fchip"        id="fc-approved"  onclick="setContentFilter('approved')">✅ Publiés</div>
+            <div class="fchip"        id="fc-suspended" onclick="setContentFilter('suspended')">⏸ Suspendus</div>
+            <div class="fchip"        id="fc-rejected"  onclick="setContentFilter('rejected')">🚫 Rejetés</div>
+          </div>
+          <div id="contenu-list"><div class="loading-state">Chargement...</div></div>
+        </div>
+      </div>
+
+      <!-- PAIEMENTS -->
+      <div id="sec-paiements" style="display:none;flex-direction:column;height:100%">
+        <div class="sec-header">
+          <div><div class="sec-title">Paiements & Reçus</div><div class="sec-sub">Validation des campagnes publicitaires</div></div>
+          <button class="refresh-btn" onclick="loadAds()">↻</button>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active" id="at-pending"  onclick="switchTab('ads','pending')">⏳ En attente</div>
+          <div class="tab-item tg"     id="at-approved" onclick="switchTab('ads','approved')">✅ Approuvés</div>
+          <div class="tab-item tr"     id="at-rejected" onclick="switchTab('ads','rejected')">❌ Rejetés</div>
+        </div>
+        <div class="sec-body"><div id="ads-list"><div class="loading-state">Chargement...</div></div></div>
+      </div>
+
+      <!-- PACKS -->
+      <div id="sec-packs" style="display:none;flex-direction:column;height:100%">
+        <div class="sec-header">
+          <div><div class="sec-title">Plans Packs</div><div class="sec-sub">Vue d'ensemble des abonnements boutique</div></div>
+          <button class="refresh-btn" onclick="loadPacks()">↻ Actualiser</button>
+        </div>
+        <div class="sec-body">
+          <!-- KPI row -->
+          <div class="pack-kpi-row">
+            <div class="pack-kpi"><div class="pack-kpi-val" id="pk-total">—</div><div class="pack-kpi-lbl">Abonnements actifs</div></div>
+            <div class="pack-kpi"><div class="pack-kpi-val" id="pk-revenue">—</div><div class="pack-kpi-lbl">Revenu total collecté</div></div>
+            <div class="pack-kpi"><div class="pack-kpi-val" id="pk-rate">—</div><div class="pack-kpi-lbl">Taux d'activation</div></div>
+            <div class="pack-kpi"><div class="pack-kpi-val" id="pk-new">—</div><div class="pack-kpi-lbl">Nouveaux ce mois</div></div>
+          </div>
+          <!-- Pack plan cards -->
+          <div class="pack-plans-grid" style="grid-template-columns:repeat(3,1fr)" id="pack-plans"><div class="loading-state">Chargement...</div></div>
+          <!-- Comparison table -->
+          <div id="pack-comp-wrap" style="display:none">
+            <div class="pack-section-title">Comparaison des plans</div>
+            <div class="card" style="overflow:hidden;border-radius:16px;border:1px solid var(--border)">
+              <table class="pack-comp-table" id="pack-comp-table"></table>
+            </div>
+          </div>
+          <!-- Pending approvals -->
+          <div id="pack-pending-section" style="display:none">
+            <div class="pack-section-title" style="color:#1A1A1A">En attente d'activation</div>
+            <div id="pack-pending-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DELIVERY -->
+      <div id="sec-delivery" style="display:none;flex-direction:column;height:100%">
+        <div class="sec-header">
+          <div><div class="sec-title">Gestion Livraison</div><div class="sec-sub">Sociétés · Expéditions · Smart Delivery</div></div>
+          <button class="refresh-btn" onclick="loadDelivery()">↻ Actualiser</button>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active" id="dt-companies"  onclick="switchDelivTab('companies')">🏢 Sociétés & API</div>
+          <div class="tab-item"        id="dt-expeditions" onclick="switchDelivTab('expeditions')">📦 Expéditions</div>
+          <div class="tab-item"        id="dt-requests"   onclick="switchDelivTab('requests')">⚡ Smart Delivery</div>
+          <div class="tab-item"        id="dt-pickups"    onclick="switchDelivTab('pickups')">📅 Ramassages</div>
+          <div class="tab-item"        id="dt-groups"     onclick="switchDelivTab('groups')">🔗 Groupes</div>
+          <div class="tab-item"        id="dt-rules"      onclick="switchDelivTab('rules')">⚙️ Règles</div>
+        </div>
+        <div class="sec-body">
+          <div id="delivery-companies"   style="display:block"></div>
+          <div id="delivery-expeditions" style="display:none"></div>
+          <div id="delivery-requests"    style="display:none"><div class="loading-state">Chargement...</div></div>
+          <div id="delivery-pickups"     style="display:none"></div>
+          <div id="delivery-groups"      style="display:none"></div>
+          <div id="delivery-rules"       style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- ADMINS -->
+      <div id="sec-admins" style="display:none;flex-direction:column;height:100%">
+        <div class="sec-header">
+          <div><div class="sec-title">Gestion des Admins</div><div class="sec-sub">Rôles · Accès · Équipe Lincoo</div></div>
+          <button class="refresh-btn" onclick="loadAdmins()">↻ Actualiser</button>
+        </div>
+        <div class="sec-body">
+          <div class="admin-toolbar">
+            <div>
+              <div style="font-size:14px;font-weight:800;color:#1A1A1A">Comptes administrateurs</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">Chaque rôle détermine les accès dans le dashboard vendeur</div>
+            </div>
+            <button class="btn-add-admin" onclick="openAddAdmin()">+ Ajouter un admin</button>
+          </div>
+          <!-- Role legend -->
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:14px">
+            <span style="font-size:11px;font-weight:700;color:var(--muted);margin-right:4px">Rôles :</span>
+            <span class="role-badge role-super">Super Admin — accès total</span>
+            <span class="role-badge role-gerant">Gérant — tout sauf suppression</span>
+            <span class="role-badge role-admin">Admin — gestion courante</span>
+            <span class="role-badge role-support">Support — lecture + réponses</span>
+            <span class="role-badge role-readonly">Lecture seule</span>
+          </div>
+          <div id="admins-list"><div class="loading-state">Chargement...</div></div>
+        </div>
+      </div>
+
+    </div><!-- /content-area -->
+  </div><!-- /app-layout -->
+</div><!-- /app-screen -->
+
+<!-- ── IMAGE MODAL ──────────────────────────────────────────────── -->
+<div class="modal-overlay" id="img-modal" onclick="closeModal()">
+  <button class="modal-close" onclick="closeModal()">✕</button>
+  <img class="modal-img" id="modal-img-el" src="" alt="" onclick="event.stopPropagation()" />
+</div>
+
+<!-- ── SUBSCRIBERS MODAL ──────────────────────────────────────────── -->
+<div class="subs-modal-overlay" id="subs-modal" onclick="if(event.target===this)closeSubs()">
+  <div class="subs-modal">
+    <div class="subs-modal-header">
+      <div class="subs-modal-title" id="subs-modal-title">Abonnés</div>
+      <button class="subs-modal-close" onclick="closeSubs()">✕</button>
+    </div>
+    <div class="subs-modal-body" id="subs-modal-body"></div>
+  </div>
+</div>
+
+<!-- ── REJECT DIALOG ─────────────────────────────────────────────── -->
+<div class="dialog-overlay" id="reject-dialog">
+  <div class="dialog">
+    <h3>Rejeter</h3>
+    <p id="reject-label">Raison du refus (optionnel)</p>
+    <textarea id="reject-reason" placeholder="Ex: Documents illisibles, informations incorrectes..."></textarea>
+    <div class="dialog-actions">
+      <button class="btn-cancel" onclick="closeRejectDialog()">Annuler</button>
+      <button class="btn-confirm-red" onclick="confirmReject()">Rejeter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── APPROVE AD DIALOG ─────────────────────────────────────────── -->
+<div class="dialog-overlay" id="approve-ad-dialog">
+  <div class="dialog">
+    <h3 style="color:var(--green)">✅ Approuver le paiement</h3>
+    <p id="approve-ad-label">L'annonce sera publiée immédiatement.</p>
+    <div class="dialog-actions">
+      <button class="btn-cancel" onclick="closeApproveAdDialog()">Annuler</button>
+      <button class="btn-confirm-green" onclick="confirmApproveAd()">✓ Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── APPROVE PACK DIALOG ───────────────────────────────────────── -->
+<div class="dialog-overlay" id="approve-pack-dialog">
+  <div class="dialog">
+    <h3 style="color:var(--green)">✅ Activer le pack</h3>
+    <p id="approve-pack-label">Le vendeur recevra une notification.</p>
+    <div class="dialog-actions">
+      <button class="btn-cancel" onclick="closeApprovePackDialog()">Annuler</button>
+      <button class="btn-confirm-green" onclick="confirmApprovePack()">✓ Activer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ORDER EDIT MODAL ──────────────────────────────────────────── -->
+<div class="oe-modal-overlay" id="oe-modal" onclick="if(event.target===this)closeOeModal()">
+  <div class="oe-modal">
+    <div class="oe-header">
+      <div class="oe-title">✏️ Modifier la commande avant expédition</div>
+      <button style="border:none;background:var(--bg);border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:16px" onclick="closeOeModal()">✕</button>
+    </div>
+    <div class="oe-body">
+      <div class="oe-section">Informations acheteur</div>
+      <div class="oe-grid2">
+        <div class="oe-field"><label>Nom complet</label><input id="oe-name" type="text" placeholder="Nom de l'acheteur"></div>
+        <div class="oe-field"><label>Téléphone</label><input id="oe-phone" type="text" placeholder="06xxxxxxxx"></div>
+      </div>
+      <div class="oe-field"><label>Adresse</label><input id="oe-address" type="text" placeholder="Adresse complète"></div>
+      <div class="oe-grid2">
+        <div class="oe-field"><label>Wilaya</label><input id="oe-wilaya" type="text" placeholder="Wilaya"></div>
+        <div class="oe-field"><label>Commune</label><input id="oe-commune" type="text" placeholder="Commune"></div>
+      </div>
+
+      <div class="oe-section">Type de livraison</div>
+      <div class="deliv-type-btns">
+        <button class="dt-btn sel" id="dt-standard" onclick="selectDelivType('standard')">🏠 Standard</button>
+        <button class="dt-btn" id="dt-express" onclick="selectDelivType('express')">⚡ Express</button>
+        <button class="dt-btn" id="dt-smart" onclick="selectDelivType('smart')">🔗 Smart (Stop)</button>
+      </div>
+
+      <div class="oe-section">Société de livraison</div>
+      <div class="co-select" id="co-select"></div>
+
+      <div class="oe-field" id="oe-api-note" style="display:none">
+        <label>Note pour le livreur</label>
+        <input id="oe-note" type="text" placeholder="Ex: appeler avant livraison, fragile...">
+      </div>
+
+      <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:4px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px">RÉSUMÉ COMMANDE</div>
+        <div id="oe-summary" style="font-size:13px;color:#1A1A1A;line-height:1.8"></div>
+      </div>
+
+      <div class="oe-footer">
+        <button class="btn-oe-cancel" onclick="closeOeModal()">Annuler</button>
+        <button class="btn-oe-confirm" onclick="confirmDispatch()">🚀 Envoyer à la société</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD ADMIN MODAL ───────────────────────────────────────────── -->
+<div class="aa-modal-overlay" id="aa-modal" onclick="if(event.target===this)closeAddAdmin()">
+  <div class="aa-modal">
+    <div class="aa-title">🔐 Ajouter un administrateur</div>
+    <div class="aa-field"><label>Nom complet</label><input id="aa-name" type="text" placeholder="Prénom Nom"></div>
+    <div class="aa-field"><label>Email</label><input id="aa-email" type="email" placeholder="admin@lincoo.dz"></div>
+    <div class="aa-field"><label>Rôle</label>
+      <select id="aa-role">
+        <option value="admin">Admin — gestion courante</option>
+        <option value="gerant">Gérant — tout sauf suppression</option>
+        <option value="support">Support — lecture + réponses</option>
+        <option value="readonly">Lecture seule</option>
+        <option value="super_admin">Super Admin — accès total</option>
+      </select>
+    </div>
+    <div class="aa-field"><label>Mot de passe temporaire</label><input id="aa-pass" type="password" placeholder="••••••••"></div>
+    <div style="font-size:11px;color:var(--muted);padding:10px 12px;background:var(--bg);border-radius:9px;margin-top:2px">
+      ℹ️ L'admin devra changer son mot de passe à la première connexion. L'accès dashboard vendeur sera limité selon le rôle.
+    </div>
+    <div class="aa-footer">
+      <button class="btn-aa-cancel" onclick="closeAddAdmin()">Annuler</button>
+      <button class="btn-aa-add" onclick="confirmAddAdmin()">✓ Créer le compte</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ─────────────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Supabase ──────────────────────────────────────────────────
+  const SUPABASE_URL = 'https://datgwhcrcptsxpysfstu.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhdGd3aGNyY3B0c3hweXNmc3R1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMTIyMzAsImV4cCI6MjA5NTc4ODIzMH0.ZGTvsVrzaNCgylbSnzZ0R6t8oVcnttomr6XH4rGXaTs';
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ── State ─────────────────────────────────────────────────────
+  let currentSection = 'overview';
+  let tabs = { comptes: 'pending', creators: 'pending', ads: 'pending' };
+  let contentFilter = 'all';
+  let allUsers = [], allCreators = [], allPosts = [], allAds = [], allPacks = [];
+
+  // reject/approve context
+  let rejectCtx = { type: null, id: null, sellerId: null };
+  let approveAdCtx  = { id: null, title: null, companyId: null };
+  let approvePackCtx = { id: null, sellerId: null, label: null };
+
+  // ── AUTH ──────────────────────────────────────────────────────
+  async function login() {
+    const email = document.getElementById('email').value.trim();
+    const pass  = document.getElementById('password').value;
+    const btn   = document.getElementById('login-btn');
+    const err   = document.getElementById('login-error');
+    err.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Connexion...';
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error) {
+      err.textContent = 'Email ou mot de passe incorrect.';
+      err.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Se connecter';
+      return;
+    }
+
+    const { data: profile, error: pErr } = await sb.from('profiles')
+      .select('is_admin, full_name').eq('id', data.user.id).maybeSingle();
+
+    if (pErr || !profile?.is_admin) {
+      await sb.auth.signOut();
+      err.textContent = pErr ? 'Erreur profil: ' + pErr.message : 'Accès refusé — compte non administrateur.';
+      err.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Se connecter';
+      return;
+    }
+
+    document.getElementById('sb-email').textContent = email;
+    showApp();
+  }
+
+  async function logout() {
+    await sb.auth.signOut();
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+
+  function showApp() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+    loadAll();
+  }
+
+  window.addEventListener('load', async () => {
+    const { data } = await sb.auth.getSession();
+    if (data.session) {
+      const { data: profile } = await sb.from('profiles')
+        .select('is_admin').eq('id', data.session.user.id).maybeSingle();
+      if (profile?.is_admin) {
+        document.getElementById('sb-email').textContent = data.session.user.email;
+        showApp(); return;
+      }
+    }
+    document.getElementById('login-screen').style.display = 'flex';
+  });
+
+  // ── NAVIGATION ────────────────────────────────────────────────
+  const SECTIONS = ['overview','comptes','creators','contenu','paiements','packs','delivery','admins'];
+
+  function showSection(sec) {
+    currentSection = sec;
+    SECTIONS.forEach(s => {
+      document.getElementById('sec-' + s).style.display = s === sec ? 'flex' : 'none';
+      document.getElementById('ni-' + s)?.classList.toggle('active', s === sec);
+    });
+  }
+
+  function switchTab(section, tab) {
+    tabs[section] = tab;
+    const prefix = { comptes:'ct', creators:'crt', ads:'at' }[section];
+    document.querySelectorAll(`[id^="${prefix}-"]`).forEach(el => el.classList.remove('active'));
+    document.getElementById(prefix + '-' + tab)?.classList.add('active');
+    if (section === 'comptes')  renderUsers(tab);
+    if (section === 'creators') renderCreators(tab);
+    if (section === 'ads')      renderAds(tab);
+  }
+
+  function updateBadges() {
+    const pending  = allUsers.filter(u => u.pro_status === 'pending').length;
+    const crPend   = allCreators.filter(u => u.pro_status === 'pending').length;
+    const rejected = allPosts.filter(p => p.moderation_status === 'rejected' || p.moderation_status === 'suspended').length;
+    const adPend   = allAds.filter(a => a.approval_status === 'pending').length;
+    const packPend = allPacks.filter(p => p.status === 'paid' || p.status === 'pending_payment').length;
+
+    setBadge('nb-comptes',  pending,  pending > 0);
+    setBadge('nb-creators', crPend,   crPend > 0);
+    setBadge('nb-contenu',  rejected, rejected > 0);
+    setBadge('nb-paiements',adPend,   adPend > 0);
+    setBadge('nb-packs',    packPend, packPend > 0);
+
+    // overview
+    setText('ov-act-comptes',  pending  + ' compte' + (pending !== 1 ? 's' : ''));
+    setText('ov-act-creators', crPend   + ' demande' + (crPend !== 1 ? 's' : ''));
+    setText('ov-act-packs',    packPend + ' pack' + (packPend !== 1 ? 's' : ''));
+    setText('ov-act-ads',      adPend   + ' paiement' + (adPend !== 1 ? 's' : ''));
+  }
+
+  function setBadge(id, val, show) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = val;
+    el.style.display = show ? '' : 'none';
+  }
+
+  function setText(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+
+  // ── LOAD ALL ──────────────────────────────────────────────────
+  async function loadAll() {
+    await Promise.all([loadStats(), loadAccounts(), loadCreators(), loadContent(), loadAds(), loadPacks(), loadDelivery(), loadAdmins()]);
+    await loadRevenue();
+  }
+
+  // ── STATS ─────────────────────────────────────────────────────
+  async function loadRevenue() {
+    const now  = new Date();
+    const y    = now.getFullYear();
+    const m    = now.getMonth();
+    const from = new Date(y, m, 1).toISOString();
+    const to   = new Date(y, m + 1, 0, 23, 59, 59, 999).toISOString();
+    const monthLabel = now.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    const el = document.getElementById('rev-month-label');
+    if (el) el.textContent = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
+
+    const fmt = n => {
+      if (!n) return '0 DA';
+      if (n >= 1000000) return (n/1000000).toFixed(1).replace('.0','') + ' M DA';
+      if (n >= 1000)    return (n/1000).toFixed(0) + ' k DA';
+      return n + ' DA';
+    };
+    const pct = (part, total) => total > 0 ? Math.round(part / total * 100) + '%' : '0%';
+
+    try {
+      const [packsRes, adsRes, ordersRes] = await Promise.all([
+        sb.from('seller_packs')
+          .select('price_dzd')
+          .eq('status', 'active')
+          .gte('activated_at', from)
+          .lte('activated_at', to),
+        sb.from('ad_campaigns')
+          .select('budget_dzd')
+          .eq('approval_status', 'approved')
+          .gte('created_at', from)
+          .lte('created_at', to),
+        sb.from('orders')
+          .select('commission_amount')
+          .gte('created_at', from)
+          .lte('created_at', to)
+          .not('commission_amount', 'is', null),
+      ]);
+
+      const packRev = (packsRes.data  || []).reduce((s, p) => s + (p.price_dzd        || 0), 0);
+      const adRev   = (adsRes.data    || []).reduce((s, a) => s + (a.budget_dzd       || 0), 0);
+      const commRev = (ordersRes.data || []).reduce((s, o) => s + (o.commission_amount || 0), 0);
+      const total   = packRev + adRev + commRev;
+
+      setText('rev-packs', fmt(packRev));
+      setText('rev-ads',   fmt(adRev));
+      setText('rev-comm',  fmt(commRev));
+      setText('rev-total', fmt(total));
+
+      setText('rev-pct-packs', pct(packRev, total));
+      setText('rev-pct-ads',   pct(adRev,   total));
+      setText('rev-pct-comm',  pct(commRev, total));
+
+      const bp = document.getElementById('rev-bar-packs');
+      const ba = document.getElementById('rev-bar-ads');
+      const bc = document.getElementById('rev-bar-comm');
+      if (bp && ba && bc && total > 0) {
+        bp.style.width = pct(packRev, total);
+        ba.style.width = pct(adRev,   total);
+        bc.style.width = pct(commRev, total);
+      }
+    } catch (e) {
+      console.error('loadRevenue', e);
+    }
+  }
+
+  async function loadStats() {
+    try {
+      const [users, sellers, creators, posts, reels, packs, ads] = await Promise.all([
+        sb.from('profiles').select('id', {count:'exact',head:true}).neq('pro_role','none'),
+        sb.from('profiles').select('id', {count:'exact',head:true}).eq('pro_role','seller'),
+        sb.from('profiles').select('id', {count:'exact',head:true}).eq('pro_role','creator'),
+        sb.from('store_posts').select('id', {count:'exact',head:true}).eq('post_type','classic'),
+        sb.from('store_posts').select('id', {count:'exact',head:true}).eq('post_type','reel'),
+        sb.from('seller_packs').select('id', {count:'exact',head:true}).eq('status','active'),
+        sb.from('ad_campaigns').select('id', {count:'exact',head:true}).eq('status','active'),
+      ]);
+      setText('ov-users',    users.count    ?? '—');
+      setText('ov-sellers',  sellers.count  ?? '—');
+      setText('ov-creators', creators.count ?? '—');
+      setText('ov-posts',    posts.count    ?? '—');
+      setText('ov-reels',    reels.count    ?? '—');
+      setText('ov-packs',    packs.count    ?? '—');
+      setText('ov-ads',      ads.count      ?? '—');
+      setText('ov-pending',  allUsers.filter(u => u.pro_status === 'pending').length);
+    } catch (_) {}
+  }
+
+  // ── ACCOUNTS ──────────────────────────────────────────────────
+  async function loadAccounts() {
+    document.getElementById('comptes-list').innerHTML = '<div class="loading-state">Chargement...</div>';
+    const { data, error } = await sb.from('profiles').select('*')
+      .neq('pro_status','none').in('pro_role',['seller','company','buyer'])
+      .order('created_at', { ascending: false });
+    if (error) { document.getElementById('comptes-list').innerHTML = errHtml(error.message); return; }
+    allUsers = data || [];
+    updateTabLabels('ct', ['pending','verified','rejected'],
+      [allUsers.filter(u=>u.pro_status==='pending').length,
+       allUsers.filter(u=>u.pro_status==='verified').length,
+       allUsers.filter(u=>u.pro_status==='rejected').length],
+      ['⏳ En attente','✅ Vérifiés','❌ Rejetés']);
+    updateBadges();
+    renderUsers(tabs.comptes);
+  }
+
+  function renderUsers(tab) {
+    const list = allUsers.filter(u => u.pro_status === tab);
+    document.getElementById('comptes-list').innerHTML = list.length === 0
+      ? emptyHtml('📭', 'Aucun compte dans cette catégorie')
+      : list.map(u => userCardHTML(u, false)).join('');
+  }
+
+  // ── CREATORS ──────────────────────────────────────────────────
+  async function loadCreators() {
+    document.getElementById('creators-list').innerHTML = '<div class="loading-state">Chargement...</div>';
+    const { data, error } = await sb.from('profiles').select('*')
+      .eq('pro_role','creator').order('created_at', { ascending: false });
+    if (error) { document.getElementById('creators-list').innerHTML = errHtml(error.message); return; }
+    allCreators = data || [];
+    updateTabLabels('crt', ['pending','verified'],
+      [allCreators.filter(u=>u.pro_status==='pending').length,
+       allCreators.filter(u=>u.pro_status==='verified').length],
+      ['⏳ En attente','✅ Vérifiés']);
+    updateBadges();
+    renderCreators(tabs.creators);
+  }
+
+  function renderCreators(tab) {
+    const list = allCreators.filter(u => u.pro_status === tab);
+    document.getElementById('creators-list').innerHTML = list.length === 0
+      ? emptyHtml('📭', 'Aucun creator dans cette catégorie')
+      : list.map(u => userCardHTML(u, true)).join('');
+  }
+
+  function userCardHTML(u, isCreator) {
+    const name    = u.full_name || 'Utilisateur';
+    const initial = name.charAt(0).toUpperCase();
+    const role    = {seller:'Vendeur',creator:'Creator',buyer:'Acheteur',company:'Entreprise'}[u.pro_role] || u.pro_role;
+    const pillCls = {pending:'pill-pending',verified:'pill-verified',rejected:'pill-rejected'}[u.pro_status] || '';
+    const pillLbl = {pending:'En attente',verified:'Vérifié',rejected:'Rejeté'}[u.pro_status] || u.pro_status;
+    const avatarBg = isCreator
+      ? 'background:linear-gradient(135deg,var(--purp),var(--accent))'
+      : 'background:linear-gradient(135deg,var(--accent),#1E40AF)';
+
+    const chips = `
+      <span class="chip accent">👤 ${role}</span>
+      ${u.store_name ? `<span class="chip purp">🏪 ${esc(u.store_name)}</span>` : ''}
+      ${u.wilaya     ? `<span class="chip">📍 ${esc(u.wilaya)}</span>` : ''}
+      ${u.category   ? `<span class="chip">🏷️ ${esc(u.category)}</span>` : ''}
+      ${isCreator && u.creator_type     ? `<span class="chip purp">🎨 ${esc(u.creator_type)}</span>` : ''}
+      ${isCreator && u.followers_range  ? `<span class="chip green">👥 ${esc(u.followers_range)}</span>` : ''}
+      ${u.created_at ? `<span class="chip">🕐 ${timeAgo(new Date(u.created_at))}</span>` : ''}
+    `;
+
+    const kyc = (u.kyc_cin_url || u.kyc_selfie_url) ? `
+      <div class="kyc-row">
+        ${u.kyc_cin_url    ? `<div class="kyc-doc"><p>CIN</p><img src="${esc(u.kyc_cin_url)}" onclick="openModal('${esc(u.kyc_cin_url)}')" /></div>` : ''}
+        ${u.kyc_selfie_url ? `<div class="kyc-doc"><p>Selfie</p><img src="${esc(u.kyc_selfie_url)}" onclick="openModal('${esc(u.kyc_selfie_url)}')" /></div>` : ''}
+      </div>` : '';
+
+    const socials = isCreator && (u.instagram_url || u.tiktok_url || u.youtube_url) ? `
+      <div class="chips-row">
+        ${u.instagram_url ? `<span class="chip orange">IG: ${esc(u.instagram_url)}</span>` : ''}
+        ${u.tiktok_url    ? `<span class="chip">TT: ${esc(u.tiktok_url)}</span>` : ''}
+        ${u.youtube_url   ? `<span class="chip red">YT: ${esc(u.youtube_url)}</span>` : ''}
+      </div>` : '';
+
+    const approveType = isCreator ? 'creator' : 'account';
+    const actions = u.pro_status === 'pending' ? `
+      <div class="action-bar">
+        <button class="btn-reject"  onclick="openReject('${approveType}','${u.id}','${esc(name)}')">✕ Rejeter</button>
+        <button class="btn-approve" onclick="doApprove('${approveType}','${u.id}','${esc(name)}')">✓ Approuver</button>
+      </div>` : '';
+
+    return `
+      <div class="item-card">
+        <div class="item-header">
+          <div class="item-avatar" style="${avatarBg}">${initial}</div>
+          <div class="item-info">
+            <div class="item-name">${esc(name)}</div>
+            <div class="item-email">${esc(u.email || '')}</div>
+          </div>
+          <span class="pill ${pillCls}">${pillLbl}</span>
+        </div>
+        <div class="chips-row">${chips}</div>
+        ${socials}
+        ${kyc}
+        ${actions}
+      </div>`;
+  }
+
+  // ── CONTENT ───────────────────────────────────────────────────
+  async function loadContent() {
+    document.getElementById('contenu-list').innerHTML = '<div class="loading-state">Chargement...</div>';
+    const { data: postsData, error } = await sb.from('store_posts')
+      .select('id, caption, media_urls, post_type, moderation_status, moderation_note, created_at, store_id')
+      .in('post_type', ['reel','classic','commercial'])
+      .order('created_at', { ascending: false }).limit(120);
+    if (error) { document.getElementById('contenu-list').innerHTML = errHtml(error.message); return; }
+
+    // fetch stores to get store_name + owner_id
+    const storeIds = [...new Set((postsData||[]).map(r => r.store_id).filter(Boolean))];
+    let storeMap = {};
+    if (storeIds.length > 0) {
+      const { data: stores } = await sb.from('stores').select('id,store_name,owner_id').in('id', storeIds);
+      (stores||[]).forEach(s => { storeMap[s.id] = s; });
+    }
+
+    // fetch profiles for store owners to get name + email
+    const ownerIds = [...new Set(Object.values(storeMap).map(s => s.owner_id).filter(Boolean))];
+    let profileMap = {};
+    if (ownerIds.length > 0) {
+      const { data: profs } = await sb.from('profiles').select('id,full_name,email').in('id', ownerIds);
+      (profs||[]).forEach(p => { profileMap[p.id] = p; });
+    }
+
+    allPosts = (postsData||[]).map(r => {
+      const store   = storeMap[r.store_id] || {};
+      const profile = profileMap[store.owner_id] || {};
+      return {
+        ...r,
+        storeName:   store.store_name   || 'Boutique',
+        posterName:  profile.full_name  || store.store_name || '—',
+        posterEmail: profile.email      || '—',
+      };
+    });
+    updateBadges();
+    renderContent();
+  }
+
+  function setContentFilter(f) {
+    contentFilter = f;
+    ['all','reel','classic','approved','suspended','rejected'].forEach(x => {
+      document.getElementById('fc-' + x)?.classList.toggle('active', x === f);
+    });
+    renderContent();
+  }
+
+  function renderContent() {
+    let filtered;
+    if      (contentFilter === 'all')       filtered = allPosts;
+    else if (contentFilter === 'reel')      filtered = allPosts.filter(p => p.post_type === 'reel');
+    else if (contentFilter === 'classic')   filtered = allPosts.filter(p => p.post_type === 'classic' || p.post_type === 'commercial');
+    else if (contentFilter === 'approved')  filtered = allPosts.filter(p => p.moderation_status === 'approved');
+    else if (contentFilter === 'suspended') filtered = allPosts.filter(p => p.moderation_status === 'suspended');
+    else if (contentFilter === 'rejected')  filtered = allPosts.filter(p => p.moderation_status === 'rejected');
+    else filtered = allPosts;
+
+    document.getElementById('contenu-list').innerHTML = filtered.length === 0
+      ? emptyHtml('📭', 'Aucun contenu')
+      : filtered.map(p => postCardHTML(p)).join('');
+  }
+
+  function postCardHTML(p) {
+    const isVideo  = isVid(p.media_urls?.[0] || '');
+    const mediaUrl = p.media_urls?.[0] || '';
+    const modStatus = p.moderation_status || 'pending';
+    const statusInfo = {
+      approved:  { color:'var(--green)',  label:'Publié'    },
+      rejected:  { color:'var(--red)',    label:'Rejeté'    },
+      suspended: { color:'var(--orange)', label:'Suspendu'  },
+    }[modStatus] || { color:'var(--gold)', label:'En attente' };
+
+    const typeColor = p.post_type === 'reel'
+      ? 'background:rgba(155,108,247,.2);color:var(--purp)'
+      : 'background:rgba(79,142,255,.2);color:var(--accent)';
+    const typeLabel = p.post_type === 'reel' ? '🎬 Reel' : '📸 Post';
+
+    const thumbInner = mediaUrl
+      ? `<img src="${esc(mediaUrl)}" onerror="this.style.display='none'" onclick="openModal('${esc(mediaUrl)}')" style="cursor:pointer" />`
+        + (isVideo ? `<div class="post-play">▶</div>` : '')
+      : `<div class="post-thumb-empty">${p.post_type === 'reel' ? '🎬' : '📸'}</div>`;
+
+    const approveBtn  = modStatus !== 'approved'
+      ? `<button class="psm psm-ok"  onclick="approvePost('${p.id}')">✓ Publier</button>` : '';
+    const suspendBtn  = modStatus !== 'suspended'
+      ? `<button class="psm" style="background:rgba(255,122,53,.1);color:var(--orange);border:1px solid rgba(255,122,53,.25)" onclick="suspendPost('${p.id}')">⏸ Suspendre</button>` : '';
+    const rejectBtn   = modStatus !== 'rejected'
+      ? `<button class="psm psm-rej" onclick="openReject('post','${p.id}','ce contenu')">✕ Rejeter</button>` : '';
+
+    return `
+      <div class="post-card">
+        <div class="post-thumb">${thumbInner}</div>
+        <div class="post-body">
+          <div class="post-meta">
+            <span class="post-type" style="${typeColor}">${typeLabel}</span>
+            <span class="post-store">${esc(p.storeName)}</span>
+            <span class="pill" style="background:${statusInfo.color}18;color:${statusInfo.color};border:1px solid ${statusInfo.color}40;font-size:9px;padding:3px 8px">${statusInfo.label}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:rgba(0,0,0,.55)">👤 ${esc(p.posterName)}</span>
+            <span style="font-size:10px;color:var(--muted)">·</span>
+            <span style="font-size:10px;color:var(--muted)">${esc(p.posterEmail)}</span>
+          </div>
+          ${p.caption ? `<div class="post-caption">${esc(p.caption)}</div>` : '<div class="post-caption" style="color:rgba(0,0,0,.2)">Aucune légende</div>'}
+          ${p.moderation_note ? `<div style="font-size:11px;color:var(--red);font-style:italic;margin-top:3px">📝 ${esc(p.moderation_note)}</div>` : ''}
+          <div class="post-acts">
+            ${approveBtn}${suspendBtn}${rejectBtn}
+            <button class="psm psm-del" onclick="deletePost('${p.id}')">🗑</button>
+            <span style="flex:1"></span>
+            <span style="font-size:10px;color:var(--muted)">${p.created_at ? timeAgo(new Date(p.created_at)) : ''}</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── ADS ───────────────────────────────────────────────────────
+  async function loadAds() {
+    document.getElementById('ads-list').innerHTML = '<div class="loading-state">Chargement...</div>';
+    const { data: adsData, error } = await sb.from('ad_campaigns').select('*').order('created_at', { ascending: false });
+    if (error) { document.getElementById('ads-list').innerHTML = errHtml(error.message); return; }
+
+    const ids = [...new Set((adsData||[]).map(a => a.company_id).filter(Boolean))];
+    let pm = {};
+    if (ids.length > 0) {
+      const { data: profiles } = await sb.from('profiles').select('id,full_name,email,store_name').in('id', ids);
+      (profiles||[]).forEach(p => { pm[p.id] = p; });
+    }
+
+    allAds = await Promise.all((adsData||[]).map(async ad => {
+      let signedUrl = null;
+      if (ad.receipt_url) {
+        try {
+          const { data: s } = await sb.storage.from('ad-receipts').createSignedUrl(ad.receipt_url, 3600);
+          signedUrl = s?.signedUrl || null;
+        } catch (_) {}
+      }
+      return { ...ad, profile: pm[ad.company_id] || null, signedUrl };
+    }));
+
+    updateTabLabels('at', ['pending','approved','rejected'],
+      [allAds.filter(a=>a.approval_status==='pending').length,
+       allAds.filter(a=>a.approval_status==='approved').length,
+       allAds.filter(a=>a.approval_status==='rejected').length],
+      ['⏳ En attente','✅ Approuvés','❌ Rejetés']);
+    updateBadges();
+    renderAds(tabs.ads);
+  }
+
+  function renderAds(tab) {
+    const list = allAds.filter(a => a.approval_status === tab);
+    document.getElementById('ads-list').innerHTML = list.length === 0
+      ? emptyHtml('📭', 'Aucune entrée')
+      : list.map(a => adCardHTML(a)).join('');
+  }
+
+  function adCardHTML(ad) {
+    const profile   = ad.profile || {};
+    const name      = profile.full_name || 'Annonceur';
+    const initial   = name.charAt(0).toUpperCase();
+    const statusColor = {pending:'var(--gold)',approved:'var(--green)',rejected:'var(--red)'}[ad.approval_status] || 'var(--muted)';
+    const statusLbl   = {pending:'En attente',approved:'Approuvé',rejected:'Rejeté'}[ad.approval_status] || ad.approval_status;
+
+    const gradients = {
+      'gradient:neon':    'linear-gradient(135deg,#00F6FF,#00B2FF)',
+      'gradient:crimson': 'linear-gradient(135deg,#292526,#6E1128)',
+      'gradient:purple':  'linear-gradient(135deg,#8A2BE2,#4B0082)',
+      'gradient:orange':  'linear-gradient(135deg,#FF512F,#DD2476)',
+    };
+
+    let adVisual;
+    if (ad.image_url && !ad.image_url.startsWith('gradient:')) {
+      adVisual = `<img class="ad-visual" src="${esc(ad.image_url)}" onerror="this.style.background='#1a1a2e'" />`;
+    } else {
+      const bg = gradients[ad.image_url] || 'linear-gradient(135deg,#1a1a2e,#16213e)';
+      adVisual = `<div class="ad-grad" style="background:${bg}"><div class="ad-grad-title">${esc(ad.title)}</div>${ad.description ? `<div class="ad-grad-desc">${esc(ad.description)}</div>` : ''}</div>`;
+    }
+
+    const receipt = ad.signedUrl
+      ? `<div class="receipt-wrap" onclick="openModal('${esc(ad.signedUrl)}')"><img src="${esc(ad.signedUrl)}" alt="Reçu" /></div>
+         <div style="font-size:10px;color:var(--accent);cursor:pointer;margin-top:5px" onclick="openModal('${esc(ad.signedUrl)}')">🔍 Agrandir</div>`
+      : `<div class="receipt-wrap"><div class="receipt-ph"><span>🧾</span><span>Pas de reçu</span></div></div>`;
+
+    const actions = ad.approval_status === 'pending' ? `
+      <div class="ad-action-bar">
+        <button class="btn-reject-ad" onclick="openReject('ad','${ad.id}','${escAttr(ad.title)}')">✕ Rejeter</button>
+        <button class="btn-approve-ad" onclick="openApproveAd('${ad.id}','${escAttr(ad.title)}','${ad.company_id}')">✓ Approuver le paiement</button>
+      </div>` : '';
+
+    return `
+      <div class="ad-card">
+        <div class="ad-header">
+          <div class="ad-avatar">${initial}</div>
+          <div class="ad-info">
+            <div class="ad-name">${esc(name)}</div>
+            ${profile.store_name ? `<div class="ad-company">🏢 ${esc(profile.store_name)}</div>` : ''}
+            <div class="ad-email">${esc(profile.email||'')}</div>
+          </div>
+          <span class="pill" style="background:${statusColor}18;color:${statusColor};border:1px solid ${statusColor}40">${statusLbl}</span>
+        </div>
+        <div class="ad-previews">
+          <div>
+            <div class="preview-lbl">Aperçu annonce</div>
+            <div class="ad-visual-wrap">${adVisual}</div>
+            <div style="font-size:13px;font-weight:700;margin-top:7px">${esc(ad.title)}</div>
+          </div>
+          <div>
+            <div class="preview-lbl">Justificatif</div>
+            ${receipt}
+          </div>
+        </div>
+        <div class="chips-row">
+          <span class="chip gold">💰 ${ad.budget_dzd||0} DA</span>
+          <span class="chip">💳 ${ad.payment_method||'—'}</span>
+          <span class="chip">📅 Soumis: ${ad.created_at ? fmtDate(new Date(ad.created_at)) : '—'}</span>
+          ${ad.approved_at ? `<span class="chip green">✅ Approuvé le ${fmtDate(new Date(ad.approved_at))}</span>` : ''}
+          ${ad.start_date  ? `<span class="chip accent">▶ Début: ${fmtDate(new Date(ad.start_date))}</span>` : ''}
+          ${ad.end_date    ? `<span class="chip">⏹ Fin: ${fmtDate(new Date(ad.end_date))}</span>` : ''}
+          ${ad.status === 'active' ? `<span class="chip green">🟢 En ligne</span>` : ''}
+          ${ad.status === 'rejected' && ad.rejection_reason ? `<span class="chip red">📝 ${esc(ad.rejection_reason)}</span>` : ''}
+        </div>
+        ${actions}
+      </div>`;
+  }
+
+  // ── PACKS ─────────────────────────────────────────────────────
+  async function loadPacks() {
+    document.getElementById('pack-plans').innerHTML = '<div class="loading-state">Chargement...</div>';
+    const { data: packsData, error } = await sb.from('seller_packs').select('*').order('created_at', { ascending: false });
+    if (error) { document.getElementById('pack-plans').innerHTML = errHtml(error.message); return; }
+
+    const ids = [...new Set((packsData||[]).map(p => p.seller_id).filter(Boolean))];
+    let pm = {};
+    if (ids.length > 0) {
+      const { data: profiles } = await sb.from('profiles').select('id,full_name,email').in('id', ids);
+      (profiles||[]).forEach(p => { pm[p.id] = p; });
+    }
+
+    allPacks = (packsData||[]).map(p => ({ ...p, profile: pm[p.seller_id] || null }));
+    updateBadges();
+    renderPacks();
+  }
+
+  function renderPacks() {
+    const planDefs = [
+      {
+        id:'starter', label:'Starter', emoji:'🛍️', price:1500, period:'mois', billing:'Mensuel', comm:'5%', commRate:5, color:'#6B7280',
+        features:['1 boutique · 15 produits max','Gestion des commandes','Livraisons avec suivi','Ma Crédibilité (consultation)','Support FAQ'],
+        locked:['Messages clients','Stats & Dashboard','Pickup Schedule / Shipping Labels','Outils IA','Boost Feed','Reels produits']
+      },
+      {
+        id:'essentiel', label:'Essentiel', emoji:'⭐', price:20000, period:'an', billing:'Annuel', equiv:'≈ 1 667 DA/mois', comm:'3%', commRate:3, color:'#3B82F6', popular:true,
+        features:['1 boutique · 300 produits','Messages clients','Stats basiques','Pickup Schedule & Shipping Labels','Boost Feed (à l\'unité)','Support Standard 48h'],
+        locked:['Dashboard avancé & Delivery Analytics','Reels produits','Outils IA']
+      },
+      {
+        id:'pro', label:'Pro', emoji:'💎', price:40000, period:'an', billing:'Annuel', equiv:'≈ 3 333 DA/mois', comm:'3%', commRate:3, color:'#A855F7',
+        features:['Jusqu\'à 3 boutiques · Produits illimités','Dashboard avancé + Delivery Analytics','Reels produits','Outils IA','Boost 3/mois inclus','Badge Pro vérifié','Support Prioritaire 12h'],
+        locked:[]
+      },
+    ];
+
+    const activePacks  = allPacks.filter(p => p.status === 'active');
+    const pendingPacks = allPacks.filter(p => p.status === 'paid' || p.status === 'pending_payment');
+    const now  = new Date();
+    const soon = new Date(now); soon.setDate(soon.getDate() + 30);
+    const thisMonthNew = allPacks.filter(p => {
+      const d = new Date(p.created_at||0);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+
+    // KPIs
+    const totalRev   = activePacks.reduce((s,p) => s + (p.price_dzd||0), 0);
+    const activeRate = allPacks.length > 0 ? Math.round((activePacks.length / allPacks.length) * 100) : 0;
+    document.getElementById('pk-total').textContent   = activePacks.length;
+    document.getElementById('pk-revenue').textContent = totalRev >= 1000 ? (totalRev/1000).toFixed(0)+'k DA' : totalRev+' DA';
+    document.getElementById('pk-rate').textContent    = activeRate + '%';
+    document.getElementById('pk-new').textContent     = '+' + thisMonthNew.length;
+
+    // Plan cards
+    document.getElementById('pack-plans').innerHTML = planDefs.map(plan => {
+      const subs    = activePacks.filter(p => p.pack_type === plan.id);
+      const rev     = subs.reduce((s,p) => s + (p.price_dzd||0), 0);
+      const expiring = subs.filter(p => p.expires_at && new Date(p.expires_at) <= soon).length;
+      return packPlanCardHTML(plan, subs.length, rev, expiring);
+    }).join('');
+
+    // Comparison table
+    const compRows = [
+      ['Facturation',         ['Mensuelle','Annuelle','Annuelle']],
+      ['Prix',                ['1 500 DA/mois','20 000 DA/an','40 000 DA/an']],
+      ['Commission Lincoo',   ['5%','3%','3%']],
+      ['Produits',            ['15','300','Illimité']],
+      ['Boutiques',           ['1','1','Jusqu\'à 3']],
+      ['Messages clients',    [false,true,true]],
+      ['Stats & Dashboard',   [false,'Basiques','Avancé + Analytics']],
+      ['Reels produits',      [false,false,true]],
+      ['Boost Feed',          [false,'À l\'unité','3/mois + à l\'unité']],
+      ['Outils IA',           [false,false,true]],
+      ['Livraisons & suivi',  [true,true,true]],
+      ['Pickup / Labels',     [false,true,true]],
+      ['Badge Pro vérifié',   [false,false,true]],
+      ['Support',             ['FAQ','Standard 48h','Prioritaire 12h']],
+    ];
+    const colors = ['#6B7280','#3B82F6','#A855F7'];
+    document.getElementById('pack-comp-table').innerHTML = `
+      <thead><tr>
+        <th style="text-align:left">Fonctionnalité</th>
+        ${planDefs.map((p,i)=>`<th style="color:${colors[i]}">${p.emoji} ${p.label}</th>`).join('')}
+      </tr></thead>
+      <tbody>${compRows.map(([feat,vals])=>`<tr>
+        <td>${feat}</td>
+        ${vals.map(v => v===true ? `<td><span class="chk">✓</span></td>`
+                      : v===false ? `<td><span class="cross">—</span></td>`
+                      : `<td style="color:#374151;font-size:11px;font-weight:600">${v}</td>`).join('')}
+      </tr>`).join('')}</tbody>`;
+    document.getElementById('pack-comp-wrap').style.display = 'block';
+
+    // Pending approvals
+    if (pendingPacks.length > 0) {
+      document.getElementById('pack-pending-section').style.display = 'block';
+      document.getElementById('pack-pending-list').innerHTML = pendingPacks.map(p => packCardHTML(p)).join('');
+    } else {
+      document.getElementById('pack-pending-section').style.display = 'none';
+    }
+  }
+
+  function packPlanCardHTML(plan, subsCount, rev, expiring) {
+    const revFmt   = rev >= 1000 ? (rev/1000).toFixed(0)+'k DA' : (rev ? rev+' DA' : '0 DA');
+    const priceFmt = plan.price >= 1000 ? (plan.price/1000).toFixed(1).replace('.0','')+'k' : plan.price;
+    return `
+      <div class="pack-plan-card${plan.popular?' popular':''}">
+        ${plan.popular ? '<div class="pack-popular-badge">POPULAIRE</div>' : ''}
+
+        <!-- Header -->
+        <div class="pack-plan-header">
+          <div class="pack-plan-icon" style="background:${plan.color}14;border:1.5px solid ${plan.color}28">${plan.emoji}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+              <div class="pack-plan-name">${plan.label}</div>
+              <span class="pack-billing-tag" style="background:${plan.color}14;color:${plan.color}">${plan.billing}</span>
+            </div>
+            <div class="pack-plan-price" style="color:${plan.color}">${priceFmt} DA<span class="pack-plan-period"> /${plan.period}</span></div>
+            ${plan.equiv ? `<div style="font-size:10px;color:var(--muted);margin-top:1px">${plan.equiv}</div>` : ''}
+          </div>
+        </div>
+
+        <!-- Commission badge -->
+        <div style="margin-bottom:14px">
+          <span class="pp-badge" style="background:${plan.color}14;color:${plan.color}">Commission ${plan.comm}</span>
+        </div>
+
+        <!-- Features -->
+        <div class="pack-plan-features">
+          ${plan.features.map(f=>`<div class="pack-plan-feat"><span style="color:${plan.color};font-size:11px">✓</span> ${f}</div>`).join('')}
+          ${(plan.locked||[]).map(f=>`<div class="pack-plan-feat locked"><span style="color:var(--muted);font-size:11px">✗</span> ${f}</div>`).join('')}
+        </div>
+
+        <!-- Stats row -->
+        <div class="pack-plan-stats">
+          <div class="pack-plan-stat">
+            <div class="ppstat-val" style="color:${plan.color}">${subsCount}</div>
+            <div class="ppstat-lbl">Abonnés actifs</div>
+          </div>
+          <div class="pack-plan-stat">
+            <div class="ppstat-val">${revFmt}</div>
+            <div class="ppstat-lbl">Revenu total</div>
+          </div>
+          <div class="pack-plan-stat">
+            <div class="ppstat-val" style="color:${expiring>0?'#EF4444':'#9CA3AF'}">${expiring}</div>
+            <div class="ppstat-lbl">Expire &lt; 30j</div>
+          </div>
+        </div>
+
+        <!-- Action -->
+        <div class="pack-plan-actions">
+          <button class="pack-btn-view" style="background:${plan.color}" onclick="viewSubscribers('${plan.id}','${plan.label}')">
+            Voir abonnés (${subsCount})
+          </button>
+        </div>
+      </div>`;
+  }
+
+  function viewSubscribers(planId, planLabel) {
+    const subs = allPacks.filter(p => p.pack_type === planId && p.status === 'active');
+    document.getElementById('subs-modal-title').textContent = planLabel + ' — Abonnés actifs';
+    document.getElementById('subs-modal-body').innerHTML = subs.length === 0
+      ? '<p style="color:var(--muted);text-align:center;padding:30px 0">Aucun abonné actif pour ce plan</p>'
+      : subs.map(p => {
+          const profile = p.profile || {};
+          const initials = (profile.full_name||'V').split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2) || 'V';
+          const expiry = p.expires_at ? 'Expire: ' + fmtDate(new Date(p.expires_at)) : 'Sans expiration';
+          return `<div class="sub-row">
+            <div class="sub-av">${initials}</div>
+            <div class="sub-info">
+              <div class="sub-name">${esc(profile.full_name||'Vendeur')}</div>
+              <div class="sub-email">${esc(profile.email||'—')}</div>
+            </div>
+            <div class="sub-expire">${expiry}</div>
+          </div>`;
+        }).join('');
+    document.getElementById('subs-modal').classList.add('open');
+  }
+
+  function closeSubs() {
+    document.getElementById('subs-modal').classList.remove('open');
+  }
+
+  function packCardHTML(pack) {
+    const profile = pack.profile || {};
+    const name    = profile.full_name || 'Vendeur';
+    const info = {
+      starter:    { label:'Starter',   emoji:'🛍️', color:'#6B7280' },
+      essentiel:  { label:'Essentiel', emoji:'⭐',  color:'#3B82F6' },
+      pro:        { label:'Pro',       emoji:'💎',  color:'#A855F7' },
+      lincoo_plus:{ label:'Pro',       emoji:'💎',  color:'#A855F7' },
+      business:   { label:'Pro',       emoji:'💎',  color:'#A855F7' },
+    }[pack.pack_type] || { label:pack.pack_type, emoji:'📦', color:'var(--muted)' };
+
+    const statusMap = {
+      pending_payment:{ lbl:'En attente paiement', clr:'var(--gold)'  },
+      paid:           { lbl:'Payé · À activer',    clr:'var(--gold)'  },
+      active:         { lbl:'Actif',               clr:'var(--green)' },
+      cancelled:      { lbl:'Annulé',              clr:'var(--red)'   },
+      expired:        { lbl:'Expiré',              clr:'var(--muted)' },
+    };
+    const st = statusMap[pack.status] || { lbl:pack.status, clr:'var(--muted)' };
+
+    const actions = (pack.status === 'paid' || pack.status === 'pending_payment') ? `
+      <div class="action-bar">
+        <button class="btn-reject" onclick="openReject('pack','${pack.id}','${escAttr(name)}')">✕ Refuser</button>
+        <button class="btn-approve"
+          onclick="openApprovePack('${pack.id}','${pack.seller_id}','${escAttr(name + ' — ' + info.label)}')">
+          ✓ Activer le pack
+        </button>
+      </div>` : '';
+
+    return `
+      <div class="item-card">
+        <div class="item-header">
+          <div class="item-avatar" style="background:${info.color}18;font-size:22px">${info.emoji}</div>
+          <div class="item-info">
+            <div class="item-name">${esc(name)}</div>
+            <div class="item-email">${esc(profile.email||'—')}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+            <span class="pill" style="background:${info.color}18;color:${info.color};border:1px solid ${info.color}40">${info.emoji} ${info.label}</span>
+            <span style="font-size:10px;font-weight:700;color:${st.clr}">${st.lbl}</span>
+          </div>
+        </div>
+        <div class="chips-row">
+          <span class="chip gold">💰 ${pack.price_dzd||0} DA</span>
+          ${pack.payment_ref ? `<span class="chip">🔖 Réf: ${esc(pack.payment_ref)}</span>` : ''}
+          <span class="chip">📅 ${pack.created_at ? fmtDate(new Date(pack.created_at)) : '—'}</span>
+          ${pack.admin_note  ? `<span class="chip red">📝 ${esc(pack.admin_note)}</span>` : ''}
+        </div>
+        ${actions}
+      </div>`;
+  }
+
+  // ── ACTIONS ───────────────────────────────────────────────────
+  function openReject(type, id, label, sellerId) {
+    rejectCtx = { type, id, label, sellerId };
+    document.getElementById('reject-label').textContent = `Raison du refus pour "${label}" (optionnel)`;
+    document.getElementById('reject-reason').value = '';
+    document.getElementById('reject-dialog').classList.add('open');
+  }
+
+  function closeRejectDialog() {
+    document.getElementById('reject-dialog').classList.remove('open');
+    rejectCtx = {};
+  }
+
+  async function confirmReject() {
+    const reason = document.getElementById('reject-reason').value.trim();
+    const { type, id, label, sellerId } = rejectCtx;
+    closeRejectDialog();
+
+    if (type === 'account') {
+      const { error } = await sb.from('profiles').update({ pro_status: 'rejected' }).eq('id', id);
+      if (error) { showToast('❌ Erreur: ' + error.message); return; }
+      await notify(id, 'Demande refusée', reason ? `Raison : ${reason}` : 'Votre demande a été refusée.');
+      showToast('❌ Compte rejeté'); await loadAccounts();
+    } else if (type === 'creator') {
+      const { error } = await sb.from('profiles').update({ pro_status: 'rejected' }).eq('id', id);
+      if (error) { showToast('❌ Erreur: ' + error.message); return; }
+      await notify(id, 'Demande creator refusée', reason || 'Votre demande n\'a pas été acceptée.');
+      showToast('❌ Creator rejeté'); await loadCreators();
+    } else if (type === 'post') {
+      const { error } = await sb.from('store_posts').update({ moderation_status:'rejected', moderation_note: reason }).eq('id', id);
+      if (error) { showToast('❌ Erreur: ' + error.message); return; }
+      showToast('🚫 Contenu rejeté'); await loadContent();
+    } else if (type === 'ad') {
+      const ad = allAds.find(a => a.id === id);
+      const { error } = await sb.from('ad_campaigns').update({ payment_status:'rejected', approval_status:'rejected', status:'rejected' }).eq('id', id);
+      if (error) { showToast('❌ Erreur: ' + error.message); return; }
+      if (ad?.company_id) await notify(ad.company_id, '❌ Publicité refusée', reason ? `Raison : ${reason}` : `Votre annonce "${label}" a été refusée.`);
+      showToast('❌ Paiement rejeté'); await loadAds();
+    } else if (type === 'pack') {
+      const { error } = await sb.from('seller_packs').update({ status:'cancelled', admin_note: reason || 'Paiement non confirmé' }).eq('id', id);
+      if (error) { showToast('❌ Erreur: ' + error.message); return; }
+      const pack = allPacks.find(p => p.id === id);
+      if (pack?.seller_id) await notify(pack.seller_id, '❌ Pack refusé', reason ? `Raison : ${reason}` : 'Votre demande de pack a été refusée.');
+      showToast('❌ Pack refusé'); await loadPacks();
+    }
+  }
+
+  async function doApprove(type, id, name) {
+    if (type === 'account') {
+      const { error } = await sb.from('profiles').update({ pro_status:'verified', onboarding_complete:true }).eq('id', id);
+      if (error) { showToast('❌ ' + error.message); return; }
+      await notify(id, '✅ Compte approuvé', 'Félicitations ! Votre compte a été validé. Bienvenue sur Lincoo !');
+      showToast('✅ ' + name + ' approuvé'); await loadAccounts();
+    } else if (type === 'creator') {
+      const { error } = await sb.from('profiles').update({ pro_status:'verified', onboarding_complete:true }).eq('id', id);
+      if (error) { showToast('❌ ' + error.message); return; }
+      await notify(id, '🎉 Tu es maintenant Lincoo Creator !', 'Ton profil Creator a été validé. Commence à créer du contenu !');
+      showToast('✅ Creator ' + name + ' approuvé'); await loadCreators();
+    }
+  }
+
+  async function approvePost(id) {
+    const { error } = await sb.from('store_posts').update({ moderation_status:'approved', moderation_note:null }).eq('id', id);
+    if (error) { showToast('❌ ' + error.message); return; }
+    showToast('✅ Contenu publié'); await loadContent();
+  }
+
+  async function suspendPost(id) {
+    const { error } = await sb.from('store_posts').update({ moderation_status:'suspended' }).eq('id', id);
+    if (error) { showToast('❌ ' + error.message); return; }
+    showToast('⏸ Contenu suspendu'); await loadContent();
+  }
+
+  async function deletePost(id) {
+    if (!confirm('Supprimer ce contenu ? Cette action est irréversible.')) return;
+    const { error } = await sb.from('store_posts').delete().eq('id', id);
+    if (error) { showToast('❌ ' + error.message); return; }
+    showToast('🗑️ Contenu supprimé'); await loadContent();
+  }
+
+  function openApproveAd(id, title, companyId) {
+    approveAdCtx = { id, title, companyId };
+    document.getElementById('approve-ad-label').textContent = `"${title}" sera publiée immédiatement sur le fil LINCOO.`;
+    document.getElementById('approve-ad-dialog').classList.add('open');
+  }
+
+  function closeApproveAdDialog() {
+    document.getElementById('approve-ad-dialog').classList.remove('open');
+    approveAdCtx = {};
+  }
+
+  async function confirmApproveAd() {
+    const { id, title, companyId } = approveAdCtx;
+    closeApproveAdDialog();
+    const { data: { user } } = await sb.auth.getUser();
+    const { error } = await sb.from('ad_campaigns').update({
+      payment_status:'verified', approval_status:'approved',
+      status:'active', approved_at:new Date().toISOString(), approved_by:user?.id || null,
+    }).eq('id', id);
+    if (error) { showToast('❌ ' + error.message); return; }
+    await notify(companyId, '✅ Publicité approuvée', `Votre annonce "${title}" est maintenant visible sur le fil LINCOO.`);
+    showToast('✅ Paiement approuvé — annonce publiée !'); await loadAds();
+  }
+
+  function openApprovePack(id, sellerId, label) {
+    approvePackCtx = { id, sellerId, label };
+    document.getElementById('approve-pack-label').textContent = `Activer "${label}" ? Le vendeur recevra une notification et ses fonctionnalités seront débloquées.`;
+    document.getElementById('approve-pack-dialog').classList.add('open');
+  }
+
+  function closeApprovePackDialog() {
+    document.getElementById('approve-pack-dialog').classList.remove('open');
+    approvePackCtx = {};
+  }
+
+  async function confirmApprovePack() {
+    const { id, sellerId, label } = approvePackCtx;
+    closeApprovePackDialog();
+    const now = new Date();
+    const expires = new Date(now); expires.setDate(expires.getDate() + 30);
+    const { error } = await sb.from('seller_packs').update({
+      status:'active', activated_at:now.toISOString(), expires_at:expires.toISOString(), admin_note:null,
+    }).eq('id', id);
+    if (error) { showToast('❌ ' + error.message); return; }
+    await notify(sellerId, '🎉 Pack activé !', `Votre pack "${label}" est maintenant actif. Toutes vos fonctionnalités sont débloquées !`);
+    showToast('✅ Pack activé avec succès !'); await loadPacks();
+  }
+
+  async function notify(userId, title, message) {
+    try { await sb.from('notifications').insert({ user_id:userId, title, message }); } catch (_) {}
+  }
+
+  // ── UI HELPERS ────────────────────────────────────────────────
+  function updateTabLabels(prefix, tabs, counts, labels) {
+    tabs.forEach((tab, i) => {
+      const el = document.getElementById(prefix + '-' + tab);
+      if (el) el.textContent = `${labels[i]} (${counts[i]})`;
+    });
+  }
+
+  function openModal(url) {
+    document.getElementById('modal-img-el').src = url;
+    document.getElementById('img-modal').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('img-modal').classList.remove('open'); }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function emptyHtml(icon, txt) {
+    return `<div class="empty"><div class="empty-icon">${icon}</div><div class="empty-text">${txt}</div></div>`;
+  }
+
+  function errHtml(msg) {
+    return `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text" style="color:var(--red)">${esc(msg)}</div></div>`;
+  }
+
+  function isVid(url) { return ['.mp4','.mov','.webm','.avi'].some(e => url.toLowerCase().endsWith(e)); }
+
+  function timeAgo(date) {
+    const d = Math.floor((Date.now() - date) / 1000);
+    if (d < 3600)  return `Il y a ${Math.floor(d/60)}min`;
+    if (d < 86400) return `Il y a ${Math.floor(d/3600)}h`;
+    return `Il y a ${Math.floor(d/86400)}j`;
+  }
+
+  function fmtDate(d) {
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  }
+
+  function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function escAttr(s) {
+    if (!s) return '';
+    return String(s).replace(/'/g,"\\'").replace(/"/g,'\\"');
+  }
+
+  // ── DELIVERY ──────────────────────────────────────────────────
+  let delivTab = 'companies';
+  let allDelivReqs = [], allDelivPickups = [], allDelivGroups = [], allDelivRules = [];
+  let allExpeditions = [];
+
+  // Delivery companies — stored in localStorage, connectable to Supabase delivery_companies table
+  const DEFAULT_COMPANIES = [
+    { id:'yalidine', name:'Yalidine',   emoji:'🟡', active:true,  apiKey:'', apiUrl:'https://api.yalidine.app/v1',    tariffs:{standard:400, express:600, smart:300} },
+    { id:'zr',       name:'ZR Express', emoji:'🔵', active:true,  apiKey:'', apiUrl:'https://zrexpress.dz/api',        tariffs:{standard:350, express:550, smart:280} },
+    { id:'maystro',  name:'Maystro',    emoji:'🟢', active:true,  apiKey:'', apiUrl:'https://app.maystro-delivery.com/api', tariffs:{standard:380, express:580, smart:290} },
+  ];
+
+  function getCompanies() {
+    try { return JSON.parse(localStorage.getItem('lincoo_delivery_cos') || 'null') || DEFAULT_COMPANIES; } catch { return DEFAULT_COMPANIES; }
+  }
+  function saveCompanies(cos) { localStorage.setItem('lincoo_delivery_cos', JSON.stringify(cos)); }
+
+  function switchDelivTab(tab) {
+    delivTab = tab;
+    ['companies','expeditions','requests','pickups','groups','rules'].forEach(t => {
+      document.getElementById('delivery-' + t).style.display = t === tab ? 'block' : 'none';
+      document.getElementById('dt-' + t)?.classList.toggle('active', t === tab);
+    });
+    if (tab === 'companies')   renderDelivCompanies();
+    if (tab === 'expeditions') renderExpeditions();
+    if (tab === 'requests')    renderDelivRequests();
+    if (tab === 'pickups')     renderDelivPickups();
+    if (tab === 'groups')      renderDelivGroups();
+    if (tab === 'rules')       renderDelivRules();
+  }
+
+  async function loadDelivery() {
+    renderDelivCompanies();
+    try {
+      const [reqsRes, pickupsRes, groupsRes, rulesRes, expsRes] = await Promise.all([
+        sb.from('seller_smart_delivery_requests').select('*').order('created_at',{ascending:false}).limit(60),
+        sb.from('pickup_requests').select('*').order('pickup_date',{ascending:false}).limit(60),
+        sb.from('smart_delivery_groups').select('id,group_code,status,total_sellers,total_products,total_price_dzd,delivery_fee_dzd,savings_dzd,created_at,buyer_wilaya').order('created_at',{ascending:false}).limit(60),
+        sb.from('delivery_rules').select('*').order('category').order('rule_key'),
+        sb.from('orders').select('*').in('status',['pending','confirmed']).order('created_at',{ascending:false}).limit(80),
+      ]);
+
+      const reqs    = reqsRes.data    || [];
+      const pickups = pickupsRes.data || [];
+      allExpeditions = expsRes.data   || [];
+
+      const sellerIds = [...new Set([...reqs.map(r=>r.seller_id), ...pickups.map(p=>p.seller_id)].filter(Boolean))];
+      let profileMap = {};
+      if (sellerIds.length) {
+        const {data:profs} = await sb.from('profiles').select('id,full_name,email').in('id',sellerIds);
+        (profs||[]).forEach(p => { profileMap[p.id]=p; });
+      }
+
+      allDelivReqs    = reqs.map(r => ({...r, profiles:profileMap[r.seller_id]||null}));
+      allDelivPickups = pickups.map(p => ({...p, profiles:profileMap[p.seller_id]||null}));
+      allDelivGroups  = groupsRes.data || [];
+      allDelivRules   = rulesRes.data  || [];
+
+      const pending = allDelivReqs.filter(r=>r.status==='pending').length + allExpeditions.length;
+      const nb = document.getElementById('nb-delivery');
+      nb.textContent = pending; nb.style.display = pending>0 ? '' : 'none';
+
+      if (delivTab==='expeditions') renderExpeditions();
+      if (delivTab==='requests')    renderDelivRequests();
+      if (delivTab==='pickups')     renderDelivPickups();
+      if (delivTab==='groups')      renderDelivGroups();
+      if (delivTab==='rules')       renderDelivRules();
+    } catch(e) {
+      console.warn('Delivery load error:', e.message);
+    }
+  }
+
+  // ── Sociétés & API ─────────────────────────────────────────────
+  function renderDelivCompanies() {
+    const cos = getCompanies();
+    document.getElementById('delivery-companies').innerHTML = `
+      <div class="co-grid">${cos.map((co,i) => `
+        <div class="co-card ${co.active?'active-co':''}">
+          <div class="co-head">
+            <div class="co-logo">${co.emoji}</div>
+            <div>
+              <div class="co-name">${co.name}</div>
+              <div class="co-url">${co.apiUrl}</div>
+            </div>
+            <label class="co-toggle">
+              <input type="checkbox" class="tog-sw" ${co.active?'checked':''} onchange="toggleCompany(${i},this.checked)">
+              ${co.active?'<span style="color:var(--accent)">Actif</span>':'<span style="color:var(--muted)">Inactif</span>'}
+            </label>
+          </div>
+          <div class="tariff-row">
+            <div class="tariff-cell"><label>🏠 Standard</label><input type="number" value="${co.tariffs.standard}" onchange="updateTariff(${i},'standard',this.value)" placeholder="DA"></div>
+            <div class="tariff-cell"><label>⚡ Express</label><input type="number" value="${co.tariffs.express}" onchange="updateTariff(${i},'express',this.value)" placeholder="DA"></div>
+            <div class="tariff-cell"><label>🔗 Smart</label><input type="number" value="${co.tariffs.smart}" onchange="updateTariff(${i},'smart',this.value)" placeholder="DA"></div>
+          </div>
+          <div class="api-row">
+            <label>Clé API</label>
+            <input type="password" id="api-key-${i}" value="${co.apiKey}" placeholder="sk_live_xxxxxxxxxxxxxxxx..." onchange="updateApiKey(${i},this.value)">
+          </div>
+          <div class="api-row">
+            <label>URL Base API</label>
+            <input type="text" value="${co.apiUrl}" onchange="updateApiUrl(${i},this.value)" placeholder="https://api.example.com">
+          </div>
+          <button class="btn-save-co" onclick="saveCompanyConfig(${i})">💾 Enregistrer la configuration</button>
+        </div>`).join('')}
+      </div>`;
+  }
+
+  function toggleCompany(idx,val) { const cos=getCompanies(); cos[idx].active=val; saveCompanies(cos); renderDelivCompanies(); showToast(val?'✅ Société activée':'⏸ Société désactivée'); }
+  function updateTariff(idx,type,val) { const cos=getCompanies(); cos[idx].tariffs[type]=parseInt(val)||0; saveCompanies(cos); }
+  function updateApiKey(idx,val) { const cos=getCompanies(); cos[idx].apiKey=val; saveCompanies(cos); }
+  function updateApiUrl(idx,val) { const cos=getCompanies(); cos[idx].apiUrl=val; saveCompanies(cos); }
+  function saveCompanyConfig(idx) { const cos=getCompanies(); saveCompanies(cos); showToast('💾 Configuration enregistrée — '+cos[idx].name); }
+
+  // ── Expéditions ────────────────────────────────────────────────
+  let oeCtx = {}; // current order being edited for dispatch
+
+  function renderExpeditions() {
+    const el = document.getElementById('delivery-expeditions');
+    if (!allExpeditions.length) { el.innerHTML = emptyHtml('📦','Aucune commande en attente d\'expédition'); return; }
+    const cos = getCompanies().filter(c=>c.active);
+    el.innerHTML = `
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px">
+        ${allExpeditions.length} commande${allExpeditions.length>1?'s':''} à expédier
+      </div>
+      ${allExpeditions.map(o => {
+        const items = Array.isArray(o.items) ? o.items : (typeof o.items==='string'?JSON.parse(o.items||'[]'):[]);
+        const delivTypeLabel = {home:'🏠 Domicile',stop:'🔗 Stop Desk',express:'⚡ Express'}[o.delivery_type] || o.delivery_type || '—';
+        const statusColor = {pending:'var(--gold)',confirmed:'var(--accent)'}[o.status]||'var(--muted)';
+        const itemSummary = items.map(i=>`${i.name||'Produit'} ×${i.qty||1}`).join(', ');
+        return `<div class="exp-card">
+          <div class="exp-head">
+            <div>
+              <div class="exp-id">Commande #${esc(o.id?.slice(-8)||'?')}</div>
+              <div class="exp-buyer">👤 ${esc(o.buyer_name||'—')} · 📞 ${esc(o.buyer_phone||'—')}</div>
+            </div>
+            <span class="status-badge" style="background:${statusColor}18;border-color:${statusColor}40;color:${statusColor}">${(o.status||'').toUpperCase()}</span>
+          </div>
+          <div class="exp-chips">
+            <span class="fc">${delivTypeLabel}</span>
+            <span class="fc">📍 ${esc(o.wilaya||'—')}${o.commune?', '+esc(o.commune):''}</span>
+            <span class="fc gold" style="color:var(--gold)">💰 ${o.total||0} DA</span>
+            <span class="fc">📅 ${o.created_at?fmtDate(new Date(o.created_at)):'—'}</span>
+          </div>
+          ${itemSummary ? `<div class="exp-items">📦 ${esc(itemSummary)}</div>` : ''}
+          <div class="exp-actions">
+            <button class="btn-edit-order" onclick="openOrderEdit(${JSON.stringify(o).replace(/"/g,'&quot;')})">✏️ Modifier</button>
+            <button class="btn-dispatch" onclick="openOrderEdit(${JSON.stringify(o).replace(/"/g,'&quot;')})">🚀 Expédier</button>
+          </div>
+        </div>`;
+      }).join('')}`;
+  }
+
+  function openOrderEdit(order) {
+    oeCtx = typeof order==='string' ? JSON.parse(order) : order;
+    const cos = getCompanies().filter(c=>c.active);
+    document.getElementById('oe-name').value    = oeCtx.buyer_name  || '';
+    document.getElementById('oe-phone').value   = oeCtx.buyer_phone || '';
+    document.getElementById('oe-address').value = oeCtx.address     || '';
+    document.getElementById('oe-wilaya').value  = oeCtx.wilaya      || '';
+    document.getElementById('oe-commune').value = oeCtx.commune     || '';
+    document.getElementById('oe-note').value    = '';
+    document.getElementById('oe-api-note').style.display = '';
+
+    // delivery type selector
+    const dt = oeCtx.delivery_type || 'home';
+    const dtMap = {home:'standard', express:'express', stop:'smart'};
+    selectDelivType(dtMap[dt]||'standard');
+
+    // companies selector
+    document.getElementById('co-select').innerHTML = cos.map(co => {
+      const tariffType = oeCtx._selectedDelivType || 'standard';
+      return `<div class="co-sel-btn" id="co-sel-${co.id}" onclick="selectCo('${co.id}')">
+        <div style="font-size:18px">${co.emoji}</div>
+        <div>${co.name}</div>
+        <div style="font-size:10px;margin-top:2px;color:var(--accent)">${co.tariffs[tariffType]||'—'} DA</div>
+      </div>`;
+    }).join('');
+    if (cos.length > 0) selectCo(cos[0].id);
+
+    // order summary
+    const items = Array.isArray(oeCtx.items) ? oeCtx.items : [];
+    document.getElementById('oe-summary').innerHTML =
+      items.map(i=>`<div>• ${esc(i.name||'Produit')} ×${i.qty||1} — ${i.total||0} DA</div>`).join('') +
+      `<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-weight:800">Total : ${oeCtx.total||0} DA · Livraison : ${oeCtx.delivery_cost||0} DA</div>`;
+
+    document.getElementById('oe-modal').classList.add('open');
+  }
+
+  let _selectedDelivType = 'standard';
+  let _selectedCoId = '';
+
+  function selectDelivType(type) {
+    _selectedDelivType = type;
+    ['standard','express','smart'].forEach(t => {
+      document.getElementById('dt-'+t)?.classList.toggle('sel', t===type);
+    });
+    // refresh tariffs in co-select
+    const cos = getCompanies().filter(c=>c.active);
+    cos.forEach(co => {
+      const el = document.querySelector(`#co-sel-${co.id} div:last-child`);
+      if (el) el.textContent = (co.tariffs[type]||'—') + ' DA';
+    });
+  }
+
+  function selectCo(id) {
+    _selectedCoId = id;
+    document.querySelectorAll('.co-sel-btn').forEach(el => el.classList.remove('sel'));
+    document.getElementById('co-sel-' + id)?.classList.add('sel');
+  }
+
+  function closeOeModal() {
+    document.getElementById('oe-modal').classList.remove('open');
+    oeCtx = {};
+  }
+
+  async function confirmDispatch() {
+    if (!_selectedCoId) { showToast('⚠️ Sélectionnez une société de livraison'); return; }
+    const co = getCompanies().find(c=>c.id===_selectedCoId);
+    if (!co) return;
+
+    // Update order in Supabase with modified details
+    const updates = {
+      buyer_name:  document.getElementById('oe-name').value.trim()    || oeCtx.buyer_name,
+      buyer_phone: document.getElementById('oe-phone').value.trim()   || oeCtx.buyer_phone,
+      address:     document.getElementById('oe-address').value.trim() || oeCtx.address,
+      wilaya:      document.getElementById('oe-wilaya').value.trim()  || oeCtx.wilaya,
+      commune:     document.getElementById('oe-commune').value.trim() || oeCtx.commune,
+      status:      'shipped',
+      delivery_company: co.name,
+      delivery_type: _selectedDelivType==='smart'?'stop':_selectedDelivType==='express'?'express':'home',
+    };
+
+    const { error } = await sb.from('orders').update(updates).eq('id', oeCtx.id);
+    if (error) { showToast('❌ Erreur: ' + error.message); return; }
+
+    // Simulate API call to delivery company
+    const note = document.getElementById('oe-note').value.trim();
+    console.log(`[Dispatch] Sending order ${oeCtx.id} to ${co.name} API (${co.apiUrl})`, { updates, note, apiKey: co.apiKey ? '***' : 'none' });
+
+    closeOeModal();
+    showToast(`✅ Commande #${oeCtx.id?.slice(-8)} expédiée via ${co.name}`);
+    await loadDelivery();
+    if (delivTab==='expeditions') renderExpeditions();
+  }
+
+  // ── Existing Smart / Ramassages / Groupes / Règles ─────────────
+  function renderDelivRequests() {
+    const el = document.getElementById('delivery-requests');
+    if (!allDelivReqs.length) { el.innerHTML = emptyHtml('📦','Aucune demande Smart Delivery'); return; }
+    el.innerHTML = allDelivReqs.map(r => {
+      const p = r.profiles || {};
+      const statusColor = {approved:'var(--green)',rejected:'var(--red)',pending:'var(--gold)'}[r.status]||'var(--muted)';
+      const isPending = r.status==='pending';
+      return `<div class="item-card" style="border-color:${statusColor}22">
+        <div class="ic-header">
+          <div class="ic-avatar" style="background:${statusColor}15">🚚</div>
+          <div class="ic-info">
+            <div class="ic-name">${esc(p.full_name||'Vendeur')}</div>
+            <div class="ic-sub">${esc(p.email||'')}${r.store_name?' · '+esc(r.store_name):''}</div>
+          </div>
+          <span class="status-badge" style="background:${statusColor}18;border-color:${statusColor}40;color:${statusColor}">${r.status.toUpperCase()}</span>
+        </div>
+        ${r.admin_note?`<div style="margin:8px 0;padding:8px;background:rgba(240,64,64,.06);border-radius:8px;font-size:11px;color:var(--red)">Note: ${esc(r.admin_note)}</div>`:''}
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">${r.created_at?fmtDate(new Date(r.created_at)):'—'}</div>
+        ${isPending?`<div class="ic-actions" style="margin-top:10px">
+          <button class="btn-reject" onclick="rejectSmartReq('${r.id}','${escAttr(p.full_name||'Vendeur')}')">✕ Rejeter</button>
+          <button class="btn-approve" onclick="approveSmartReq('${r.id}','${escAttr(p.full_name||'Vendeur')}')">✓ Approuver</button>
+        </div>`:''}
+      </div>`;
+    }).join('');
+  }
+
+  function renderDelivPickups() {
+    const el = document.getElementById('delivery-pickups');
+    if (!allDelivPickups.length) { el.innerHTML = emptyHtml('📅','Aucun ramassage'); return; }
+    el.innerHTML = allDelivPickups.map(p => {
+      const prof = p.profiles||{};
+      const sc = {completed:'var(--green)',en_route:'var(--accent)',confirmed:'var(--green)',failed:'var(--red)',cancelled:'rgba(0,0,0,.3)'}[p.status]||'var(--gold)';
+      return `<div class="item-card" style="border-color:${sc}22">
+        <div class="ic-header">
+          <div class="ic-avatar" style="background:${sc}15">📅</div>
+          <div class="ic-info">
+            <div class="ic-name">${esc(prof.full_name||'Vendeur')}</div>
+            <div class="ic-sub">${esc(p.pickup_date||'—')} · ${esc(p.pickup_from||'')}–${esc(p.pickup_to||'')} · 📦 ${p.packages_count||1} colis</div>
+            <div class="ic-sub" style="font-size:10px">${esc(p.address||'')}</div>
+          </div>
+          <span class="status-badge" style="background:${sc}18;border-color:${sc}40;color:${sc}">${(p.status||'').replace(/_/g,' ').toUpperCase()}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderDelivGroups() {
+    const el = document.getElementById('delivery-groups');
+    if (!allDelivGroups.length) { el.innerHTML = emptyHtml('🔗','Aucun groupe Smart Delivery'); return; }
+    el.innerHTML = allDelivGroups.map(g => {
+      const sc = {delivered:'var(--green)',in_transit:'var(--accent)',confirmed:'var(--green)',cancelled:'rgba(0,0,0,.3)',disputed:'var(--red)'}[g.status]||'var(--gold)';
+      return `<div class="item-card" style="border-color:${sc}22">
+        <div class="ic-header">
+          <div class="ic-name" style="font-size:14px;letter-spacing:1px">#${esc((g.group_code||'').toUpperCase())}</div>
+          <span class="status-badge" style="background:${sc}18;border-color:${sc}40;color:${sc}">${(g.status||'').replace(/_/g,' ').toUpperCase()}</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+          <span class="fc">🏪 ${g.total_sellers||0} vendeurs</span>
+          <span class="fc">📦 ${g.total_products||0} produits</span>
+          <span class="fc" style="color:var(--accent)">💰 ${g.total_price_dzd||0} DA</span>
+          <span class="fc" style="color:var(--gold)">🚚 ${g.delivery_fee_dzd||0} DA frais</span>
+          ${g.buyer_wilaya?`<span class="fc">📍 ${esc(g.buyer_wilaya)}</span>`:''}
+          ${g.savings_dzd>0?`<span class="fc" style="background:rgba(58,139,58,.08);border-color:rgba(58,139,58,.2);color:var(--green)">💚 -${g.savings_dzd} DA économisés</span>`:''}
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:6px">${g.created_at?fmtDate(new Date(g.created_at)):'—'}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderDelivRules() {
+    const el = document.getElementById('delivery-rules');
+    if (!allDelivRules.length) { el.innerHTML = emptyHtml('⚙️','Aucune règle'); return; }
+    const byCategory = {};
+    allDelivRules.forEach(r => { (byCategory[r.category]=byCategory[r.category]||[]).push(r); });
+    el.innerHTML = Object.entries(byCategory).map(([cat,rules]) => `
+      <div style="margin-bottom:20px">
+        <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">${cat}</div>
+        ${rules.map(r => `
+          <div class="item-card" style="margin-bottom:8px;padding:12px 14px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="flex:1">
+                <div style="font-size:12px;font-weight:700;color:#1A1A1A">${esc(r.rule_key)}</div>
+                <div style="font-size:10px;color:var(--muted)">${esc(r.description||'')}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input id="rule-${esc(r.id)}" value="${esc(JSON.stringify(r.rule_value).replace(/"/g,''))}"
+                  style="width:80px;padding:6px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#1A1A1A;font-size:12px;text-align:center"/>
+                <button onclick="saveRule('${r.id}')" style="padding:6px 12px;background:rgba(91,138,90,.12);border:1px solid rgba(91,138,90,.3);border-radius:8px;color:var(--accent);font-size:11px;font-weight:800;cursor:pointer">Sauver</button>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>`).join('');
+  }
+
+  async function approveSmartReq(id, name) {
+    if (!confirm(`Approuver Smart Delivery pour ${name} ?`)) return;
+    const {error} = await sb.from('seller_smart_delivery_requests').update({status:'approved',reviewed_at:new Date().toISOString()}).eq('id',id);
+    if (error) { showToast('Erreur: '+error.message); return; }
+    showToast('✅ Smart Delivery approuvé pour '+name); await loadDelivery();
+  }
+
+  async function rejectSmartReq(id, name) {
+    const reason = prompt(`Raison du refus pour ${name} (optionnel) :`);
+    if (reason===null) return;
+    const {error} = await sb.from('seller_smart_delivery_requests').update({status:'rejected',admin_note:reason||null,reviewed_at:new Date().toISOString()}).eq('id',id);
+    if (error) { showToast('Erreur: '+error.message); return; }
+    showToast('❌ Demande rejetée'); await loadDelivery();
+  }
+
+  async function saveRule(id) {
+    const input = document.getElementById('rule-'+id);
+    if (!input) return;
+    let val=input.value.trim(), parsed;
+    try { parsed=JSON.parse(val); } catch { parsed=val; }
+    const {error} = await sb.from('delivery_rules').update({rule_value:parsed,updated_at:new Date().toISOString()}).eq('id',id);
+    if (error) { showToast('Erreur: '+error.message); return; }
+    showToast('✅ Règle mise à jour');
+  }
+
+  // ── ADMINS ────────────────────────────────────────────────────
+  let allAdmins = [];
+
+  const ROLE_LABELS = {
+    super_admin: { label:'Super Admin', cls:'role-super',    perms:['Accès total à tout','Suppression de données','Gestion des admins','Gestion des packs'] },
+    gerant:      { label:'Gérant',      cls:'role-gerant',   perms:['Tout sauf suppression','Validation comptes & packs','Modération contenu','Gestion pubs'] },
+    admin:       { label:'Admin',       cls:'role-admin',    perms:['Validation comptes vendeurs','Modération contenu','Gestion pubs','Vue dashboard'] },
+    support:     { label:'Support',     cls:'role-support',  perms:['Lecture seule','Réponses support','Pas de validation'] },
+    readonly:    { label:'Lecture seule',cls:'role-readonly', perms:['Vue dashboard uniquement','Aucune modification'] },
+  };
+
+  async function loadAdmins() {
+    document.getElementById('admins-list').innerHTML = '<div class="loading-state">Chargement...</div>';
+    const { data, error } = await sb.from('profiles')
+      .select('id, full_name, email, is_admin, admin_role, pro_status, created_at')
+      .eq('is_admin', true)
+      .order('created_at', { ascending: false });
+    if (error) { document.getElementById('admins-list').innerHTML = errHtml(error.message); return; }
+    allAdmins = data || [];
+    renderAdmins();
+  }
+
+  function renderAdmins() {
+    if (!allAdmins.length) {
+      document.getElementById('admins-list').innerHTML = emptyHtml('🔐','Aucun administrateur trouvé');
+      return;
+    }
+    document.getElementById('admins-list').innerHTML = `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Admin</th>
+              <th>Email</th>
+              <th>Rôle</th>
+              <th>Accès dashboard vendeur</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${allAdmins.map(a => {
+              const role = ROLE_LABELS[a.admin_role] || ROLE_LABELS['admin'];
+              const initials = (a.full_name||'A').split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
+              const isActive = a.pro_status === 'verified' || a.pro_status === 'active';
+              return `<tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purp),var(--accent));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0">${initials}</div>
+                    <div style="font-size:13px;font-weight:700;color:#1A1A1A">${esc(a.full_name||'Admin')}</div>
+                  </div>
+                </td>
+                <td style="font-size:12px;color:var(--muted)">${esc(a.email||'—')}</td>
+                <td>
+                  <select class="role-badge ${role.cls}" onchange="updateAdminRole('${a.id}',this.value)"
+                    style="border:1px solid;border-radius:20px;padding:4px 10px;font-size:10px;font-weight:800;cursor:pointer;outline:none">
+                    ${Object.entries(ROLE_LABELS).map(([k,v])=>`<option value="${k}" ${a.admin_role===k?'selected':''}>${v.label}</option>`).join('')}
+                  </select>
+                </td>
+                <td>
+                  <div style="font-size:10px;color:var(--muted);line-height:1.6">${role.perms.slice(0,2).map(p=>`✓ ${p}`).join('<br>')}</div>
+                </td>
+                <td>
+                  <span class="pill ${isActive?'pill-verified':'pill-pending'}">${isActive?'Actif':'En attente'}</span>
+                </td>
+                <td>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    ${!isActive?`<button class="btn-sm btn-sm-validate" onclick="validateAdmin('${a.id}','${escAttr(a.full_name||'Admin')}')">✓ Valider</button>`:''}
+                    <button class="btn-sm btn-sm-del" onclick="deleteAdmin('${a.id}','${escAttr(a.full_name||'Admin')}')">🗑</button>
+                  </div>
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  async function updateAdminRole(id, role) {
+    const { error } = await sb.from('profiles').update({ admin_role: role }).eq('id', id);
+    if (error) { showToast('❌ Erreur: ' + error.message); await loadAdmins(); return; }
+    showToast('✅ Rôle mis à jour → ' + (ROLE_LABELS[role]?.label || role));
+    const a = allAdmins.find(a=>a.id===id);
+    if (a) a.admin_role = role;
+  }
+
+  async function validateAdmin(id, name) {
+    const { error } = await sb.from('profiles').update({ pro_status: 'verified', is_admin: true }).eq('id', id);
+    if (error) { showToast('❌ ' + error.message); return; }
+    await notify(id, '✅ Compte admin activé', 'Votre accès au panneau d\'administration Lincoo est activé.');
+    showToast('✅ ' + name + ' — compte admin validé'); await loadAdmins();
+  }
+
+  async function deleteAdmin(id, name) {
+    if (!confirm(`Supprimer les droits admin de ${name} ?`)) return;
+    const { error } = await sb.from('profiles').update({ is_admin: false, admin_role: null }).eq('id', id);
+    if (error) { showToast('❌ ' + error.message); return; }
+    showToast('🗑 Droits admin retirés — ' + name); await loadAdmins();
+  }
+
+  function openAddAdmin() { document.getElementById('aa-modal').classList.add('open'); }
+  function closeAddAdmin() {
+    document.getElementById('aa-modal').classList.remove('open');
+    ['aa-name','aa-email','aa-pass'].forEach(id => { document.getElementById(id).value=''; });
+  }
+
+  async function confirmAddAdmin() {
+    const name  = document.getElementById('aa-name').value.trim();
+    const email = document.getElementById('aa-email').value.trim();
+    const role  = document.getElementById('aa-role').value;
+    const pass  = document.getElementById('aa-pass').value;
+    if (!name || !email || !pass) { showToast('⚠️ Tous les champs sont requis'); return; }
+
+    // Create auth user then set admin flag
+    const { data, error } = await sb.auth.admin?.createUser
+      ? await sb.auth.admin.createUser({ email, password: pass, email_confirm: true })
+      : { data: null, error: { message: 'API admin non disponible — utilisez Supabase Studio pour créer l\'utilisateur' }};
+
+    if (error) {
+      // Fallback: try to find existing profile and grant admin
+      const { data: existing } = await sb.from('profiles').select('id').eq('email', email).maybeSingle();
+      if (existing) {
+        await sb.from('profiles').update({ is_admin:true, admin_role:role, full_name:name, pro_status:'verified' }).eq('id', existing.id);
+        closeAddAdmin(); showToast('✅ Droits admin accordés à ' + name); await loadAdmins(); return;
+      }
+      showToast('⚠️ ' + error.message); return;
+    }
+
+    if (data?.user) {
+      await sb.from('profiles').update({ is_admin:true, admin_role:role, full_name:name, pro_status:'verified' }).eq('id', data.user.id);
+    }
+    closeAddAdmin(); showToast('✅ Admin ' + name + ' créé avec le rôle ' + (ROLE_LABELS[role]?.label||role)); await loadAdmins();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key==='Enter' && document.getElementById('login-screen').style.display!=='none') login();
+    if (e.key==='Escape') {
+      closeModal(); closeRejectDialog(); closeApproveAdDialog(); closeApprovePackDialog();
+      closeOeModal(); closeAddAdmin();
+    }
+  });
+</script>
+</body>
+</html>
