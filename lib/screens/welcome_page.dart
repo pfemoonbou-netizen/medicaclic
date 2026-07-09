@@ -58,7 +58,7 @@ class _WelcomePageState extends State<WelcomePage>
             bottom: 0,
             left: 0,
             right: 0,
-            height: MediaQuery.of(context).size.height * 0.42,
+            height: MediaQuery.of(context).size.height * 0.38,
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -66,57 +66,23 @@ class _WelcomePageState extends State<WelcomePage>
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.white.withValues(alpha: 0.0),
-                    Colors.white.withValues(alpha: 0.85),
+                    Colors.white.withValues(alpha: 0.80),
                     Colors.white.withValues(alpha: 0.95),
                     Colors.white,
                   ],
-                  stops: const [0.0, 0.3, 0.5, 0.7],
+                  stops: const [0.0, 0.25, 0.5, 0.7],
                 ),
               ),
             ),
           ),
 
-          // ── Contenu par-dessus ──
+          // ── Contenu en bas uniquement ──
           SafeArea(
             child: FadeTransition(
               opacity: _fade,
               child: SlideTransition(
                 position: _slide,
                 child: Column(children: [
-                  const SizedBox(height: 40),
-
-                  // ── Logo LINCOO ──
-                  _buildLogo(),
-
-                  const SizedBox(height: 8),
-
-                  // ── Slogan ──
-                  Text(
-                    'Découvrez, connectez, achetez.',
-                    style: GoogleFonts.montserrat(
-                      color: const Color(0xFF6B5B6E),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // ── 4 icônes ──
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _iconCircle(Icons.shopping_bag_outlined),
-                      const SizedBox(width: 16),
-                      _iconCircle(Icons.play_circle_outline),
-                      const SizedBox(width: 16),
-                      _iconCircle(Icons.favorite_outline),
-                      const SizedBox(width: 16),
-                      _iconCircle(Icons.chat_bubble_outline),
-                    ],
-                  ),
-
                   const Spacer(),
 
                   // ── "Le commerce autrement." ──
@@ -183,57 +149,6 @@ class _WelcomePageState extends State<WelcomePage>
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildLogo() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 52,
-          height: 52,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.deepPurple, Color(0xFF5B21B6)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Icon(
-            Icons.shopping_bag_rounded,
-            color: Colors.white,
-            size: 28,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          'LINCOO',
-          style: GoogleFonts.montserrat(
-            color: AppColors.deepPurple,
-            fontSize: 32,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 3,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _iconCircle(IconData icon) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: 0.7),
-        border: Border.all(
-          color: AppColors.deepPurple.withValues(alpha: 0.15),
-          width: 1,
-        ),
-      ),
-      child: Icon(icon, color: AppColors.deepPurple, size: 20),
     );
   }
 }
