@@ -34,142 +34,154 @@ class _WelcomePageState extends State<WelcomePage>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFF5EEF0),
-              Color(0xFFEDE4E8),
-              Color(0xFFF0E8EC),
-              Color(0xFFF8F2F5),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: FadeTransition(
-            opacity: _fade,
-            child: SlideTransition(
-              position: _slide,
-              child: Column(children: [
-                const SizedBox(height: 40),
-
-                // ── Logo LINCOO ──
-                _buildLogo(),
-
-                const SizedBox(height: 8),
-
-                // ── Slogan ──
-                Text(
-                  'Découvrez, connectez, achetez.',
-                  style: GoogleFonts.montserrat(
-                    color: const Color(0xFF6B5B6E),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.3,
-                  ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // ── Image de fond plein écran ──
+          Image.asset(
+            'assets/images/welcome_bg.png',
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFFF5EEF0), Color(0xFFF8F2F5)],
                 ),
-
-                const SizedBox(height: 20),
-
-                // ── 4 icônes ──
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _iconCircle(Icons.shopping_bag_outlined),
-                    const SizedBox(width: 16),
-                    _iconCircle(Icons.play_circle_outline),
-                    const SizedBox(width: 16),
-                    _iconCircle(Icons.favorite_outline),
-                    const SizedBox(width: 16),
-                    _iconCircle(Icons.chat_bubble_outline),
-                  ],
-                ),
-
-                // ── Photo de fond ──
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(0),
-                      child: Image.asset(
-                        'assets/images/welcome_bg.png',
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // ── "Le commerce autrement." ──
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(children: [
-                    TextSpan(
-                      text: 'Le commerce\n',
-                      style: GoogleFonts.montserrat(
-                        color: const Color(0xFF2D1F3D),
-                        fontSize: 30,
-                        fontWeight: FontWeight.w800,
-                        height: 1.3,
-                      ),
-                    ),
-                    TextSpan(
-                      text: 'autrement.',
-                      style: GoogleFonts.dancingScript(
-                        color: AppColors.deepPurple,
-                        fontSize: 34,
-                        fontWeight: FontWeight.w700,
-                        height: 1.4,
-                      ),
-                    ),
-                  ]),
-                ),
-
-                const SizedBox(height: 32),
-
-                // ── Boutons CTA ──
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28),
-                  child: Column(children: [
-                    _AnimatedCTA(
-                      label: 'Créer un compte',
-                      onTap: () => Navigator.pushNamed(context, '/signup'),
-                      isPrimary: true,
-                    ),
-                    const SizedBox(height: 12),
-                    _AnimatedCTA(
-                      label: 'Se connecter',
-                      onTap: () => Navigator.pushNamed(context, '/login'),
-                      isPrimary: false,
-                    ),
-                  ]),
-                ),
-
-                const SizedBox(height: 18),
-
-                Text(
-                  'En continuant, vous acceptez nos Conditions d\'utilisation',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.montserrat(
-                    color: const Color(0xFF9B8A9E),
-                    fontSize: 10,
-                    height: 1.6,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-              ]),
+              ),
             ),
           ),
-        ),
+
+          // ── Dégradé blanc en bas pour lisibilité ──
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: MediaQuery.of(context).size.height * 0.42,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withValues(alpha: 0.0),
+                    Colors.white.withValues(alpha: 0.85),
+                    Colors.white.withValues(alpha: 0.95),
+                    Colors.white,
+                  ],
+                  stops: const [0.0, 0.3, 0.5, 0.7],
+                ),
+              ),
+            ),
+          ),
+
+          // ── Contenu par-dessus ──
+          SafeArea(
+            child: FadeTransition(
+              opacity: _fade,
+              child: SlideTransition(
+                position: _slide,
+                child: Column(children: [
+                  const SizedBox(height: 40),
+
+                  // ── Logo LINCOO ──
+                  _buildLogo(),
+
+                  const SizedBox(height: 8),
+
+                  // ── Slogan ──
+                  Text(
+                    'Découvrez, connectez, achetez.',
+                    style: GoogleFonts.montserrat(
+                      color: const Color(0xFF6B5B6E),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // ── 4 icônes ──
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _iconCircle(Icons.shopping_bag_outlined),
+                      const SizedBox(width: 16),
+                      _iconCircle(Icons.play_circle_outline),
+                      const SizedBox(width: 16),
+                      _iconCircle(Icons.favorite_outline),
+                      const SizedBox(width: 16),
+                      _iconCircle(Icons.chat_bubble_outline),
+                    ],
+                  ),
+
+                  const Spacer(),
+
+                  // ── "Le commerce autrement." ──
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(children: [
+                      TextSpan(
+                        text: 'Le commerce\n',
+                        style: GoogleFonts.montserrat(
+                          color: const Color(0xFF2D1F3D),
+                          fontSize: 30,
+                          fontWeight: FontWeight.w800,
+                          height: 1.3,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'autrement.',
+                        style: GoogleFonts.dancingScript(
+                          color: AppColors.deepPurple,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w700,
+                          height: 1.4,
+                        ),
+                      ),
+                    ]),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // ── Boutons CTA ──
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    child: Column(children: [
+                      _AnimatedCTA(
+                        label: 'Créer un compte',
+                        onTap: () => Navigator.pushNamed(context, '/signup'),
+                        isPrimary: true,
+                      ),
+                      const SizedBox(height: 12),
+                      _AnimatedCTA(
+                        label: 'Se connecter',
+                        onTap: () => Navigator.pushNamed(context, '/login'),
+                        isPrimary: false,
+                      ),
+                    ]),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  Text(
+                    'En continuant, vous acceptez nos Conditions d\'utilisation',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.montserrat(
+                      color: const Color(0xFF9B8A9E),
+                      fontSize: 10,
+                      height: 1.6,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+                ]),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -178,7 +190,6 @@ class _WelcomePageState extends State<WelcomePage>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Icône sac
         Container(
           width: 52,
           height: 52,
@@ -197,31 +208,14 @@ class _WelcomePageState extends State<WelcomePage>
           ),
         ),
         const SizedBox(height: 10),
-        // Texte LINCOO
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              'LINC',
-              style: GoogleFonts.montserrat(
-                color: AppColors.deepPurple,
-                fontSize: 32,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 3,
-              ),
-            ),
-            // Double "O" stylisé
-            Text(
-              'OO',
-              style: GoogleFonts.montserrat(
-                color: AppColors.deepPurple,
-                fontSize: 32,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 3,
-              ),
-            ),
-          ],
+        Text(
+          'LINCOO',
+          style: GoogleFonts.montserrat(
+            color: AppColors.deepPurple,
+            fontSize: 32,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 3,
+          ),
         ),
       ],
     );
@@ -233,7 +227,7 @@ class _WelcomePageState extends State<WelcomePage>
       height: 40,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: 0.6),
+        color: Colors.white.withValues(alpha: 0.7),
         border: Border.all(
           color: AppColors.deepPurple.withValues(alpha: 0.15),
           width: 1,
