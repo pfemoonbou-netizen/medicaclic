@@ -2,7 +2,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/app_colors.dart';
 import '../models/app_user.dart';
@@ -402,7 +401,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   label: 'WhatsApp',
                   hint: '+213 5XX XXX XXX',
                   color: const Color(0xFF25D366),
-                  icon: FontAwesomeIcons.whatsapp,
+                  icon: Icons.chat,
                 ),
                 const SizedBox(height: 12),
                 _contactField(
@@ -410,7 +409,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   label: 'Messenger',
                   hint: 'username ou lien',
                   color: const Color(0xFF0084FF),
-                  icon: FontAwesomeIcons.facebookMessenger,
+                  icon: Icons.messenger_outline,
                 ),
                 const SizedBox(height: 12),
                 _contactField(
@@ -418,7 +417,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   label: 'Telegram',
                   hint: '@username',
                   color: const Color(0xFF29B6F6),
-                  icon: FontAwesomeIcons.telegram,
+                  icon: Icons.send,
                 ),
                 const SizedBox(height: 12),
                 _contactField(
@@ -426,7 +425,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   label: 'Email professionnel',
                   hint: 'contact@boutique.com',
                   color: const Color(0xFFEA4335),
-                  icon: FontAwesomeIcons.solidEnvelope,
+                  icon: Icons.email,
                   keyboardType: TextInputType.emailAddress,
                 ),
               ],

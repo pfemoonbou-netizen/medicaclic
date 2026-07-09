@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/app_colors.dart';
@@ -1743,7 +1742,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                 Text('Contact', style: GoogleFonts.montserrat(
                     fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.gray)),
                 const SizedBox(height: 10),
-                _editField(_waCtrl, 'WhatsApp', FontAwesomeIcons.whatsapp,
+                _editField(_waCtrl, 'WhatsApp', Icons.chat,
                     kb: TextInputType.phone),
               ]),
             ),
