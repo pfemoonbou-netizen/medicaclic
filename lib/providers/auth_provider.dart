@@ -71,6 +71,9 @@ class AuthProvider extends ChangeNotifier {
     String? providerCategoryId,
     String? providerSpecialty,
     String? providerPhone,
+    String? birthDate,
+    String? gender,
+    String? phone,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -82,7 +85,17 @@ class AuthProvider extends ChangeNotifier {
       if (role == 'prestataire' && (providerCategoryId == null || providerSpecialty == null || providerSpecialty.isEmpty || providerPhone == null || providerPhone.isEmpty)) {
         throw 'Veuillez renseigner votre spécialité, catégorie et téléphone';
       }
-      final res = await supabase.auth.signUp(email: email, password: password, data: {'name': name, 'role': role});
+      final res = await supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {
+          'name': name,
+          'role': role,
+          'birth_date': birthDate,
+          'gender': gender,
+          'phone': phone,
+        },
+      );
       if (res.user == null) throw 'Inscription impossible';
       if (role == 'prestataire') {
         await supabase.from('home_care_providers').insert({
