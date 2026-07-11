@@ -34,8 +34,10 @@ class _AdSlide {
   final String desc;
   final List<Color> colors;
   final String badge;
+  final String? imagePath;
   const _AdSlide(
-      this.title, this.subtitle, this.desc, this.colors, this.badge);
+      this.title, this.subtitle, this.desc, this.colors, this.badge,
+      {this.imagePath});
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -62,7 +64,8 @@ class _FeedPageState extends State<FeedPage> {
   static const List<_AdSlide> _adSlides = [
     _AdSlide('Djezzy APP', 'أريح وقتك',
         'عبئوا أو سددوا الفاتورة باستعمال البطاقة البنكية',
-        [Color(0xFFBB0000), Color(0xFFEE2222)], 'DJEZZY'),
+        [Color(0xFFBB0000), Color(0xFFEE2222)], 'DJEZZY',
+        imagePath: 'assets/images/djezzy_ad.jpg'),
     _AdSlide('Summer Sale', 'Jusqu\'à −50%',
         'Sur toute la collection femme été 2026',
         [Color(0xFF1B5E20), Color(0xFF43A047)], 'PROMO'),
@@ -698,70 +701,80 @@ class _FeedPageState extends State<FeedPage> {
 
   Widget _mockSlide(_AdSlide s) => ClipRRect(
         borderRadius: BorderRadius.circular(18),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            gradient: LinearGradient(
-                colors: s.colors,
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight),
+        child: s.imagePath != null
+            ? Image.asset(
+                s.imagePath!,
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _mockSlideGradient(s),
+              )
+            : _mockSlideGradient(s),
+      );
+
+  Widget _mockSlideGradient(_AdSlide s) => Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: LinearGradient(
+              colors: s.colors,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight),
+        ),
+        child: Stack(children: [
+          Positioned(
+            right: -30, top: -30,
+            child: Container(
+              width: 180, height: 180,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.06)),
+            ),
           ),
-          child: Stack(children: [
-            Positioned(
-              right: -30, top: -30,
-              child: Container(
-                width: 180, height: 180,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.06)),
-              ),
+          Positioned(
+            left: -20, bottom: -40,
+            child: Container(
+              width: 140, height: 140,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.04)),
             ),
-            Positioned(
-              left: -20, bottom: -40,
-              child: Container(
-                width: 140, height: 140,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.04)),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(s.badge,
-                        style: GoogleFonts.montserrat(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                  const SizedBox(height: 10),
-                  Text(s.title,
+                  child: Text(s.badge,
                       style: GoogleFonts.montserrat(
                           color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          height: 1.2)),
-                  const SizedBox(height: 6),
-                  Text(s.subtitle,
-                      style: GoogleFonts.montserrat(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500)),
-                ],
-              ),
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1)),
+                ),
+                const SizedBox(height: 10),
+                Text(s.title,
+                    style: GoogleFonts.montserrat(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        height: 1.2)),
+                const SizedBox(height: 6),
+                Text(s.subtitle,
+                    style: GoogleFonts.montserrat(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500)),
+              ],
             ),
-          ]),
-        ),
+          ),
+        ]),
       );
 
   Widget _campaignSlide(AdCampaign c) {
