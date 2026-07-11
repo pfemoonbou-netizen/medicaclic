@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/doctor_provider.dart';
-import '../../providers/yemma_provider.dart';
 import '../../utils/app_colors.dart';
 import '../pharmacy/pharmacy_screen.dart';
 import '../doctors/find_doctors_screen.dart';
@@ -27,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final pages = [
       _homeTab(),
       const FindDoctorsScreen(),
-      ChangeNotifierProvider(create: (_) => YemmaProvider(), child: const YemmaScreen()),
+      const YemmaScreen(),
       const PharmacyScreen(),
       const ProfileScreen(),
     ];

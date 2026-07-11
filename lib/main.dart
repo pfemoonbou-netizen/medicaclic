@@ -7,6 +7,7 @@ import 'providers/auth_provider.dart';
 import 'providers/product_provider.dart';
 import 'providers/doctor_provider.dart';
 import 'providers/cart_provider.dart';
+import 'providers/yemma_provider.dart';
 import 'screens/auth/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => DoctorProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => YemmaProvider()),
       ],
       child: MaterialApp.router(
         title: 'MedicaClic',
