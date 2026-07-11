@@ -725,6 +725,41 @@ class _FeedPageState extends State<FeedPage> {
                     color: Colors.white.withValues(alpha: 0.04)),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(s.badge,
+                        style: GoogleFonts.montserrat(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1)),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(s.title,
+                      style: GoogleFonts.montserrat(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          height: 1.2)),
+                  const SizedBox(height: 6),
+                  Text(s.subtitle,
+                      style: GoogleFonts.montserrat(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500)),
+                ],
+              ),
+            ),
           ]),
         ),
       );
