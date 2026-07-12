@@ -96,6 +96,78 @@ class ProductProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
+  /// Produits locaux toujours affichés (images dans assets/images/),
+  /// meme sans connexion Supabase.
+  static final List<Product> _localProducts = [
+    Product(
+      id: 'local_genouillere',
+      name: 'Genouillère orthopédique',
+      brand: 'MedicaClic',
+      category: 'Orthopédie',
+      description: "Genouillère de maintien et compression pour soulager les douleurs articulaires, entorses et tendinites. Tissu respirant, ajustable et confortable pour un port quotidien.",
+      price: 2500,
+      originalPrice: 3200,
+      image: 'assets/images/genouillere.jpg',
+      rating: 4.6,
+      reviewCount: 42,
+      seller: 'MedicaClic',
+      phone: '',
+    ),
+    Product(
+      id: 'local_chevillere',
+      name: 'Chevillère de maintien',
+      brand: 'MedicaClic',
+      category: 'Orthopédie',
+      description: "Chevillère élastique pour stabiliser la cheville après une entorse ou pendant l'activité sportive. Maintien ferme, réduit l'œdème et sécurise l'articulation.",
+      price: 1800,
+      image: 'assets/images/chevillere.jpg',
+      rating: 4.5,
+      reviewCount: 28,
+      seller: 'MedicaClic',
+      phone: '',
+    ),
+    Product(
+      id: 'local_semelles',
+      name: 'Semelles orthopédiques',
+      brand: 'MedicaClic',
+      category: 'Orthopédie',
+      description: "Semelles anatomiques à mémoire de forme qui soutiennent la voûte plantaire, absorbent les chocs et corrigent la posture. Idéales contre la fatigue et les douleurs du pied.",
+      price: 2200,
+      image: 'assets/images/semelles.jpg',
+      rating: 4.7,
+      reviewCount: 55,
+      seller: 'MedicaClic',
+      phone: '',
+    ),
+    Product(
+      id: 'local_sacoche_insuline',
+      name: 'Sacoche isotherme insuline',
+      brand: 'MedicaClic',
+      category: 'Bien-être',
+      description: "Trousse isotherme pour conserver l'insuline et les médicaments au frais lors des déplacements. Compartiments protégés, maintien de la température plusieurs heures.",
+      price: 3500,
+      originalPrice: 4000,
+      image: 'assets/images/sacoche_insuline.jpg',
+      rating: 4.8,
+      reviewCount: 33,
+      seller: 'MedicaClic',
+      phone: '',
+    ),
+    Product(
+      id: 'local_brosse_dents',
+      name: 'Brosse à dents souple',
+      brand: 'MedicaClic',
+      category: 'Hygiène',
+      description: "Brosse à dents à poils souples respectueuse des gencives sensibles et de l'émail. Nettoyage doux et efficace, manche ergonomique antidérapant.",
+      price: 350,
+      image: 'assets/images/brosse_dents.jpg',
+      rating: 4.4,
+      reviewCount: 19,
+      seller: 'MedicaClic',
+      phone: '',
+    ),
+  ];
+
   ProductProvider() {
     fetchAll();
   }
@@ -124,6 +196,9 @@ class ProductProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
     }
+
+    // Toujours ajouter les produits locaux (affichés meme hors ligne).
+    _products = [..._localProducts, ..._products];
 
     // Bannières pub (table optionnelle) : isolé pour ne pas casser les
     // produits si la table n'existe pas encore.
