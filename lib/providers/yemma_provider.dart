@@ -224,6 +224,20 @@ class YemmaProvider extends ChangeNotifier {
     await fetchAll();
   }
 
+  /// Enregistre une douleur avec affichage immédiat (optimiste), meme hors
+  /// ligne. Tente ensuite de sauvegarder sur Supabase sans bloquer l'UI.
+  Future<void> logPain({required String location, required String type, required String duration, required int severity}) async {
+    _painEntries.add(PainEntry(date: DateTime.now(), location: location, type: type, duration: duration, severity: severity));
+    notifyListeners();
+    final userId = _userId;
+    if (userId == null) return;
+    try {
+      await supabase.from('pain_entries').insert({'user_id': userId, 'location': location, 'type': type, 'duration': duration, 'severity': severity});
+    } catch (_) {
+      // Hors ligne : la douleur reste affichée localement.
+    }
+  }
+
   Future<void> createBabyProfile({required String name, required DateTime birthDate, required String gender}) async {
     final userId = _userId;
     if (userId == null) throw 'Vous devez être connecté.';

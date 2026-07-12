@@ -56,6 +56,37 @@ class PainTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        // ---- Bouton : enregistrer une nouvelle douleur ----
+        GestureDetector(
+          onTap: () => _showLogPainSheet(context),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(color: YemmaColors.card, borderRadius: BorderRadius.circular(16), border: Border.all(color: YemmaColors.pink.withValues(alpha: 0.4))),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(color: YemmaColors.pink.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
+                  child: const Icon(Icons.add, color: YemmaColors.pink, size: 24),
+                ),
+                const SizedBox(width: 14),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Enregistrer une douleur', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
+                      SizedBox(height: 2),
+                      Text('Localisez, intensité, durée, type', style: TextStyle(color: YemmaColors.textFaint, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: YemmaColors.pink),
+              ],
+            ),
+          ),
+        ),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(color: YemmaColors.card, borderRadius: BorderRadius.circular(16), border: Border.all(color: YemmaColors.border)),
@@ -176,6 +207,16 @@ class PainTab extends StatelessWidget {
     );
   }
 
+  void _showLogPainSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: const Color(0x99000000),
+      builder: (_) => const _LogPainSheet(),
+    );
+  }
+
   Widget _painChart(List<PainEntry> entries) {
     final recent = entries.length > 10 ? entries.sublist(entries.length - 10) : entries;
     return Container(
@@ -251,4 +292,257 @@ class PainTab extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Formulaire d'enregistrement d'une douleur (localisation, intensité,
+/// durée, type) puis analyse automatique.
+class _LogPainSheet extends StatefulWidget {
+  const _LogPainSheet();
+  @override
+  State<_LogPainSheet> createState() => _LogPainSheetState();
+}
+
+class _LogPainSheetState extends State<_LogPainSheet> {
+  static const _locations = [
+    ('Dos', Icons.accessibility_new),
+    ('Ventre', Icons.pregnant_woman),
+    ('Tête', Icons.face_retouching_natural),
+    ('Seins', Icons.favorite_border),
+    ('Jambes', Icons.directions_walk),
+  ];
+  static const _durations = ['Quelques min', 'Quelques h', 'Toute la journée'];
+  static const _types = ['Crampes', 'Brûlure', 'Pointue', 'Sourde'];
+
+  String _location = 'Dos';
+  int _severity = 5;
+  String _duration = 'Quelques h';
+  String _type = 'Crampes';
+  bool _saving = false;
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    final yemma = context.read<YemmaProvider>();
+    await yemma.logPain(location: _location, type: _type, duration: _duration, severity: _severity);
+    if (!mounted) return;
+    Navigator.pop(context);
+    _showAnalysis(context, _location, _type, _duration, _severity);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).viewInsets.bottom;
+    return Container(
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 20 + bottom),
+      decoration: const BoxDecoration(
+        color: YemmaColors.card,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Enregistrer une douleur', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
+                GestureDetector(onTap: () => Navigator.pop(context), child: const Icon(Icons.close, color: YemmaColors.textSecondary)),
+              ],
+            ),
+            const SizedBox(height: 20),
+            const Text('Localisation', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: _locations.map((loc) {
+                final active = _location == loc.$1;
+                return _chip(loc.$1, active, () => setState(() => _location = loc.$1), icon: loc.$2);
+              }).toList(),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Text('Intensité : ', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w700)),
+                Text('$_severity/10', style: TextStyle(color: YemmaColors.severityColor(_severity), fontSize: 14, fontWeight: FontWeight.w700)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: List.generate(10, (i) {
+                final val = i + 1;
+                final active = _severity == val;
+                final color = YemmaColors.severityColor(val);
+                return GestureDetector(
+                  onTap: () => setState(() => _severity = val),
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: active ? color : Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: color),
+                    ),
+                    child: Text('$val', style: TextStyle(color: active ? Colors.white : color, fontSize: 14, fontWeight: FontWeight.w700)),
+                  ),
+                );
+              }),
+            ),
+            const SizedBox(height: 20),
+            const Text('Durée', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 10),
+            Wrap(spacing: 10, runSpacing: 10, children: _durations.map((d) => _chip(d, _duration == d, () => setState(() => _duration = d))).toList()),
+            const SizedBox(height: 20),
+            const Text('Type de douleur', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 10),
+            Wrap(spacing: 10, runSpacing: 10, children: _types.map((t) => _chip(t, _type == t, () => setState(() => _type = t))).toList()),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _saving ? null : _save,
+                icon: _saving
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.save_outlined, size: 20),
+                label: const Text('Enregistrer', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                style: ElevatedButton.styleFrom(backgroundColor: YemmaColors.pink, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _chip(String label, bool active, VoidCallback onTap, {IconData? icon}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: active ? YemmaColors.pink.withValues(alpha: 0.15) : YemmaColors.background,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: active ? YemmaColors.pink : YemmaColors.border),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[Icon(icon, size: 16, color: active ? YemmaColors.pink : YemmaColors.textSecondary), const SizedBox(width: 6)],
+            Text(label, style: TextStyle(color: active ? YemmaColors.pink : YemmaColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Petite "analyse IA" locale : génère des conseils selon la douleur saisie.
+List<String> _painAdvice(String location, String type, int severity) {
+  final advice = <String>[];
+  if (severity >= 8) {
+    advice.add('Douleur intense : consultez rapidement un médecin.');
+  } else if (severity >= 5) {
+    advice.add('Douleur modérée : reposez-vous et surveillez son évolution.');
+  } else {
+    advice.add('Douleur légère : hydratez-vous et bougez doucement.');
+  }
+  switch (location) {
+    case 'Ventre':
+      advice.add('Douleur au ventre : contactez votre gynécologue si elle persiste.');
+      break;
+    case 'Dos':
+      advice.add('Mal de dos : adoptez une bonne posture et évitez de porter lourd.');
+      break;
+    case 'Tête':
+      advice.add('Maux de tête : reposez vos yeux et buvez de l\'eau.');
+      break;
+    case 'Jambes':
+      advice.add('Jambes douloureuses : surélevez-les pour améliorer la circulation.');
+      break;
+    case 'Seins':
+      advice.add('Tension mammaire : portez un soutien-gorge adapté et confortable.');
+      break;
+  }
+  if (type == 'Brûlure') advice.add('Sensation de brûlure : évitez les aliments épicés et acides.');
+  return advice;
+}
+
+void _showAnalysis(BuildContext context, String location, String type, String duration, int severity) {
+  showDialog(
+    context: context,
+    builder: (_) {
+      final advice = _painAdvice(location, type, severity);
+      return Dialog(
+        backgroundColor: YemmaColors.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Text('Douleur enregistrée ', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 17, fontWeight: FontWeight.w700)),
+                  Icon(Icons.check_circle, color: YemmaColors.green, size: 20),
+                ],
+              ),
+              const SizedBox(height: 14),
+              _summaryRow('Zone', location),
+              _summaryRow('Intensité', '$severity/10'),
+              _summaryRow('Durée', duration),
+              _summaryRow('Type', type),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(color: YemmaColors.pink.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
+                    child: const Text('IA', style: TextStyle(color: YemmaColors.pink, fontSize: 11, fontWeight: FontWeight.w700)),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text('Analyse & conseils', style: TextStyle(color: YemmaColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w700)),
+                ],
+              ),
+              const SizedBox(height: 10),
+              ...advice.map((a) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(padding: EdgeInsets.only(top: 5), child: Icon(Icons.circle, size: 6, color: YemmaColors.pink)),
+                        const SizedBox(width: 10),
+                        Expanded(child: Text(a, style: const TextStyle(color: YemmaColors.textSecondary, fontSize: 13, height: 1.3))),
+                      ],
+                    ),
+                  )),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Fermer', style: TextStyle(color: YemmaColors.pink, fontWeight: FontWeight.w700)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+Widget _summaryRow(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Row(
+      children: [
+        SizedBox(width: 80, child: Text(label, style: const TextStyle(color: YemmaColors.textFaint, fontSize: 13))),
+        Text(value, style: const TextStyle(color: YemmaColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+      ],
+    ),
+  );
 }
