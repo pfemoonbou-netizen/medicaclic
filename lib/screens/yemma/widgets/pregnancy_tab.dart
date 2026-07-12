@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/yemma_provider.dart';
 import '../yemma_theme.dart';
-import 'momcare_home.dart';
+import 'pregnancy_tracker.dart';
 
 class PregnancyTab extends StatelessWidget {
   const PregnancyTab({super.key});
@@ -15,7 +15,7 @@ class PregnancyTab extends StatelessWidget {
       return ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          MomCareHome(currentWeek: yemma.pregnancyWeek),
+          PregnancyTracker(currentWeek: yemma.pregnancyWeek),
           const SizedBox(height: 16),
           const _DueDateCalculator(),
           const SizedBox(height: 20),
@@ -47,7 +47,7 @@ class PregnancyTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        MomCareHome(currentWeek: yemma.pregnancyWeek),
+        PregnancyTracker(currentWeek: yemma.pregnancyWeek),
         const SizedBox(height: 16),
         const _DueDateCalculator(),
         const SizedBox(height: 16),
