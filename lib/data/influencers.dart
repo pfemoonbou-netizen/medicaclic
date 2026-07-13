@@ -71,6 +71,7 @@ const Map<String, InfluencerInfo> kInfluencers = {
     posts: 98,
     followers: 6700,
     following: 340,
+    gridImages: ['assets/images/influencers/post_steak.jpg', 'assets/images/influencers/post_bowl.jpg'],
   ),
   'mama.care': InfluencerInfo(
     username: 'mama.care',
@@ -91,6 +92,11 @@ const Map<String, InfluencerInfo> kInfluencers = {
     posts: 130,
     followers: 9800,
     following: 260,
+    gridImages: [
+      'assets/images/influencers/post_plank.jpg',
+      'assets/images/influencers/post_yoga.jpg',
+      'assets/images/influencers/post_water.jpg',
+    ],
   ),
   'bébé.plus': InfluencerInfo(
     username: 'bébé.plus',
