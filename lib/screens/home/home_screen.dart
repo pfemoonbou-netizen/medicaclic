@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/supabase_config.dart';
+import 'widgets/stories_bar.dart';
 import '../../providers/doctor_provider.dart';
 import '../../providers/yemma_provider.dart';
 import '../../utils/app_colors.dart';
@@ -340,6 +341,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 20),
+          const StoriesBar(),
           const SizedBox(height: 24),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
