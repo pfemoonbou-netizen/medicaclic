@@ -9,6 +9,7 @@ class SocialFeed extends StatelessWidget {
     _Post(
       user: 'dr.sarah',
       avatarColor: Color(0xFFE57399),
+      avatarImage: 'assets/images/influencers/influencer3.jpg',
       caption: "Pensez à bien vous hydrater pendant la grossesse 💧 Au moins 1,5L d'eau par jour pour vous et bébé.",
       likes: 128,
       comments: 16,
@@ -18,25 +19,27 @@ class SocialFeed extends StatelessWidget {
       sponsored: true,
     ),
     _Post(
-      user: 'mama.care',
-      avatarColor: Color(0xFF35B8A6),
-      caption: "Le portage physiologique renforce le lien avec votre bébé et facilite son sommeil 🤱",
-      likes: 342,
-      comments: 41,
-      timeAgo: 'il y a 2 h',
-      imageColors: [Color(0xFF35B8A6), Color(0xFF4C9BF5)],
-      imageIcon: Icons.child_friendly,
-      sponsored: false,
-    ),
-    _Post(
       user: 'dr.karim',
       avatarColor: Color(0xFF4C9BF5),
+      avatarImage: 'assets/images/influencers/influencer2.jpg',
       caption: "3 étirements simples pour soulager le mal de dos au bureau. Enregistrez ce post ! 🧘",
       likes: 205,
       comments: 27,
-      timeAgo: 'il y a 5 h',
+      timeAgo: 'il y a 2 h',
       imageColors: [Color(0xFF4C9BF5), Color(0xFF35B8A6)],
       imageIcon: Icons.self_improvement,
+      sponsored: false,
+    ),
+    _Post(
+      user: 'amine.h',
+      avatarColor: Color(0xFF7C6BE0),
+      avatarImage: 'assets/images/influencers/influencer1.jpg',
+      caption: "Bien manger, c'est la base ! 🥗 Privilégiez les fruits, légumes et une bonne hydratation.",
+      likes: 342,
+      comments: 41,
+      timeAgo: 'il y a 5 h',
+      imageColors: [Color(0xFF35B8A6), Color(0xFF4C9BF5)],
+      imageIcon: Icons.restaurant,
       sponsored: false,
     ),
   ];
@@ -86,7 +89,15 @@ class _PostCardState extends State<_PostCard> {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                CircleAvatar(radius: 18, backgroundColor: p.avatarColor, child: Text(initial, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                ClipOval(
+                  child: SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: p.avatarImage != null
+                        ? Image.asset(p.avatarImage!, fit: BoxFit.cover, errorBuilder: (c, e, s) => _initialAvatar(p.avatarColor, initial))
+                        : _initialAvatar(p.avatarColor, initial),
+                  ),
+                ),
                 const SizedBox(width: 10),
                 Expanded(child: Text(p.user, style: const TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold))),
                 const Icon(Icons.more_horiz, color: Colors.black54),
@@ -172,11 +183,20 @@ class _PostCardState extends State<_PostCard> {
       ),
     );
   }
+
+  Widget _initialAvatar(Color color, String initial) {
+    return Container(
+      color: color,
+      alignment: Alignment.center,
+      child: Text(initial, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+    );
+  }
 }
 
 class _Post {
   final String user;
   final Color avatarColor;
+  final String? avatarImage;
   final String caption;
   final int likes;
   final int comments;
@@ -187,6 +207,7 @@ class _Post {
   const _Post({
     required this.user,
     required this.avatarColor,
+    this.avatarImage,
     required this.caption,
     required this.likes,
     required this.comments,

@@ -7,12 +7,12 @@ class StoriesBar extends StatelessWidget {
 
   static const _ring = Color(0xFFC913B9);
 
-  // Influenceurs / comptes santé mis en avant (nom + couleur d'avatar).
+  // Influenceurs / comptes santé mis en avant (nom + couleur + photo).
   static const List<_Story> _stories = [
-    _Story('dr.sarah', Color(0xFFE57399)),
-    _Story('yasmine.h', Color(0xFF7C6BE0)),
+    _Story('dr.sarah', Color(0xFFE57399), image: 'assets/images/influencers/influencer3.jpg'),
+    _Story('dr.karim', Color(0xFF4C9BF5), image: 'assets/images/influencers/influencer2.jpg'),
+    _Story('amine.h', Color(0xFF7C6BE0), image: 'assets/images/influencers/influencer1.jpg'),
     _Story('mama.care', Color(0xFF35B8A6)),
-    _Story('dr.karim', Color(0xFF4C9BF5)),
     _Story('nadia.fit', Color(0xFFF2994A)),
     _Story('bébé.plus', Color(0xFFEB5757)),
   ];
@@ -90,9 +90,14 @@ class StoriesBar extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: _ring, width: 2.5),
             ),
-            child: CircleAvatar(
-              backgroundColor: s.color,
-              child: Text(initials, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+            child: ClipOval(
+              child: s.image != null
+                  ? Image.asset(
+                      s.image!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (c, e, st) => _initialCircle(s.color, initials),
+                    )
+                  : _initialCircle(s.color, initials),
             ),
           ),
           const SizedBox(height: 6),
@@ -101,10 +106,19 @@ class StoriesBar extends StatelessWidget {
       ),
     );
   }
+
+  Widget _initialCircle(Color color, String initials) {
+    return Container(
+      color: color,
+      alignment: Alignment.center,
+      child: Text(initials, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+    );
+  }
 }
 
 class _Story {
   final String name;
   final Color color;
-  const _Story(this.name, this.color);
+  final String? image;
+  const _Story(this.name, this.color, {this.image});
 }
