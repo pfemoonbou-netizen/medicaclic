@@ -6,6 +6,7 @@ import '../doctors/find_doctors_screen.dart';
 import 'home_care/home_care_screen.dart';
 import '../../providers/home_care_provider.dart';
 import 'widgets/ambulance_sheet.dart';
+import '../medical/medical_record_screen.dart';
 
 /// Page "Autour de moi" : regroupe la recherche des services les plus
 /// proches (pharmacies, cliniques/médecins, soins à domicile, ambulance).
@@ -73,6 +74,14 @@ class NearbyServicesScreen extends StatelessWidget {
               barrierColor: const Color(0x99000000),
               builder: (_) => const AmbulanceSheet(),
             ),
+          ),
+          const SizedBox(height: 10),
+          _serviceCard(
+            icon: Icons.folder_shared_outlined,
+            color: const Color(0xFF18A589),
+            title: 'Mon dossier médical',
+            subtitle: 'Allergies, traitements, analyses, antécédents...',
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MedicalRecordScreen())),
           ),
         ],
       ),

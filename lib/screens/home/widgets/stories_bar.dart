@@ -70,8 +70,6 @@ class StoriesBar extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          const Text('Vous', style: TextStyle(color: Color(0xFF6E6E6E), fontSize: 12), overflow: TextOverflow.ellipsis),
         ],
       ),
     );

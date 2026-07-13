@@ -13,7 +13,6 @@ import '../doctors/find_doctors_screen.dart';
 import '../yemma/yemma_screen.dart';
 import '../yemma/yemma_theme.dart';
 import '../profile/profile_screen.dart';
-import '../medical/medical_record_screen.dart';
 import 'widgets/ambulance_sheet.dart';
 import 'home_care/home_care_screen.dart';
 import '../../providers/home_care_provider.dart';
@@ -134,13 +133,6 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const NearbyServicesScreen()),
-    );
-  }
-
-  void _openMedicalRecord(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => MedicalRecordScreen(patientName: _displayName.isEmpty ? 'Mon dossier' : _displayName)),
     );
   }
 
@@ -356,41 +348,6 @@ class _HomeScreenState extends State<HomeScreen> {
               itemCount: doctors.length,
               separatorBuilder: (_, _) => const SizedBox(width: 13),
               itemBuilder: (context, i) => _topDoctorCard(doctors[i]),
-            ),
-          ),
-          const SizedBox(height: 24),
-          const Text('Mon dossier médical', style: TextStyle(color: _darkText, fontSize: 16, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () => _openMedicalRecord(context),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: _lightTeal,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(12)),
-                    child: const Icon(Icons.folder_shared_outlined, color: AppColors.primary, size: 28),
-                  ),
-                  const SizedBox(width: 14),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Consulter mon dossier', style: TextStyle(color: _darkText, fontSize: 15, fontWeight: FontWeight.w700)),
-                        SizedBox(height: 4),
-                        Text('Allergies, traitements, analyses, antécédents...', style: TextStyle(color: _gray, fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right, color: AppColors.primary),
-                ],
-              ),
             ),
           ),
           const SizedBox(height: 12),
