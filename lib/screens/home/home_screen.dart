@@ -54,11 +54,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final pages = [
       _homeTab(),
+      const NearbyServicesScreen(),
       ChangeNotifierProvider(create: (_) => YemmaProvider(), child: const YemmaScreen()),
       const PharmacyScreen(),
       const ProfileScreen(),
     ];
-    final isYemma = _index == 1;
+    final isYemma = _index == 2;
     final isDark = isYemma;
     final darkBackground = YemmaColors.background;
     final darkCard = YemmaColors.card;
@@ -77,6 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: (i) => setState(() => _index = i),
         items: [
           const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
+          const BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Autour de moi'),
           BottomNavigationBarItem(
             icon: Image.asset(
               'assets/images/services/yemma.png',
@@ -234,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         GestureDetector(
-          onTap: () => setState(() => _index = 3),
+          onTap: () => setState(() => _index = 4),
           child: CircleAvatar(
             radius: 26,
             backgroundColor: AppColors.primary,
@@ -335,36 +337,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _greetingHeader(),
           const SizedBox(height: 20),
-          GestureDetector(
-            onTap: () => _openDoctorsScreen(context),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              height: 44,
-              decoration: BoxDecoration(color: Colors.grey.shade50, border: Border.all(color: _lightTeal), borderRadius: BorderRadius.circular(24)),
-              child: const Row(
-                children: [
-                  Icon(Icons.search, size: 18, color: _gray),
-                  SizedBox(width: 10),
-                  Text('Rechercher un médecin, une pharmacie...', style: TextStyle(color: _gray, fontSize: 12)),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
           const StoriesBar(),
-          const SizedBox(height: 24),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _categoryTile(Icons.medical_services_outlined, 'Médecin', () => _openDoctorsScreen(context), imagePath: 'assets/images/services/doctor.png'),
-                const SizedBox(width: 16),
-                _categoryTile(Icons.local_pharmacy_outlined, 'Pharmacie', () => _openPharmacyMap(context), imagePath: 'assets/images/services/pharmacy.png'),
-                const SizedBox(width: 16),
-                _categoryTile(Icons.favorite_border, 'Autour de moi', () => _openNearbyServices(context)),
-              ],
-            ),
-          ),
           const SizedBox(height: 24),
           const SocialFeed(),
           const SizedBox(height: 24),
