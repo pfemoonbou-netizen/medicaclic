@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../data/influencers.dart';
+import '../influencer_profile_screen.dart';
 
 /// Barre de "stories" (style réseaux sociaux) pour mettre en avant des
 /// influenceurs / professionnels santé. Premier cercle = ajouter sa story.
@@ -28,7 +30,7 @@ class StoriesBar extends StatelessWidget {
         children: [
           _addStory(),
           const SizedBox(width: 16),
-          ..._stories.expand((s) => [_storyItem(s), const SizedBox(width: 16)]),
+          ..._stories.expand((s) => [_storyItem(context, s), const SizedBox(width: 16)]),
         ],
       ),
     );
@@ -75,11 +77,19 @@ class StoriesBar extends StatelessWidget {
     );
   }
 
-  Widget _storyItem(_Story s) {
+  void _openProfile(BuildContext context, String username) {
+    final inf = influencerByName(username);
+    if (inf == null) return;
+    Navigator.push(context, MaterialPageRoute(builder: (_) => InfluencerProfileScreen(influencer: inf)));
+  }
+
+  Widget _storyItem(BuildContext context, _Story s) {
     final initials = s.name.replaceAll('.', ' ').trim().isEmpty
         ? '?'
         : s.name.replaceAll(RegExp(r'[^a-zA-Z]'), '').substring(0, 1).toUpperCase();
-    return SizedBox(
+    return GestureDetector(
+      onTap: () => _openProfile(context, s.name),
+      child: SizedBox(
       width: 68,
       child: Column(
         children: [
@@ -104,6 +114,7 @@ class StoriesBar extends StatelessWidget {
           const SizedBox(height: 6),
           Text(s.name, style: const TextStyle(color: Colors.black, fontSize: 12), overflow: TextOverflow.ellipsis),
         ],
+      ),
       ),
     );
   }

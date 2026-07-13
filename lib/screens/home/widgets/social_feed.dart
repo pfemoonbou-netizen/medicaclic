@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../data/influencers.dart';
+import '../influencer_profile_screen.dart';
 
 /// Fil de publications (style réseau social) pour les influenceurs / pros
 /// santé. Cartes propres, sans images réseau (visuels dégradés + icônes).
@@ -92,6 +94,12 @@ class _PostCardState extends State<_PostCard> {
     super.dispose();
   }
 
+  void _openProfile(BuildContext context, String username) {
+    final inf = influencerByName(username);
+    if (inf == null) return;
+    Navigator.push(context, MaterialPageRoute(builder: (_) => InfluencerProfileScreen(influencer: inf)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = widget.post;
@@ -111,21 +119,24 @@ class _PostCardState extends State<_PostCard> {
           // Header
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                ClipOval(
-                  child: SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: p.avatarImage != null
-                        ? Image.asset(p.avatarImage!, fit: BoxFit.cover, errorBuilder: (c, e, s) => _initialAvatar(p.avatarColor, initial))
-                        : _initialAvatar(p.avatarColor, initial),
+            child: GestureDetector(
+              onTap: () => _openProfile(context, p.user),
+              child: Row(
+                children: [
+                  ClipOval(
+                    child: SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: p.avatarImage != null
+                          ? Image.asset(p.avatarImage!, fit: BoxFit.cover, errorBuilder: (c, e, s) => _initialAvatar(p.avatarColor, initial))
+                          : _initialAvatar(p.avatarColor, initial),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(child: Text(p.user, style: const TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold))),
-                const Icon(Icons.more_horiz, color: Colors.black54),
-              ],
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(p.user, style: const TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold))),
+                  const Icon(Icons.more_horiz, color: Colors.black54),
+                ],
+              ),
             ),
           ),
           // Image (carrousel de photos réelles, ou dégradé + icône)
