@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../config/supabase_config.dart';
 import 'widgets/stories_bar.dart';
 import 'widgets/social_feed.dart';
+import 'nearby_services_screen.dart';
 import '../../providers/doctor_provider.dart';
 import '../../providers/yemma_provider.dart';
 import '../../utils/app_colors.dart';
@@ -124,6 +125,13 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const PharmacyMapScreen()),
+    );
+  }
+
+  void _openNearbyServices(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const NearbyServicesScreen()),
     );
   }
 
@@ -353,9 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(width: 16),
                 _categoryTile(Icons.local_pharmacy_outlined, 'Pharmacie', () => _openPharmacyMap(context), imagePath: 'assets/images/services/pharmacy.png'),
                 const SizedBox(width: 16),
-                _categoryTile(Icons.emergency_outlined, 'Ambulance', () => _showAmbulanceSheet(context), imagePath: 'assets/images/services/ambulance.png'),
-                const SizedBox(width: 16),
-                _categoryTile(Icons.home_repair_service_outlined, 'Domicile', () => _openHomeCareScreen(context), imagePath: 'assets/images/services/home_care.png'),
+                _categoryTile(Icons.favorite_border, 'Autour de moi', () => _openNearbyServices(context)),
               ],
             ),
           ),
