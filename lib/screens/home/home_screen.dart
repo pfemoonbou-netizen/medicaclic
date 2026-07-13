@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/supabase_config.dart';
 import 'widgets/stories_bar.dart';
+import 'widgets/social_feed.dart';
 import '../../providers/doctor_provider.dart';
 import '../../providers/yemma_provider.dart';
 import '../../utils/app_colors.dart';
@@ -359,35 +360,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          _promoBanner(),
-          const SizedBox(height: 24),
-          const Text('Prochains rendez-vous', style: TextStyle(color: _darkText, fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 100,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _appointmentCard(
-                  name: 'Dr. Samuel',
-                  specialty: 'Cardiologie',
-                  time: '9:30',
-                  day: 'Mar',
-                  date: '12',
-                  gradient: const [Color(0xFF38A8A8), Color(0xFF1E8A8A)],
-                ),
-                const SizedBox(width: 12),
-                _appointmentCard(
-                  name: 'Dr. Amina',
-                  specialty: 'Pédiatrie',
-                  time: '14:00',
-                  day: 'Mer',
-                  date: '13',
-                  gradient: const [Color(0xFFF4890D), Color(0xFFC65C0F)],
-                ),
-              ],
-            ),
-          ),
+          const SocialFeed(),
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
