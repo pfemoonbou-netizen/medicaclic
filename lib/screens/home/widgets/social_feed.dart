@@ -7,6 +7,22 @@ class SocialFeed extends StatelessWidget {
 
   static const List<_Post> _posts = [
     _Post(
+      user: 'forma',
+      avatarColor: Color(0xFF2E4636),
+      avatarImage: 'assets/images/influencers/forma_logo.jpg',
+      caption: "Plonge dans l'univers de Forma 🌿 Un détoxifiant naturel qui purifie ton corps et t'aide à brûler les graisses efficacement.",
+      likes: 512,
+      comments: 63,
+      timeAgo: 'il y a 15 min',
+      imageColors: [Color(0xFF2E4636), Color(0xFF3E5C48)],
+      imageIcon: Icons.eco,
+      sponsored: true,
+      postImages: [
+        'assets/images/influencers/forma_pub2.jpg',
+        'assets/images/influencers/forma_pub1.jpg',
+      ],
+    ),
+    _Post(
       user: 'dr.sarah',
       avatarColor: Color(0xFFE57399),
       avatarImage: 'assets/images/influencers/influencer3.jpg',
@@ -67,6 +83,14 @@ class _PostCard extends StatefulWidget {
 class _PostCardState extends State<_PostCard> {
   bool _liked = false;
   bool _saved = false;
+  int _page = 0;
+  final PageController _pageCtrl = PageController();
+
+  @override
+  void dispose() {
+    _pageCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,14 +128,56 @@ class _PostCardState extends State<_PostCard> {
               ],
             ),
           ),
-          // Image
-          AspectRatio(
-            aspectRatio: 1.2,
-            child: Container(
-              decoration: BoxDecoration(gradient: LinearGradient(colors: p.imageColors, begin: Alignment.topLeft, end: Alignment.bottomRight)),
-              child: Center(child: Icon(p.imageIcon, color: Colors.white.withValues(alpha: 0.9), size: 72)),
+          // Image (carrousel de photos réelles, ou dégradé + icône)
+          if (p.postImages.isNotEmpty)
+            AspectRatio(
+              aspectRatio: 0.85,
+              child: Stack(
+                children: [
+                  PageView.builder(
+                    controller: _pageCtrl,
+                    itemCount: p.postImages.length,
+                    onPageChanged: (i) => setState(() => _page = i),
+                    itemBuilder: (_, i) => Image.asset(
+                      p.postImages[i],
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (c, e, s) => Container(
+                        color: p.imageColors.first,
+                        child: Icon(p.imageIcon, color: Colors.white.withValues(alpha: 0.9), size: 72),
+                      ),
+                    ),
+                  ),
+                  if (p.postImages.length > 1)
+                    Positioned(
+                      bottom: 10,
+                      left: 0,
+                      right: 0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(p.postImages.length, (i) {
+                          final active = i == _page;
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            margin: const EdgeInsets.symmetric(horizontal: 3),
+                            width: active ? 8 : 6,
+                            height: active ? 8 : 6,
+                            decoration: BoxDecoration(color: active ? const Color(0xFF31B5FF) : Colors.white70, shape: BoxShape.circle),
+                          );
+                        }),
+                      ),
+                    ),
+                ],
+              ),
+            )
+          else
+            AspectRatio(
+              aspectRatio: 1.2,
+              child: Container(
+                decoration: BoxDecoration(gradient: LinearGradient(colors: p.imageColors, begin: Alignment.topLeft, end: Alignment.bottomRight)),
+                child: Center(child: Icon(p.imageIcon, color: Colors.white.withValues(alpha: 0.9), size: 72)),
+              ),
             ),
-          ),
           // Sponsored CTA
           if (p.sponsored)
             Container(
@@ -204,10 +270,12 @@ class _Post {
   final List<Color> imageColors;
   final IconData imageIcon;
   final bool sponsored;
+  final List<String> postImages;
   const _Post({
     required this.user,
     required this.avatarColor,
     this.avatarImage,
+    this.postImages = const [],
     required this.caption,
     required this.likes,
     required this.comments,

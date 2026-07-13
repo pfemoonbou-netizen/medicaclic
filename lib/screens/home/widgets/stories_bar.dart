@@ -9,6 +9,7 @@ class StoriesBar extends StatelessWidget {
 
   // Influenceurs / comptes santé mis en avant (nom + couleur + photo).
   static const List<_Story> _stories = [
+    _Story('forma', Color(0xFF2E4636), image: 'assets/images/influencers/forma_logo.jpg'),
     _Story('dr.sarah', Color(0xFFE57399), image: 'assets/images/influencers/influencer3.jpg'),
     _Story('dr.karim', Color(0xFF4C9BF5), image: 'assets/images/influencers/influencer2.jpg'),
     _Story('amine.h', Color(0xFF7C6BE0), image: 'assets/images/influencers/influencer1.jpg'),
