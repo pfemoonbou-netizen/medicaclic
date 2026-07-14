@@ -16,10 +16,22 @@ class _ProductCardState extends State<ProductCard> {
   static const _dark = Color(0xFF101522);
   static const _grey = Color(0xFF9B9999);
   bool _fav = false;
+  bool _hidden = false;
+
+  void _hideCard() {
+    if (!mounted || _hidden) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _hidden = true);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final p = widget.product;
+    // Aucune image utilisable : ne pas afficher de carte avec icone generique.
+    if (_hidden || p.image == null || p.image!.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
     final discount = p.discountPercent;
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -118,8 +130,8 @@ class _ProductCardState extends State<ProductCard> {
   }
 
   Widget _image(Product p) {
-    final img = p.image;
-    if (img != null && img.startsWith('http')) {
+    final img = p.image!;
+    if (img.startsWith('http')) {
       return Image.network(
         img,
         height: 120,
@@ -132,40 +144,21 @@ class _ProductCardState extends State<ProductCard> {
                 color: const Color(0xFFF3F4F6),
                 child: const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
               ),
-        errorBuilder: (c, e, s) => _placeholder(),
+        errorBuilder: (c, e, s) {
+          _hideCard();
+          return const SizedBox.shrink();
+        },
       );
     }
-    if (img != null && img.startsWith('assets/')) {
-      return Image.asset(
-        img,
-        height: 120,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (c, e, s) => _placeholder(),
-      );
-    }
-    return _placeholder();
-  }
-
-  Widget _placeholder() => Container(
-        height: 120,
-        width: double.infinity,
-        color: const Color(0xFFF3F4F6),
-        child: Center(child: Icon(_iconFor(widget.product.category), size: 40, color: _purple)),
-      );
-
-  IconData _iconFor(String category) {
-    switch (category) {
-      case 'Orthopédie':
-        return Icons.healing_outlined;
-      case 'Mobilité':
-        return Icons.accessible_outlined;
-      case 'Diagnostic':
-        return Icons.monitor_heart_outlined;
-      case 'Hygiène':
-        return Icons.sanitizer_outlined;
-      default:
-        return Icons.medical_services_outlined;
-    }
+    return Image.asset(
+      img,
+      height: 120,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder: (c, e, s) {
+        _hideCard();
+        return const SizedBox.shrink();
+      },
+    );
   }
 }
