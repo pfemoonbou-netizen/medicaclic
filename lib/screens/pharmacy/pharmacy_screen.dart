@@ -24,6 +24,9 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
   String _role = '';
   final PageController _bannerController = PageController();
   int _bannerPage = 0;
+  // Produits dont l'image n'a pas charge : retires de l'affichage pour
+  // eviter un emplacement vide dans la grille/liste.
+  final Set<String> _hiddenProductIds = {};
 
   bool get _isAdmin => _role == 'admin';
 
@@ -78,8 +81,8 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ProductProvider>();
-    final products = provider.byCategory(_category);
-    final featured = provider.featured;
+    final products = provider.byCategory(_category).where((p) => !_hiddenProductIds.contains(p.id)).toList();
+    final featured = provider.featured.where((p) => !_hiddenProductIds.contains(p.id)).toList();
 
     return Container(
       color: _bg,
@@ -117,7 +120,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                         scrollDirection: Axis.horizontal,
                         itemCount: featured.length,
                         separatorBuilder: (_, _) => const SizedBox(width: 12),
-                        itemBuilder: (context, i) => SizedBox(width: 165, child: ProductCard(product: featured[i], onAddToCart: () => _add(featured[i]))),
+                        itemBuilder: (context, i) => SizedBox(width: 165, child: ProductCard(product: featured[i], onAddToCart: () => _add(featured[i]), onImageError: () => setState(() => _hiddenProductIds.add(featured[i].id)))),
                       ),
                     ),
                     const SizedBox(height: 22),
@@ -131,7 +134,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                     shrinkWrap: true,
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 0.66, crossAxisSpacing: 12, mainAxisSpacing: 12),
                     itemCount: products.length,
-                    itemBuilder: (context, i) => ProductCard(product: products[i], onAddToCart: () => _add(products[i])),
+                    itemBuilder: (context, i) => ProductCard(product: products[i], onAddToCart: () => _add(products[i]), onImageError: () => setState(() => _hiddenProductIds.add(products[i].id))),
                   ),
                   if (products.isEmpty)
                     const Padding(

@@ -5,7 +5,10 @@ import '../screens/pharmacy/product_detail_screen.dart';
 class ProductCard extends StatefulWidget {
   final Product product;
   final VoidCallback onAddToCart;
-  const ProductCard({super.key, required this.product, required this.onAddToCart});
+  /// Appele si l'image du produit ne charge pas, pour que le parent
+  /// retire ce produit de la liste (evite un emplacement vide).
+  final VoidCallback? onImageError;
+  const ProductCard({super.key, required this.product, required this.onAddToCart, this.onImageError});
 
   @override
   State<ProductCard> createState() => _ProductCardState();
@@ -19,9 +22,11 @@ class _ProductCardState extends State<ProductCard> {
   bool _hidden = false;
 
   void _hideCard() {
-    if (!mounted || _hidden) return;
+    if (_hidden) return;
+    _hidden = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) setState(() => _hidden = true);
+      widget.onImageError?.call();
+      if (mounted) setState(() {});
     });
   }
 
