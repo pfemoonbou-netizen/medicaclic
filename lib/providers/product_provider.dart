@@ -359,8 +359,9 @@ class ProductProvider extends ChangeNotifier {
     }
 
     // Toujours ajouter les produits locaux (affichés meme hors ligne).
-    // On ne garde que les produits qui ont une vraie image (pas d'icone par defaut).
-    _products = [..._localProducts, ..._products].where((p) => p.image != null && p.image!.trim().isNotEmpty).toList();
+    // On ne garde que les produits avec une image embarquee dans l'app
+    // (assets/...) : garantie de s'afficher, jamais de case vide ou d'icone.
+    _products = [..._localProducts, ..._products].where((p) => p.image != null && p.image!.trim().startsWith('assets/')).toList();
 
     // Bannières pub (table optionnelle) : isolé pour ne pas casser les
     // produits si la table n'existe pas encore.
