@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../pharmacy/boutique_theme.dart';
 import '../../../providers/home_care_provider.dart';
 import 'provider_list_screen.dart';
+
+// Theme clair bleu et blanc (au lieu du theme sombre BoutiqueColors).
+class _T {
+  static const bg = Colors.white;
+  static const card = Color(0xFFF9F9F9);
+  static const border = Color(0xFFEDF1F0);
+  static const accent = Color(0xFF3E69FE);
+  static const textPrimary = Color(0xFF1E1F2E);
+  static const textSecondary = Color(0xFF6B7280);
+  static const textFaint = Color(0xFF9C9C9C);
+}
 
 class HomeCareScreen extends StatefulWidget {
   const HomeCareScreen({super.key});
@@ -25,31 +35,31 @@ class _HomeCareScreenState extends State<HomeCareScreen> {
     final homeCare = context.watch<HomeCareProvider>();
 
     return Scaffold(
-      backgroundColor: BoutiqueColors.background,
+      backgroundColor: _T.bg,
       appBar: AppBar(
-        backgroundColor: BoutiqueColors.background,
+        backgroundColor: _T.bg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: BoutiqueColors.textPrimary),
-        title: const Text('Services à Domicile', style: TextStyle(color: BoutiqueColors.textPrimary, fontSize: 17)),
+        iconTheme: const IconThemeData(color: _T.textPrimary),
+        title: const Text('Services à Domicile', style: TextStyle(color: _T.textPrimary, fontSize: 17)),
       ),
       body: homeCare.isLoading && homeCare.categories.isEmpty
-          ? const Center(child: CircularProgressIndicator(color: BoutiqueColors.accent))
+          ? const Center(child: CircularProgressIndicator(color: _T.accent))
           : ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Row(
             children: [
-              Container(width: 8, height: 8, decoration: const BoxDecoration(color: BoutiqueColors.accent, shape: BoxShape.circle)),
+              Container(width: 8, height: 8, decoration: const BoxDecoration(color: _T.accent, shape: BoxShape.circle)),
               const SizedBox(width: 8),
-              const Text('3 prestataires disponibles maintenant', style: TextStyle(color: BoutiqueColors.accent, fontSize: 13, fontWeight: FontWeight.w600)),
+              const Text('3 prestataires disponibles maintenant', style: TextStyle(color: _T.accent, fontSize: 13, fontWeight: FontWeight.w600)),
             ],
           ),
           const SizedBox(height: 12),
-          const Text('Services à Domicile', style: TextStyle(color: BoutiqueColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold)),
+          const Text('Services à Domicile', style: TextStyle(color: _T.textPrimary, fontSize: 24, fontWeight: FontWeight.bold)),
           const SizedBox(height: 6),
-          const Text('Médecins, Infirmiers, Kinés — chez vous en 15-45 min', style: TextStyle(color: BoutiqueColors.textSecondary, fontSize: 13)),
+          const Text('Médecins, Infirmiers, Kinés — chez vous en 15-45 min', style: TextStyle(color: _T.textSecondary, fontSize: 13)),
           const SizedBox(height: 20),
-          const Text('Services', style: TextStyle(color: BoutiqueColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w600)),
+          const Text('Services', style: TextStyle(color: _T.textPrimary, fontSize: 20, fontWeight: FontWeight.w600)),
           const SizedBox(height: 12),
           Row(
             children: const [
@@ -63,7 +73,12 @@ class _HomeCareScreenState extends State<HomeCareScreen> {
           const SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: BoxDecoration(color: BoutiqueColors.card, borderRadius: BorderRadius.circular(16), border: Border.all(color: BoutiqueColors.border)),
+            decoration: BoxDecoration(
+              color: _T.card,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: _T.border),
+              boxShadow: const [BoxShadow(color: Color(0x0F000000), offset: Offset(0, 4), blurRadius: 14)],
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: const [
@@ -77,7 +92,12 @@ class _HomeCareScreenState extends State<HomeCareScreen> {
           ),
           const SizedBox(height: 16),
           Container(
-            decoration: BoxDecoration(color: BoutiqueColors.card, borderRadius: BorderRadius.circular(16), border: Border.all(color: BoutiqueColors.border)),
+            decoration: BoxDecoration(
+              color: _T.card,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: _T.border),
+              boxShadow: const [BoxShadow(color: Color(0x0F000000), offset: Offset(0, 4), blurRadius: 14)],
+            ),
             child: Column(
               children: [
                 InkWell(
@@ -87,18 +107,18 @@ class _HomeCareScreenState extends State<HomeCareScreen> {
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        const Icon(Icons.help_outline, color: BoutiqueColors.accent, size: 20),
+                        const Icon(Icons.help_outline, color: _T.accent, size: 20),
                         const SizedBox(width: 12),
                         const Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Comment ça marche ?', style: TextStyle(color: BoutiqueColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
-                              Text('4 étapes simples pour recevoir un soin', style: TextStyle(color: BoutiqueColors.textFaint, fontSize: 11)),
+                              Text('Comment ça marche ?', style: TextStyle(color: _T.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
+                              Text('4 étapes simples pour recevoir un soin', style: TextStyle(color: _T.textFaint, fontSize: 11)),
                             ],
                           ),
                         ),
-                        Icon(_howItWorksExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: BoutiqueColors.textSecondary),
+                        Icon(_howItWorksExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: _T.textSecondary),
                       ],
                     ),
                   ),
@@ -108,7 +128,7 @@ class _HomeCareScreenState extends State<HomeCareScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                     child: Column(
                       children: [
-                        const Divider(color: BoutiqueColors.border, height: 1),
+                        const Divider(color: _T.border, height: 1),
                         const SizedBox(height: 12),
                         for (final step in _steps)
                           Padding(
@@ -119,17 +139,17 @@ class _HomeCareScreenState extends State<HomeCareScreen> {
                                 Container(
                                   width: 36,
                                   height: 36,
-                                  decoration: BoxDecoration(color: BoutiqueColors.accent.withValues(alpha: 0.15), shape: BoxShape.circle),
-                                  child: Icon(step.icon, color: BoutiqueColors.accent, size: 18),
+                                  decoration: BoxDecoration(color: _T.accent.withValues(alpha: 0.15), shape: BoxShape.circle),
+                                  child: Icon(step.icon, color: _T.accent, size: 18),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(step.title, style: const TextStyle(color: BoutiqueColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+                                      Text(step.title, style: const TextStyle(color: _T.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
                                       const SizedBox(height: 2),
-                                      Text(step.desc, style: const TextStyle(color: BoutiqueColors.textFaint, fontSize: 12, height: 1.3)),
+                                      Text(step.desc, style: const TextStyle(color: _T.textFaint, fontSize: 12, height: 1.3)),
                                     ],
                                   ),
                                 ),
@@ -143,7 +163,7 @@ class _HomeCareScreenState extends State<HomeCareScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          const Text('De quoi avez-vous besoin ?', style: TextStyle(color: BoutiqueColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
+          const Text('De quoi avez-vous besoin ?', style: TextStyle(color: _T.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
           GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
@@ -157,7 +177,12 @@ class _HomeCareScreenState extends State<HomeCareScreen> {
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProviderListScreen(initialCategoryId: cat.id))),
                 child: Container(
                   padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(color: BoutiqueColors.card, borderRadius: BorderRadius.circular(14), border: Border.all(color: BoutiqueColors.border)),
+                  decoration: BoxDecoration(
+                    color: _T.card,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: _T.border),
+                    boxShadow: const [BoxShadow(color: Color(0x0F000000), offset: Offset(0, 4), blurRadius: 14)],
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -168,9 +193,9 @@ class _HomeCareScreenState extends State<HomeCareScreen> {
                         child: Icon(cat.icon, color: cat.color, size: 18),
                       ),
                       const Spacer(),
-                      Text(cat.name, style: const TextStyle(color: BoutiqueColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
+                      Text(cat.name, style: const TextStyle(color: _T.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
                       const SizedBox(height: 2),
-                      Text(cat.subtitle, style: const TextStyle(color: BoutiqueColors.textFaint, fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(cat.subtitle, style: const TextStyle(color: _T.textFaint, fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis),
                       const SizedBox(height: 6),
                       Text('dès ${cat.priceFrom} DA', style: TextStyle(color: cat.color, fontSize: 12, fontWeight: FontWeight.w700)),
                     ],
@@ -194,9 +219,9 @@ class _StatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(color: BoutiqueColors.accent, fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(value, style: const TextStyle(color: _T.accent, fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 2),
-        Text(label, style: const TextStyle(color: BoutiqueColors.textFaint, fontSize: 11)),
+        Text(label, style: const TextStyle(color: _T.textFaint, fontSize: 11)),
       ],
     );
   }
@@ -205,7 +230,7 @@ class _StatItem extends StatelessWidget {
 class _StatDivider extends StatelessWidget {
   const _StatDivider();
   @override
-  Widget build(BuildContext context) => Container(width: 1, height: 28, color: BoutiqueColors.border);
+  Widget build(BuildContext context) => Container(width: 1, height: 28, color: _T.border);
 }
 
 /// Tuile bleue arrondie de raccourci vers un type de service (style
@@ -220,7 +245,7 @@ class _QuickServiceTile extends StatelessWidget {
     return Container(
       height: 78,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: const Color(0xFF3E69FE), borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: _T.accent, borderRadius: BorderRadius.circular(16)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
