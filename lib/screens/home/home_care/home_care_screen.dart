@@ -49,6 +49,18 @@ class _HomeCareScreenState extends State<HomeCareScreen> {
           const SizedBox(height: 6),
           const Text('Médecins, Infirmiers, Kinés — chez vous en 15-45 min', style: TextStyle(color: BoutiqueColors.textSecondary, fontSize: 13)),
           const SizedBox(height: 20),
+          const Text('Services', style: TextStyle(color: BoutiqueColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 12),
+          Row(
+            children: const [
+              Expanded(child: _QuickServiceTile(icon: Icons.medical_services_outlined, label: 'Visite\nmédecin')),
+              SizedBox(width: 12),
+              Expanded(child: _QuickServiceTile(icon: Icons.healing_outlined, label: 'Soins\ninfirmiers')),
+              SizedBox(width: 12),
+              Expanded(child: _QuickServiceTile(icon: Icons.favorite_border, label: 'Garde\nmalade')),
+            ],
+          ),
+          const SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
             decoration: BoxDecoration(color: BoutiqueColors.card, borderRadius: BorderRadius.circular(16), border: Border.all(color: BoutiqueColors.border)),
@@ -194,4 +206,29 @@ class _StatDivider extends StatelessWidget {
   const _StatDivider();
   @override
   Widget build(BuildContext context) => Container(width: 1, height: 28, color: BoutiqueColors.border);
+}
+
+/// Tuile bleue arrondie de raccourci vers un type de service (style
+/// maquette : fond bleu, icone blanche, libelle en bas).
+class _QuickServiceTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _QuickServiceTile({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 78,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: const Color(0xFF3E69FE), borderRadius: BorderRadius.circular(16)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Colors.white, size: 26),
+          const Spacer(),
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600, height: 1.1)),
+        ],
+      ),
+    );
+  }
 }
