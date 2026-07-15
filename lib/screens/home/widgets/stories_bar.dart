@@ -18,6 +18,8 @@ class StoriesBar extends StatelessWidget {
     _Story('mama.care', Color(0xFF35B8A6)),
     _Story('nadia.fit', Color(0xFFF2994A)),
     _Story('bébé.plus', Color(0xFFEB5757)),
+    _Story('california.gym', Color(0xFF1E4C8C)),
+    _Story('algiers.trail', Color(0xFF2F9E44)),
   ];
 
   @override

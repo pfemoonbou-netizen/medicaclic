@@ -108,6 +108,28 @@ const Map<String, InfluencerInfo> kInfluencers = {
     followers: 3500,
     following: 90,
   ),
+  'california.gym': InfluencerInfo(
+    username: 'california.gym',
+    color: Color(0xFF1E4C8C),
+    avatar: null,
+    category: 'Salle de sport · Fitness',
+    bio: "California Gym 💪 Musculation, cardio et coaching. Abonnements mensuels, trimestriels, semestriels et annuels.",
+    posts: 45,
+    followers: 7800,
+    following: 30,
+    gridImages: ['assets/images/influencers/gym_subscription.jpg', 'assets/images/influencers/gym_equipment.jpg'],
+  ),
+  'algiers.trail': InfluencerInfo(
+    username: 'algiers.trail',
+    color: Color(0xFF2F9E44),
+    avatar: null,
+    category: 'Événement sportif',
+    bio: "Algiers Urban Trail 🏃 Course urbaine dans les rues d'Alger. Rejoins l'aventure !",
+    posts: 12,
+    followers: 2100,
+    following: 8,
+    gridImages: ['assets/images/influencers/algiers_trail.jpg'],
+  ),
 };
 
 InfluencerInfo? influencerByName(String username) => kInfluencers[username];

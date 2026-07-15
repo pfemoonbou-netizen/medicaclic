@@ -7,6 +7,7 @@ import 'home_care/home_care_screen.dart';
 import '../../providers/home_care_provider.dart';
 import 'widgets/ambulance_sheet.dart';
 import '../medical/medical_record_screen.dart';
+import 'fitness_screen.dart';
 
 /// Page "Autour de moi" : regroupe la recherche des services les plus
 /// proches (pharmacies, cliniques/médecins, soins à domicile, ambulance).
@@ -61,6 +62,13 @@ class NearbyServicesScreen extends StatelessWidget {
             title: 'Soins à domicile',
             subtitle: 'Infirmiers et services de soins à domicile',
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChangeNotifierProvider(create: (_) => HomeCareProvider(), child: const HomeCareScreen()))),
+          ),
+          _serviceCard(
+            icon: Icons.fitness_center,
+            color: const Color(0xFF1E4C8C),
+            title: 'Salles de fitness proches',
+            subtitle: 'Trouver une salle de sport près de vous',
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FitnessScreen())),
           ),
           _serviceCard(
             icon: Icons.emergency,

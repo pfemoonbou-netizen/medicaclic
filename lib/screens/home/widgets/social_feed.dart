@@ -126,6 +126,30 @@ class SocialFeed extends StatelessWidget {
       sponsored: false,
       postImages: ['assets/images/influencers/post_diabetes.jpg'],
     ),
+    _Post(
+      user: 'california.gym',
+      avatarColor: Color(0xFF1E4C8C),
+      caption: "Nouvel abonnement Fitness Only 💪 Mensuel 20 000 DA · Trimestriel 55 000 DA · Semestriel 90 000 DA · Annuel 140 000 DA.",
+      likes: 276,
+      comments: 33,
+      timeAgo: 'il y a 6 j',
+      imageColors: [Color(0xFF1E4C8C), Color(0xFF3E69FE)],
+      imageIcon: Icons.fitness_center,
+      sponsored: true,
+      postImages: ['assets/images/influencers/gym_subscription.jpg', 'assets/images/influencers/gym_equipment.jpg'],
+    ),
+    _Post(
+      user: 'algiers.trail',
+      avatarColor: Color(0xFF2F9E44),
+      caption: "Algiers Urban Trail 26 juin 2026 🏃 Vendredi 26 juin à 18h30. Rejoins la course urbaine dans les rues d'Alger !",
+      likes: 198,
+      comments: 24,
+      timeAgo: 'il y a 1 sem',
+      imageColors: [Color(0xFF2F9E44), Color(0xFFF2994A)],
+      imageIcon: Icons.directions_run,
+      sponsored: false,
+      postImages: ['assets/images/influencers/algiers_trail.jpg'],
+    ),
   ];
 
   @override
