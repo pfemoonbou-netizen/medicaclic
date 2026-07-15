@@ -44,6 +44,7 @@ class NearbyServicesScreen extends StatelessWidget {
           const SizedBox(height: 14),
           _serviceCard(
             icon: Icons.local_pharmacy,
+            image: 'assets/images/services/pharmacie_icon.jpg',
             color: const Color(0xFF18A589),
             title: 'Pharmacies proches',
             subtitle: 'Trouver les pharmacies ouvertes près de vous',
@@ -51,6 +52,7 @@ class NearbyServicesScreen extends StatelessWidget {
           ),
           _serviceCard(
             icon: Icons.local_hospital,
+            image: 'assets/images/services/medecin_icon.jpg',
             color: const Color(0xFF3E69FE),
             title: 'Cliniques & médecins proches',
             subtitle: 'Consulter les praticiens autour de vous',
@@ -58,6 +60,7 @@ class NearbyServicesScreen extends StatelessWidget {
           ),
           _serviceCard(
             icon: Icons.home_repair_service,
+            image: 'assets/images/services/domicile_icon.jpg',
             color: const Color(0xFFF2994A),
             title: 'Soins à domicile',
             subtitle: 'Infirmiers et services de soins à domicile',
@@ -72,6 +75,7 @@ class NearbyServicesScreen extends StatelessWidget {
           ),
           _serviceCard(
             icon: Icons.emergency,
+            image: 'assets/images/services/ambulance_icon.jpg',
             color: const Color(0xFFEB5757),
             title: 'Ambulance',
             subtitle: 'Appeler une ambulance en urgence',
@@ -96,7 +100,7 @@ class NearbyServicesScreen extends StatelessWidget {
     );
   }
 
-  Widget _serviceCard({required IconData icon, required Color color, required String title, required String subtitle, required VoidCallback onTap}) {
+  Widget _serviceCard({required IconData icon, String? image, required Color color, required String title, required String subtitle, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -113,8 +117,11 @@ class NearbyServicesScreen extends StatelessWidget {
             Container(
               width: 52,
               height: 52,
+              padding: image != null ? const EdgeInsets.all(8) : EdgeInsets.zero,
               decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(14)),
-              child: Icon(icon, color: color, size: 26),
+              child: image != null
+                  ? Image.asset(image, fit: BoxFit.contain, errorBuilder: (c, e, s) => Icon(icon, color: color, size: 26))
+                  : Icon(icon, color: color, size: 26),
             ),
             const SizedBox(width: 14),
             Expanded(
