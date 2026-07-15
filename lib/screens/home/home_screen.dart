@@ -321,7 +321,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _homeTab() {
-    final doctors = context.watch<DoctorProvider>().doctors;
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
@@ -332,24 +331,6 @@ class _HomeScreenState extends State<HomeScreen> {
           const StoriesBar(),
           const SizedBox(height: 24),
           const SocialFeed(),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Top Doctor', style: TextStyle(color: _darkText, fontSize: 16, fontWeight: FontWeight.w600)),
-              GestureDetector(onTap: () => _openDoctorsScreen(context), child: const Text('See all', style: TextStyle(color: AppColors.primary, fontSize: 12))),
-            ],
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 173,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: doctors.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 13),
-              itemBuilder: (context, i) => _topDoctorCard(doctors[i]),
-            ),
-          ),
           const SizedBox(height: 12),
         ],
       ),
