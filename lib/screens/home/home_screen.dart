@@ -326,8 +326,6 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _greetingHeader(),
-          const SizedBox(height: 20),
           const StoriesBar(),
           const SizedBox(height: 24),
           const SocialFeed(),
