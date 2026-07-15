@@ -24,12 +24,16 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
   }
 
   void _book(BuildContext context, CareProvider provider) {
+    final existingProvider = context.read<HomeCareProvider>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: const Color(0x99000000),
-      builder: (context) => BookingSheet(provider: provider),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: existingProvider,
+        child: BookingSheet(provider: provider),
+      ),
     );
   }
 

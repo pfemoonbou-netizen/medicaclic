@@ -174,7 +174,18 @@ class _HomeCareScreenState extends State<HomeCareScreen> {
               final cat = homeCare.categories[i];
               return InkWell(
                 borderRadius: BorderRadius.circular(14),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProviderListScreen(initialCategoryId: cat.id))),
+                onTap: () {
+                  final existingProvider = context.read<HomeCareProvider>();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChangeNotifierProvider.value(
+                        value: existingProvider,
+                        child: ProviderListScreen(initialCategoryId: cat.id),
+                      ),
+                    ),
+                  );
+                },
                 child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
