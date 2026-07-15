@@ -227,6 +227,7 @@ class _BookingSheetState extends State<BookingSheet> {
       const SizedBox(height: 10),
       TextField(
         controller: _dateController,
+        onChanged: (_) => setState(() {}),
         style: const TextStyle(color: HomeCareColors.textPrimary),
         decoration: InputDecoration(
           hintText: 'ex: 20/01/2025',
@@ -235,6 +236,7 @@ class _BookingSheetState extends State<BookingSheet> {
           filled: true,
           fillColor: HomeCareColors.background,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: HomeCareColors.border)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: HomeCareColors.accent)),
         ),
       ),
       const SizedBox(height: 20),
@@ -265,6 +267,7 @@ class _BookingSheetState extends State<BookingSheet> {
       TextField(
         controller: _addressController,
         maxLines: 2,
+        onChanged: (_) => setState(() {}),
         style: const TextStyle(color: HomeCareColors.textPrimary),
         decoration: InputDecoration(
           hintText: 'Quartier, rue, repère...',
@@ -273,6 +276,7 @@ class _BookingSheetState extends State<BookingSheet> {
           filled: true,
           fillColor: HomeCareColors.background,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: HomeCareColors.border)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: HomeCareColors.accent)),
         ),
       ),
       const SizedBox(height: 20),
@@ -288,6 +292,7 @@ class _BookingSheetState extends State<BookingSheet> {
           filled: true,
           fillColor: HomeCareColors.background,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: HomeCareColors.border)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: HomeCareColors.accent)),
         ),
       ),
     ];
