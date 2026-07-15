@@ -25,9 +25,9 @@ class _HomeCareScreenState extends State<HomeCareScreen> {
     final homeCare = context.watch<HomeCareProvider>();
 
     return Scaffold(
-      backgroundColor: HomeCareColors.bg,
+      backgroundColor: HomeCareColors.background,
       appBar: AppBar(
-        backgroundColor: HomeCareColors.bg,
+        backgroundColor: HomeCareColors.background,
         elevation: 0,
         iconTheme: const IconThemeData(color: HomeCareColors.textPrimary),
         title: const Text('Services à Domicile', style: TextStyle(color: HomeCareColors.textPrimary, fontSize: 17)),
