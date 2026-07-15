@@ -8,7 +8,8 @@ class Gym {
   final double rating;
   final String priceFrom;
   final Color color;
-  const Gym({required this.name, required this.address, required this.distanceKm, required this.rating, required this.priceFrom, required this.color});
+  final String? logo;
+  const Gym({required this.name, required this.address, required this.distanceKm, required this.rating, required this.priceFrom, required this.color, this.logo});
 }
 
 /// Page Fitness : recherche et liste des salles de sport les plus proches.
@@ -22,10 +23,10 @@ class _FitnessScreenState extends State<FitnessScreen> {
   String _query = '';
 
   static const List<Gym> _gyms = [
-    Gym(name: 'California Gym', address: 'Alger Centre', distanceKm: 1.2, rating: 4.7, priceFrom: '20 000 DA/mois', color: Color(0xFF1E4C8C)),
-    Gym(name: 'Fitness Park', address: 'Hydra, Alger', distanceKm: 2.5, rating: 4.5, priceFrom: '15 000 DA/mois', color: Color(0xFFF2994A)),
-    Gym(name: 'Gold\'s Gym', address: 'Bab Ezzouar', distanceKm: 4.1, rating: 4.6, priceFrom: '18 000 DA/mois', color: Color(0xFF7C6BE0)),
-    Gym(name: 'PowerHouse', address: 'Kouba, Alger', distanceKm: 3.3, rating: 4.4, priceFrom: '12 000 DA/mois', color: Color(0xFF35B8A6)),
+    Gym(name: 'California Gym', address: 'Alger Centre', distanceKm: 1.2, rating: 4.7, priceFrom: '20 000 DA/mois', color: Color(0xFF1E4C8C), logo: 'assets/images/influencers/gym_logo_california.jpg'),
+    Gym(name: 'Fitness Park Club DZ', address: 'Hydra, Alger', distanceKm: 2.5, rating: 4.5, priceFrom: '15 000 DA/mois', color: Color(0xFFF2994A), logo: 'assets/images/influencers/gym_logo_fitness_park.jpg'),
+    Gym(name: 'Gold\'s Gym', address: 'Bab Ezzouar', distanceKm: 4.1, rating: 4.6, priceFrom: '18 000 DA/mois', color: Color(0xFF7C6BE0), logo: 'assets/images/influencers/gym_logo_golds.jpg'),
+    Gym(name: 'PowerHouse.DZ', address: 'Kouba, Alger', distanceKm: 3.3, rating: 4.4, priceFrom: '12 000 DA/mois', color: Color(0xFF35B8A6), logo: 'assets/images/influencers/gym_logo_powerhouse.jpg'),
   ];
 
   List<Gym> get _filtered {
@@ -98,11 +99,20 @@ class _FitnessScreenState extends State<FitnessScreen> {
       ),
       child: Row(
         children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(color: g.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(14)),
-            child: Icon(Icons.fitness_center, color: g.color, size: 26),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(color: g.color.withValues(alpha: 0.12)),
+              child: g.logo != null
+                  ? Image.asset(
+                      g.logo!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (c, e, s) => Icon(Icons.fitness_center, color: g.color, size: 26),
+                    )
+                  : Icon(Icons.fitness_center, color: g.color, size: 26),
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
