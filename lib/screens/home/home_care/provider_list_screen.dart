@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../pharmacy/boutique_theme.dart';
+import 'home_care_theme.dart';
 import '../../../providers/home_care_provider.dart';
 import 'booking_sheet.dart';
 
@@ -47,12 +47,12 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
     final category = _categoryId == 'tous' ? null : homeCare.categoryById(_categoryId);
 
     return Scaffold(
-      backgroundColor: BoutiqueColors.background,
+      backgroundColor: HomeCareColors.background,
       appBar: AppBar(
-        backgroundColor: BoutiqueColors.background,
+        backgroundColor: HomeCareColors.background,
         elevation: 0,
-        iconTheme: const IconThemeData(color: BoutiqueColors.textPrimary),
-        title: const Text('Services à Domicile', style: TextStyle(color: BoutiqueColors.textPrimary, fontSize: 17)),
+        iconTheme: const IconThemeData(color: HomeCareColors.textPrimary),
+        title: const Text('Services à Domicile', style: TextStyle(color: HomeCareColors.textPrimary, fontSize: 17)),
       ),
       body: Column(
         children: [
@@ -67,7 +67,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
                 final isAll = i == 0;
                 final cat = isAll ? null : homeCare.categories[i - 1];
                 final active = isAll ? _categoryId == 'tous' : cat!.id == _categoryId;
-                final color = isAll ? BoutiqueColors.accent : cat!.color;
+                final color = isAll ? HomeCareColors.accent : cat!.color;
                 return GestureDetector(
                   onTap: () => setState(() => _categoryId = isAll ? 'tous' : cat!.id),
                   child: Container(
@@ -75,14 +75,14 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
                     decoration: BoxDecoration(
                       color: active ? color.withValues(alpha: 0.18) : Colors.transparent,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: active ? color : BoutiqueColors.border),
+                      border: Border.all(color: active ? color : HomeCareColors.border),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(isAll ? Icons.apps : cat!.icon, size: 14, color: active ? color : BoutiqueColors.textSecondary),
+                        Icon(isAll ? Icons.apps : cat!.icon, size: 14, color: active ? color : HomeCareColors.textSecondary),
                         const SizedBox(width: 6),
-                        Text(isAll ? 'Tous' : cat!.name, style: TextStyle(color: active ? color : BoutiqueColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
+                        Text(isAll ? 'Tous' : cat!.name, style: TextStyle(color: active ? color : HomeCareColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
@@ -92,7 +92,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
           ),
           Expanded(
             child: providers.isEmpty
-                ? Center(child: Text('Aucun prestataire pour "${category?.name ?? 'Tous'}" pour le moment.', style: const TextStyle(color: BoutiqueColors.textSecondary)))
+                ? Center(child: Text('Aucun prestataire pour "${category?.name ?? 'Tous'}" pour le moment.', style: const TextStyle(color: HomeCareColors.textSecondary)))
                 : ListView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                     itemCount: providers.length,
@@ -128,7 +128,7 @@ class _ProviderCardState extends State<_ProviderCard> {
         children: [
           Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: BoutiqueColors.card, borderRadius: BorderRadius.circular(16), border: Border.all(color: BoutiqueColors.border)),
+            decoration: BoxDecoration(color: HomeCareColors.card, borderRadius: BorderRadius.circular(16), border: Border.all(color: HomeCareColors.border)),
             child: _buildCardContent(p),
           ),
           Positioned(
@@ -149,7 +149,7 @@ class _ProviderCardState extends State<_ProviderCard> {
                         child: Container(
                           width: 120,
                           alignment: Alignment.center,
-                          color: p.available ? BoutiqueColors.green : BoutiqueColors.muted,
+                          color: p.available ? HomeCareColors.green : HomeCareColors.muted,
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Text(
                             p.available ? 'Disponible' : 'Indisponible',
@@ -183,8 +183,8 @@ class _ProviderCardState extends State<_ProviderCard> {
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => CircleAvatar(
                     radius: 28,
-                    backgroundColor: BoutiqueColors.accent.withValues(alpha: 0.15),
-                    child: Text(p.name.split(' ').map((s) => s.isNotEmpty ? s[0] : '').take(2).join(), style: const TextStyle(color: BoutiqueColors.accent, fontWeight: FontWeight.bold)),
+                    backgroundColor: HomeCareColors.accent.withValues(alpha: 0.15),
+                    child: Text(p.name.split(' ').map((s) => s.isNotEmpty ? s[0] : '').take(2).join(), style: const TextStyle(color: HomeCareColors.accent, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ),
@@ -193,17 +193,17 @@ class _ProviderCardState extends State<_ProviderCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: BoutiqueColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w700)),
-                    Text(p.specialty, style: const TextStyle(color: BoutiqueColors.textFaint, fontSize: 11)),
+                    Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: HomeCareColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w700)),
+                    Text(p.specialty, style: const TextStyle(color: HomeCareColors.textFaint, fontSize: 11)),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.star, size: 13, color: BoutiqueColors.orange),
+                        const Icon(Icons.star, size: 13, color: HomeCareColors.orange),
                         const SizedBox(width: 3),
-                        Text('${p.rating} (${p.reviewCount} avis)', style: const TextStyle(color: BoutiqueColors.textSecondary, fontSize: 11)),
+                        Text('${p.rating} (${p.reviewCount} avis)', style: const TextStyle(color: HomeCareColors.textSecondary, fontSize: 11)),
                         const SizedBox(width: 8),
-                        const Icon(Icons.location_on_outlined, size: 13, color: BoutiqueColors.textFaint),
-                        Text(' ${p.distanceKm} km', style: const TextStyle(color: BoutiqueColors.textFaint, fontSize: 11)),
+                        const Icon(Icons.location_on_outlined, size: 13, color: HomeCareColors.textFaint),
+                        Text(' ${p.distanceKm} km', style: const TextStyle(color: HomeCareColors.textFaint, fontSize: 11)),
                       ],
                     ),
                   ],
@@ -212,8 +212,8 @@ class _ProviderCardState extends State<_ProviderCard> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('${p.pricePerVisit}', style: const TextStyle(color: BoutiqueColors.accent, fontSize: 16, fontWeight: FontWeight.bold)),
-                  const Text('DA/visite', style: TextStyle(color: BoutiqueColors.textFaint, fontSize: 10)),
+                  Text('${p.pricePerVisit}', style: const TextStyle(color: HomeCareColors.accent, fontSize: 16, fontWeight: FontWeight.bold)),
+                  const Text('DA/visite', style: TextStyle(color: HomeCareColors.textFaint, fontSize: 10)),
                 ],
               ),
             ],
@@ -229,26 +229,26 @@ class _ProviderCardState extends State<_ProviderCard> {
           const SizedBox(height: 10),
           Row(
             children: [
-              Container(width: 8, height: 8, decoration: BoxDecoration(color: p.available ? BoutiqueColors.green : BoutiqueColors.muted, shape: BoxShape.circle)),
+              Container(width: 8, height: 8, decoration: BoxDecoration(color: p.available ? HomeCareColors.green : HomeCareColors.muted, shape: BoxShape.circle)),
             ],
           ),
           const SizedBox(height: 10),
-          Wrap(spacing: 6, runSpacing: 6, children: p.tags.map((t) => Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5), decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: BoutiqueColors.border)), child: Text(t, style: const TextStyle(color: BoutiqueColors.textSecondary, fontSize: 11)))).toList()),
+          Wrap(spacing: 6, runSpacing: 6, children: p.tags.map((t) => Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5), decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: HomeCareColors.border)), child: Text(t, style: const TextStyle(color: HomeCareColors.textSecondary, fontSize: 11)))).toList()),
           const SizedBox(height: 6),
           GestureDetector(
             onTap: () => setState(() => _expanded = !_expanded),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(_expanded ? 'Voir moins' : 'Voir plus (tarifs, contacts, avis)', style: const TextStyle(color: BoutiqueColors.accent, fontSize: 12)),
-                Icon(_expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, size: 16, color: BoutiqueColors.accent),
+                Text(_expanded ? 'Voir moins' : 'Voir plus (tarifs, contacts, avis)', style: const TextStyle(color: HomeCareColors.accent, fontSize: 12)),
+                Icon(_expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, size: 16, color: HomeCareColors.accent),
               ],
             ),
           ),
           if (_expanded) ...[
             const SizedBox(height: 8),
-            Text('Adresse : ${p.address}', style: const TextStyle(color: BoutiqueColors.textSecondary, fontSize: 12)),
-            Text('Téléphone : ${p.phone}', style: const TextStyle(color: BoutiqueColors.textSecondary, fontSize: 12)),
+            Text('Adresse : ${p.address}', style: const TextStyle(color: HomeCareColors.textSecondary, fontSize: 12)),
+            Text('Téléphone : ${p.phone}', style: const TextStyle(color: HomeCareColors.textSecondary, fontSize: 12)),
           ],
           const SizedBox(height: 12),
           Row(
@@ -256,9 +256,9 @@ class _ProviderCardState extends State<_ProviderCard> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => widget.onCall(p.phone),
-                  icon: const Icon(Icons.call, size: 16, color: BoutiqueColors.accent),
-                  label: const Text('Appeler', style: TextStyle(color: BoutiqueColors.accent, fontSize: 12)),
-                  style: OutlinedButton.styleFrom(side: const BorderSide(color: BoutiqueColors.accent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), padding: const EdgeInsets.symmetric(vertical: 10)),
+                  icon: const Icon(Icons.call, size: 16, color: HomeCareColors.accent),
+                  label: const Text('Appeler', style: TextStyle(color: HomeCareColors.accent, fontSize: 12)),
+                  style: OutlinedButton.styleFrom(side: const BorderSide(color: HomeCareColors.accent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), padding: const EdgeInsets.symmetric(vertical: 10)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -274,7 +274,7 @@ class _ProviderCardState extends State<_ProviderCard> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: p.available ? widget.onBook : null,
-                  style: ElevatedButton.styleFrom(backgroundColor: BoutiqueColors.accent, disabledBackgroundColor: BoutiqueColors.border, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), padding: const EdgeInsets.symmetric(vertical: 10)),
+                  style: ElevatedButton.styleFrom(backgroundColor: HomeCareColors.accent, disabledBackgroundColor: HomeCareColors.border, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), padding: const EdgeInsets.symmetric(vertical: 10)),
                   child: const Text('Réserver', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
                 ),
               ),
@@ -287,13 +287,13 @@ class _ProviderCardState extends State<_ProviderCard> {
   Widget _pill(IconData icon, String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: BoutiqueColors.background, borderRadius: BorderRadius.circular(20), border: Border.all(color: BoutiqueColors.border)),
+      decoration: BoxDecoration(color: HomeCareColors.background, borderRadius: BorderRadius.circular(20), border: Border.all(color: HomeCareColors.border)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: BoutiqueColors.textFaint),
+          Icon(icon, size: 12, color: HomeCareColors.textFaint),
           const SizedBox(width: 4),
-          Text(text, style: const TextStyle(color: BoutiqueColors.textFaint, fontSize: 11)),
+          Text(text, style: const TextStyle(color: HomeCareColors.textFaint, fontSize: 11)),
         ],
       ),
     );
