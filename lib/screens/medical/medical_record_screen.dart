@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../config/supabase_config.dart';
 import '../../utils/app_colors.dart';
 import 'medical_category_screen.dart';
@@ -36,6 +37,44 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   void initState() {
     super.initState();
     _loadCounts();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkDataConsent());
+  }
+
+  Future<void> _checkDataConsent() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'medical_data_consent_${user.id}';
+    if (prefs.getBool(key) == true) return;
+    if (!mounted) return;
+
+    final accepted = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Sécurité de vos données médicales'),
+        content: const SingleChildScrollView(
+          child: Text(
+            "Votre dossier médical contient des informations sensibles (allergies, diagnostics, traitements, "
+            "analyses...). Ces données sont stockées de façon sécurisée et ne sont accessibles qu'à vous, "
+            "sauf si vous choisissez de les partager avec un prestataire de soins.\n\n"
+            "En continuant, vous acceptez que MedicaClic collecte et conserve ces données médicales pour "
+            "vous permettre d'y accéder et de les gérer depuis l'application.",
+            style: TextStyle(fontSize: 13, height: 1.5),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Refuser')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('J\'accepte')),
+        ],
+      ),
+    );
+
+    if (accepted == true) {
+      await prefs.setBool(key, true);
+    } else if (mounted) {
+      Navigator.of(context).maybePop();
+    }
   }
 
   Future<void> _loadCounts() async {

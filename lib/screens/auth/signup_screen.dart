@@ -19,6 +19,7 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _obscureConfirm = true;
   DateTime? _birthDate;
   String? _gender;
+  bool _acceptedTerms = false;
 
   @override
   void dispose() {
@@ -83,6 +84,10 @@ class _SignupScreenState extends State<SignupScreen> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gender required')));
       return;
     }
+    if (!_acceptedTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vous devez accepter les conditions d\'utilisation pour continuer.')));
+      return;
+    }
 
     final auth = context.read<AuthProvider>();
     final success = await auth.signup(
@@ -101,6 +106,29 @@ class _SignupScreenState extends State<SignupScreen> {
         SnackBar(content: Text(auth.errorMessage ?? 'Inscription impossible')),
       );
     }
+  }
+
+  void _showTermsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Conditions d'utilisation"),
+        content: const SingleChildScrollView(
+          child: Text(
+            "En utilisant MedicaClic, vous acceptez que vos données personnelles et médicales soient "
+            "collectées et traitées dans le but de vous fournir les services de l'application "
+            "(prise de rendez-vous, dossier médical, mise en relation avec des prestataires de soins).\n\n"
+            "Vos données sont stockées de façon sécurisée et ne sont jamais partagées avec des tiers sans "
+            "votre consentement. Vous pouvez demander la suppression de votre compte et de vos données à "
+            "tout moment depuis votre profil.",
+            style: TextStyle(fontSize: 13, height: 1.5),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Fermer')),
+        ],
+      ),
+    );
   }
 
   @override
@@ -271,7 +299,37 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Checkbox(
+                    value: _acceptedTerms,
+                    activeColor: AppColors.primary,
+                    onChanged: (v) => setState(() => _acceptedTerms = v ?? false),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: RichText(
+                        text: TextSpan(
+                          style: const TextStyle(color: Color(0xFF707684), fontSize: 13, height: 1.4),
+                          children: [
+                            const TextSpan(text: "J'accepte les "),
+                            TextSpan(
+                              text: "conditions d'utilisation et la politique de confidentialité",
+                              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+                              recognizer: TapGestureRecognizer()..onTap = () => _showTermsDialog(context),
+                            ),
+                            const TextSpan(text: " de MedicaClic."),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               Consumer<AuthProvider>(
                 builder: (context, auth, _) => SizedBox(
                   width: double.infinity,
