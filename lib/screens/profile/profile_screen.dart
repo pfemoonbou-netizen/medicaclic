@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/home_care_provider.dart';
 import '../../providers/profile_provider.dart';
-import '../medical/medical_record_screen.dart';
 import '../premium/premium_screen.dart';
 import 'add_family_member_sheet.dart';
 import 'add_post_sheet.dart';
@@ -13,16 +11,6 @@ import 'edit_profile_sheet.dart';
 import 'profile_theme.dart';
 
 const _bloodTypes = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
-
-const _medicalCategoryLabels = {
-  'allergies': 'Allergies',
-  'family_history': 'Antécédents familiaux',
-  'diagnoses': 'Diagnostics',
-  'treatment': 'Traitement',
-  'symptoms': 'Symptômes',
-  'lab_tests': 'Analyses',
-  'imaging': 'Scanner / Imagerie',
-};
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -102,15 +90,8 @@ class _ProfileBody extends StatelessWidget {
     final provider = context.read<ProfileProvider>();
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => MultiProvider(
-        providers: [
-          ChangeNotifierProvider.value(value: provider),
-          ChangeNotifierProvider(create: (_) => HomeCareProvider()),
-        ],
-        child: const BecomeProSheet(),
-      ),
+      builder: (_) => ChangeNotifierProvider.value(value: provider, child: const BecomeProSheet()),
     );
   }
 
@@ -204,6 +185,8 @@ class _ProfileBody extends StatelessWidget {
             const SizedBox(height: 20),
             if (profile.isPro) _publicationsSection(context, profile),
             const SizedBox(height: 20),
+            _settingsSection(context),
+            const SizedBox(height: 20),
             GestureDetector(
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PremiumScreen())),
               child: Container(
@@ -288,38 +271,6 @@ class _ProfileBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        _sectionCard(
-          title: 'Dossier médical',
-          children: [
-            if (profile.medicalCounts.isEmpty)
-              const Text('Aucune donnée médicale enregistrée.', style: TextStyle(color: ProfileColors.textFaint, fontSize: 12))
-            else
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: profile.medicalCounts.entries.map((e) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: ProfileColors.border)),
-                    child: Text('${_medicalCategoryLabels[e.key] ?? e.key} · ${e.value}', style: const TextStyle(color: ProfileColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600)),
-                  );
-                }).toList(),
-              ),
-            const SizedBox(height: 12),
-            GestureDetector(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MedicalRecordScreen())),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Voir mon dossier médical complet', style: TextStyle(color: ProfileColors.accent, fontSize: 12, fontWeight: FontWeight.w600)),
-                  SizedBox(width: 4),
-                  Icon(Icons.chevron_right, color: ProfileColors.accent, size: 16),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
         _familyMembersSection(context, profile),
         const SizedBox(height: 16),
         GestureDetector(
@@ -336,7 +287,7 @@ class _ProfileBody extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Devenir un compte Pro', style: TextStyle(color: ProfileColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w700)),
-                      Text('Proposez vos services et publiez sur votre page.', style: TextStyle(color: ProfileColors.textSecondary, fontSize: 11)),
+                      Text('Débloquez la publication de contenu sur votre page.', style: TextStyle(color: ProfileColors.textSecondary, fontSize: 11)),
                     ],
                   ),
                 ),
@@ -522,6 +473,33 @@ class _ProfileBody extends StatelessWidget {
           Text(label, style: const TextStyle(color: ProfileColors.textSecondary, fontSize: 13)),
           const Spacer(),
           Text(value, style: const TextStyle(color: ProfileColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  Widget _settingsSection(BuildContext context) {
+    return _sectionCard(
+      title: 'Paramètres',
+      children: [
+        _settingsRow(context, Icons.language_outlined, 'Langue'),
+        const Divider(height: 20, color: ProfileColors.border),
+        _settingsRow(context, Icons.security_outlined, 'Sécurité'),
+        const Divider(height: 20, color: ProfileColors.border),
+        _settingsRow(context, Icons.accessibility_new_outlined, 'Accessibilité'),
+      ],
+    );
+  }
+
+  Widget _settingsRow(BuildContext context, IconData icon, String label) {
+    return GestureDetector(
+      onTap: () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$label — bientôt disponible'))),
+      child: Row(
+        children: [
+          Icon(icon, color: ProfileColors.accent, size: 18),
+          const SizedBox(width: 10),
+          Expanded(child: Text(label, style: const TextStyle(color: ProfileColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600))),
+          const Icon(Icons.chevron_right, color: ProfileColors.textFaint, size: 18),
         ],
       ),
     );

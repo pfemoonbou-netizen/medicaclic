@@ -52,13 +52,13 @@ class ProfileProvider extends ChangeNotifier {
   String? shopBio;
   double? weightKg;
   double? heightCm;
+  bool isCreator = false;
 
   CareProvider? providerInfo;
-  Map<String, int> medicalCounts = {};
   List<UserPost> posts = [];
   List<FamilyMember> familyMembers = [];
 
-  bool get isPro => role == 'prestataire' || role == 'vendeur';
+  bool get isPro => role == 'prestataire' || role == 'vendeur' || isCreator;
   String get userId => supabase.auth.currentUser!.id;
 
   Future<void> load() async {
@@ -81,6 +81,7 @@ class ProfileProvider extends ChangeNotifier {
       shopBio = profile['shop_bio'] as String?;
       weightKg = (profile['weight_kg'] as num?)?.toDouble();
       heightCm = (profile['height_cm'] as num?)?.toDouble();
+      isCreator = profile['is_creator'] as bool? ?? false;
 
       if (role == 'prestataire') {
         final rows = await supabase.from('home_care_providers').select().eq('user_id', uid).limit(1);
@@ -90,13 +91,6 @@ class ProfileProvider extends ChangeNotifier {
       }
 
       if (role != 'prestataire' && role != 'vendeur') {
-        final records = await supabase.from('medical_records').select('category').eq('user_id', uid);
-        medicalCounts = {};
-        for (final row in (records as List)) {
-          final cat = row['category'] as String;
-          medicalCounts[cat] = (medicalCounts[cat] ?? 0) + 1;
-        }
-
         final memberRows = await supabase.from('family_members').select().eq('user_id', uid).order('created_at');
         familyMembers = (memberRows as List).map((row) => FamilyMember.fromMap(row as Map<String, dynamic>)).toList();
       } else {
@@ -169,26 +163,10 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> becomePrestataire({required String categoryId, required String specialty, required String phone}) async {
-    await supabase.from('profiles').update({'role': 'prestataire'}).eq('id', userId);
-    await supabase.from('home_care_providers').insert({
-      'user_id': userId,
-      'category_id': categoryId,
-      'name': name,
-      'specialty': specialty,
-      'phone': phone,
-    });
-    await load();
-  }
-
-  Future<void> becomeVendeur({required String shopName, required String shopPhone, required String shopBio}) async {
-    await supabase.from('profiles').update({
-      'role': 'vendeur',
-      'shop_name': shopName,
-      'shop_phone': shopPhone,
-      'shop_bio': shopBio,
-    }).eq('id', userId);
-    await load();
+  Future<void> becomeCreator() async {
+    await supabase.from('profiles').update({'is_creator': true}).eq('id', userId);
+    isCreator = true;
+    notifyListeners();
   }
 
   Future<void> addPost({required String content, XFile? image}) async {
