@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/app_colors.dart';
+import 'workout_plan_screen.dart';
 
 class Gym {
   final String name;
@@ -70,6 +71,31 @@ class _FitnessScreenState extends State<FitnessScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WorkoutPlanScreen())),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(color: const Color(0xFF0D0F14), borderRadius: BorderRadius.circular(16)),
+              child: Row(
+                children: [
+                  const Icon(Icons.fitness_center, color: Color(0xFFFF6B35), size: 22),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Mon programme de musculation', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                        SizedBox(height: 2),
+                        Text('Séances Push/Pull/Legs — suivi des poids et séries', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Colors.white70),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 20),
