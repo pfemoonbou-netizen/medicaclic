@@ -6,6 +6,7 @@ import '../../providers/home_care_provider.dart';
 import '../../providers/profile_provider.dart';
 import '../medical/medical_record_screen.dart';
 import '../premium/premium_screen.dart';
+import 'add_family_member_sheet.dart';
 import 'add_post_sheet.dart';
 import 'become_pro_sheet.dart';
 import 'edit_profile_sheet.dart';
@@ -55,6 +56,45 @@ class _ProfileBody extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => ChangeNotifierProvider.value(value: provider, child: const AddPostSheet()),
+    );
+  }
+
+  void _openAddFamilyMember(BuildContext context) {
+    final provider = context.read<ProfileProvider>();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => ChangeNotifierProvider.value(value: provider, child: const AddFamilyMemberSheet()),
+    );
+  }
+
+  Future<void> _editStats(BuildContext context, ProfileProvider profile) async {
+    final weightController = TextEditingController(text: profile.weightKg?.toString() ?? '');
+    final heightController = TextEditingController(text: profile.heightCm?.toString() ?? '');
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Poids & taille'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: weightController, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Poids (kg)')),
+            const SizedBox(height: 12),
+            TextField(controller: heightController, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Taille (cm)')),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Annuler')),
+          TextButton(
+            onPressed: () {
+              profile.updateStats(weightKg: double.tryParse(weightController.text.trim()), heightCm: double.tryParse(heightController.text.trim()));
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Enregistrer'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -153,7 +193,14 @@ class _ProfileBody extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            if (profile.role == 'prestataire') _prestataireCard(profile) else if (profile.role == 'vendeur') _vendeurCard(profile) else _patientCard(context, profile),
+            if (profile.role == 'prestataire')
+              _prestataireCard(profile)
+            else if (profile.role == 'vendeur')
+              _vendeurCard(profile)
+            else if (profile.role == 'admin')
+              _adminCard()
+            else
+              _patientCard(context, profile),
             const SizedBox(height: 20),
             if (profile.isPro) _publicationsSection(context, profile),
             const SizedBox(height: 20),
@@ -231,27 +278,19 @@ class _ProfileBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionCard(
-          title: 'Informations médicales',
+        Row(
           children: [
-            Row(
-              children: [
-                const Icon(Icons.bloodtype_outlined, color: ProfileColors.accent, size: 18),
-                const SizedBox(width: 8),
-                const Text('Groupe sanguin', style: TextStyle(color: ProfileColors.textSecondary, fontSize: 13)),
-                const Spacer(),
-                DropdownButton<String>(
-                  value: profile.bloodType,
-                  hint: const Text('—', style: TextStyle(color: ProfileColors.textFaint)),
-                  underline: const SizedBox.shrink(),
-                  items: _bloodTypes.map((t) => DropdownMenuItem(value: t, child: Text(t, style: const TextStyle(color: ProfileColors.textPrimary, fontWeight: FontWeight.w600)))).toList(),
-                  onChanged: (v) {
-                    if (v != null) profile.updateBloodType(v);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
+            _statBox(profile.weightKg != null ? '${_trim(profile.weightKg!)} kg' : '—', 'Poids', onTap: () => _editStats(context, profile)),
+            const SizedBox(width: 10),
+            _statBox(profile.heightCm != null ? '${_trim(profile.heightCm!)} cm' : '—', 'Taille', onTap: () => _editStats(context, profile)),
+            const SizedBox(width: 10),
+            _statBox(profile.bloodType ?? '—', 'Groupe sanguin', onTap: () => _editBloodType(context, profile)),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _sectionCard(
+          title: 'Dossier médical',
+          children: [
             if (profile.medicalCounts.isEmpty)
               const Text('Aucune donnée médicale enregistrée.', style: TextStyle(color: ProfileColors.textFaint, fontSize: 12))
             else
@@ -280,6 +319,8 @@ class _ProfileBody extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 16),
+        _familyMembersSection(context, profile),
         const SizedBox(height: 16),
         GestureDetector(
           onTap: () => _openBecomePro(context),
@@ -310,14 +351,150 @@ class _ProfileBody extends StatelessWidget {
 
   Widget _prestataireCard(ProfileProvider profile) {
     final info = profile.providerInfo;
-    return _sectionCard(
-      title: 'Informations prestataire',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _infoRow(Icons.medical_services_outlined, 'Spécialité', info?.specialty ?? '—'),
-        _infoRow(Icons.call_outlined, 'Téléphone', info?.phone ?? '—'),
-        _infoRow(Icons.payments_outlined, 'Tarif / visite', info != null ? '${info.pricePerVisit} DA' : '—'),
-        _infoRow(Icons.star_outline, 'Note', info != null ? '${info.rating} (${info.reviewCount} avis)' : '—'),
+        Row(
+          children: [
+            _statBox(info != null ? '${info.pricePerVisit} DA' : '—', 'Tarif / visite'),
+            const SizedBox(width: 10),
+            _statBox(info != null ? '${info.rating}' : '—', 'Note'),
+            const SizedBox(width: 10),
+            _statBox(info != null ? '${info.yearsExperience} ans' : '—', 'Expérience'),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _sectionCard(
+          title: 'Informations prestataire',
+          children: [
+            _infoRow(Icons.medical_services_outlined, 'Spécialité', info?.specialty ?? '—'),
+            _infoRow(Icons.call_outlined, 'Téléphone', info?.phone ?? '—'),
+          ],
+        ),
       ],
+    );
+  }
+
+  Widget _adminCard() {
+    return _sectionCard(
+      title: 'Espace Administrateur',
+      children: const [
+        Text('Vous gérez les bannières publicitaires, les catégories et le contenu public de MedicaClic.', style: TextStyle(color: ProfileColors.textSecondary, fontSize: 12)),
+      ],
+    );
+  }
+
+  Widget _statBox(String value, String label, {VoidCallback? onTap}) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 63,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(border: Border.all(color: ProfileColors.accent, width: 2), borderRadius: BorderRadius.circular(8)),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: ProfileColors.textPrimary, fontSize: 15, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 2),
+              Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: ProfileColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w500)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _trim(double value) => value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
+
+  Future<void> _editBloodType(BuildContext context, ProfileProvider profile) async {
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Groupe sanguin'),
+        content: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _bloodTypes.map((t) {
+            final active = t == profile.bloodType;
+            return GestureDetector(
+              onTap: () {
+                profile.updateBloodType(t);
+                Navigator.pop(dialogContext);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: active ? ProfileColors.accent : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: active ? ProfileColors.accent : ProfileColors.border),
+                ),
+                child: Text(t, style: TextStyle(color: active ? Colors.white : ProfileColors.textSecondary, fontWeight: FontWeight.w600)),
+              ),
+            );
+          }).toList(),
+        ),
+        actions: [TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Fermer'))],
+      ),
+    );
+  }
+
+  Widget _familyMembersSection(BuildContext context, ProfileProvider profile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text('Membres de la famille', style: TextStyle(color: ProfileColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
+            const Spacer(),
+            GestureDetector(
+              onTap: () => _openAddFamilyMember(context),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.add, color: ProfileColors.accent, size: 16),
+                  SizedBox(width: 2),
+                  Text('Ajouter un membre', style: TextStyle(color: ProfileColors.accent, fontSize: 12, fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (profile.familyMembers.isEmpty)
+          const Text('Aucun membre ajouté.', style: TextStyle(color: ProfileColors.textFaint, fontSize: 12))
+        else
+          SizedBox(
+            height: 108,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: profile.familyMembers.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (context, i) => _familyMemberCard(profile, profile.familyMembers[i]),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _familyMemberCard(ProfileProvider profile, FamilyMember member) {
+    final initial = member.name.isNotEmpty ? member.name[0].toUpperCase() : '?';
+    return GestureDetector(
+      onLongPress: () => profile.deleteFamilyMember(member.id),
+      child: Container(
+        width: 92,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(color: ProfileColors.card, borderRadius: BorderRadius.circular(14), border: Border.all(color: ProfileColors.border)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircleAvatar(radius: 20, backgroundColor: ProfileColors.accent.withValues(alpha: 0.12), child: Text(initial, style: const TextStyle(color: ProfileColors.accent, fontWeight: FontWeight.bold))),
+            const SizedBox(height: 6),
+            Text(member.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: ProfileColors.textPrimary, fontSize: 12, fontWeight: FontWeight.w600)),
+            Text(member.relation, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: ProfileColors.textFaint, fontSize: 10)),
+          ],
+        ),
+      ),
     );
   }
 

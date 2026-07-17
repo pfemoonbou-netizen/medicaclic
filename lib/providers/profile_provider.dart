@@ -18,6 +18,25 @@ class UserPost {
       );
 }
 
+class FamilyMember {
+  final String id;
+  final String name;
+  final String relation;
+  final double? weightKg;
+  final double? heightCm;
+  final String? bloodType;
+  const FamilyMember({required this.id, required this.name, required this.relation, this.weightKg, this.heightCm, this.bloodType});
+
+  factory FamilyMember.fromMap(Map<String, dynamic> map) => FamilyMember(
+        id: map['id'] as String,
+        name: map['name'] as String,
+        relation: map['relation'] as String? ?? 'Autre',
+        weightKg: (map['weight_kg'] as num?)?.toDouble(),
+        heightCm: (map['height_cm'] as num?)?.toDouble(),
+        bloodType: map['blood_type'] as String?,
+      );
+}
+
 class ProfileProvider extends ChangeNotifier {
   bool isLoading = false;
   String? error;
@@ -31,10 +50,13 @@ class ProfileProvider extends ChangeNotifier {
   String? shopName;
   String? shopPhone;
   String? shopBio;
+  double? weightKg;
+  double? heightCm;
 
   CareProvider? providerInfo;
   Map<String, int> medicalCounts = {};
   List<UserPost> posts = [];
+  List<FamilyMember> familyMembers = [];
 
   bool get isPro => role == 'prestataire' || role == 'vendeur';
   String get userId => supabase.auth.currentUser!.id;
@@ -57,6 +79,8 @@ class ProfileProvider extends ChangeNotifier {
       shopName = profile['shop_name'] as String?;
       shopPhone = profile['shop_phone'] as String?;
       shopBio = profile['shop_bio'] as String?;
+      weightKg = (profile['weight_kg'] as num?)?.toDouble();
+      heightCm = (profile['height_cm'] as num?)?.toDouble();
 
       if (role == 'prestataire') {
         final rows = await supabase.from('home_care_providers').select().eq('user_id', uid).limit(1);
@@ -72,6 +96,11 @@ class ProfileProvider extends ChangeNotifier {
           final cat = row['category'] as String;
           medicalCounts[cat] = (medicalCounts[cat] ?? 0) + 1;
         }
+
+        final memberRows = await supabase.from('family_members').select().eq('user_id', uid).order('created_at');
+        familyMembers = (memberRows as List).map((row) => FamilyMember.fromMap(row as Map<String, dynamic>)).toList();
+      } else {
+        familyMembers = [];
       }
 
       final postRows = await supabase.from('user_posts').select().eq('user_id', uid).order('created_at', ascending: false);
@@ -109,6 +138,34 @@ class ProfileProvider extends ChangeNotifier {
   Future<void> updateBloodType(String value) async {
     await supabase.from('profiles').update({'blood_type': value}).eq('id', userId);
     bloodType = value;
+    notifyListeners();
+  }
+
+  Future<void> updateStats({double? weightKg, double? heightCm}) async {
+    await supabase.from('profiles').update({
+      'weight_kg': weightKg,
+      'height_cm': heightCm,
+    }).eq('id', userId);
+    this.weightKg = weightKg;
+    this.heightCm = heightCm;
+    notifyListeners();
+  }
+
+  Future<void> addFamilyMember({required String name, required String relation, double? weightKg, double? heightCm, String? bloodType}) async {
+    await supabase.from('family_members').insert({
+      'user_id': userId,
+      'name': name,
+      'relation': relation,
+      'weight_kg': weightKg,
+      'height_cm': heightCm,
+      'blood_type': bloodType,
+    });
+    await load();
+  }
+
+  Future<void> deleteFamilyMember(String id) async {
+    await supabase.from('family_members').delete().eq('id', id);
+    familyMembers.removeWhere((m) => m.id == id);
     notifyListeners();
   }
 
