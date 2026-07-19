@@ -20,12 +20,14 @@ class _Exercise {
   final String equipment;
   final String target;
   final String instructions;
-  const _Exercise({required this.name, required this.muscle, required this.equipment, required this.target, required this.instructions});
+  final String photoAsset;
+  const _Exercise({required this.name, required this.muscle, required this.equipment, required this.target, required this.instructions, required this.photoAsset});
 }
 
 const _exercises = [
   _Exercise(
     name: 'Curl biceps incliné haltères',
+    photoAsset: 'assets/images/exercises/curl_biceps_incline.jpg',
     muscle: _bras,
     equipment: 'Haltères + banc incliné',
     target: '3 × 10-12',
@@ -34,6 +36,7 @@ const _exercises = [
   ),
   _Exercise(
     name: 'Extension triceps à la poulie',
+    photoAsset: 'assets/images/exercises/extension_triceps_poulie.jpg',
     muscle: _bras,
     equipment: 'Poulie haute + corde ou barre',
     target: '3 × 10-12',
@@ -42,6 +45,7 @@ const _exercises = [
   ),
   _Exercise(
     name: 'Pompes (push-up dynamique)',
+    photoAsset: 'assets/images/exercises/pompes.jpg',
     muscle: _pectoraux,
     equipment: 'Poids du corps',
     target: '3 × 12-20',
@@ -50,6 +54,7 @@ const _exercises = [
   ),
   _Exercise(
     name: 'Développé couché',
+    photoAsset: 'assets/images/exercises/developpe_couche.jpg',
     muscle: _pectoraux,
     equipment: 'Barre + banc plat',
     target: '4 × 8-10',
@@ -58,6 +63,7 @@ const _exercises = [
   ),
   _Exercise(
     name: 'Rowing barre',
+    photoAsset: 'assets/images/exercises/rowing_barre.jpg',
     muscle: _dos,
     equipment: 'Barre',
     target: '3 × 8-10',
@@ -66,6 +72,7 @@ const _exercises = [
   ),
   _Exercise(
     name: 'Tractions (tirage vertical)',
+    photoAsset: 'assets/images/exercises/tractions.jpg',
     muscle: _dos,
     equipment: 'Barre de traction ou machine',
     target: '4 × 8-10',
@@ -74,6 +81,7 @@ const _exercises = [
   ),
   _Exercise(
     name: 'Squat',
+    photoAsset: 'assets/images/exercises/squat.jpg',
     muscle: _jambes,
     equipment: 'Barre ou poids du corps',
     target: '4 × 8-10',
@@ -82,6 +90,7 @@ const _exercises = [
   ),
   _Exercise(
     name: 'Fentes haltères',
+    photoAsset: 'assets/images/exercises/fentes_halteres.jpg',
     muscle: _jambes,
     equipment: 'Haltères',
     target: '3 × 10-12',
@@ -90,6 +99,7 @@ const _exercises = [
   ),
   _Exercise(
     name: 'Développé militaire',
+    photoAsset: 'assets/images/exercises/developpe_militaire.jpg',
     muscle: _epaules,
     equipment: 'Barre ou haltères',
     target: '3 × 8-10',
@@ -98,6 +108,7 @@ const _exercises = [
   ),
   _Exercise(
     name: 'Élévations latérales',
+    photoAsset: 'assets/images/exercises/elevations_laterales.jpg',
     muscle: _epaules,
     equipment: 'Haltères',
     target: '3 × 12-15',
@@ -106,6 +117,7 @@ const _exercises = [
   ),
   _Exercise(
     name: 'Gainage (planche)',
+    photoAsset: 'assets/images/exercises/gainage_planche.jpg',
     muscle: _abdos,
     equipment: 'Poids du corps',
     target: '3 × 45-60 sec',
@@ -114,6 +126,7 @@ const _exercises = [
   ),
   _Exercise(
     name: 'Crunch',
+    photoAsset: 'assets/images/exercises/crunch.jpg',
     muscle: _abdos,
     equipment: 'Poids du corps',
     target: '3 × 15-20',
@@ -206,11 +219,19 @@ class _ExerciseLibraryScreenState extends State<ExerciseLibraryScreen> {
         decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFEDF1F0))),
         child: Row(
           children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(color: exercise.muscle.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(14)),
-              child: Icon(exercise.muscle.icon, color: exercise.muscle.color, size: 28),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                width: 56,
+                height: 56,
+                alignment: Alignment.center,
+                color: exercise.muscle.color.withValues(alpha: 0.12),
+                child: Image.asset(
+                  exercise.photoAsset,
+                  fit: BoxFit.cover,
+                  errorBuilder: (c, e, s) => Icon(exercise.muscle.icon, color: exercise.muscle.color, size: 28),
+                ),
+              ),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -257,12 +278,18 @@ class _ExerciseDetailSheet extends StatelessWidget {
           Center(
             child: Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 16), decoration: BoxDecoration(color: const Color(0xFFE5E7EB), borderRadius: BorderRadius.circular(2))),
           ),
-          Center(
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
             child: Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(color: exercise.muscle.color.withValues(alpha: 0.12), shape: BoxShape.circle),
-              child: Icon(exercise.muscle.icon, color: exercise.muscle.color, size: 48),
+              width: double.infinity,
+              height: 180,
+              alignment: Alignment.center,
+              color: exercise.muscle.color.withValues(alpha: 0.12),
+              child: Image.asset(
+                exercise.photoAsset,
+                fit: BoxFit.cover,
+                errorBuilder: (c, e, s) => Icon(exercise.muscle.icon, color: exercise.muscle.color, size: 64),
+              ),
             ),
           ),
           const SizedBox(height: 16),

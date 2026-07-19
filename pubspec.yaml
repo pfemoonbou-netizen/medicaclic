@@ -75,6 +75,7 @@ flutter:
     - assets/images/services/
     - assets/images/products/
     - assets/images/yemma/
+    - assets/images/exercises/
     - assets/images/influencers/
 
   # An image asset can refer to one or more resolution-specific "variants", see
