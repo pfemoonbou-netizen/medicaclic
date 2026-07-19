@@ -71,6 +71,12 @@ class UserTypeSelectionScreen extends StatelessWidget {
                     icon: Icons.admin_panel_settings_outlined,
                     onTap: () => context.go('/complete-profile', extra: 'admin'),
                   ),
+                  const SizedBox(height: 20),
+                  _TypeButton(
+                    label: 'Vendeur',
+                    icon: Icons.storefront_outlined,
+                    onTap: () => context.go('/complete-profile', extra: 'vendeur'),
+                  ),
                   const Spacer(flex: 2),
                 ],
               ),

@@ -128,17 +128,30 @@ class ProfileProvider extends ChangeNotifier {
     return supabase.storage.from('profile-photos').getPublicUrl(path);
   }
 
-  Future<void> updateProfile({required String name, required String bio, XFile? photo}) async {
+  Future<void> updateProfile({
+    required String name,
+    required String bio,
+    XFile? photo,
+    String? shopName,
+    String? shopPhone,
+    String? shopBio,
+  }) async {
     String? newPhotoUrl;
     if (photo != null) newPhotoUrl = await _uploadImage(photo, 'profile');
     await supabase.from('profiles').update({
       'name': name,
       'bio': bio,
       if (newPhotoUrl != null) 'photo_url': newPhotoUrl,
+      if (shopName != null) 'shop_name': shopName,
+      if (shopPhone != null) 'shop_phone': shopPhone,
+      if (shopBio != null) 'shop_bio': shopBio,
     }).eq('id', userId);
     this.name = name;
     this.bio = bio;
     if (newPhotoUrl != null) photoUrl = newPhotoUrl;
+    if (shopName != null) this.shopName = shopName;
+    if (shopPhone != null) this.shopPhone = shopPhone;
+    if (shopBio != null) this.shopBio = shopBio;
     notifyListeners();
   }
 

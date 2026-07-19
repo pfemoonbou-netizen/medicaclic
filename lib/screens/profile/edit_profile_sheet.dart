@@ -16,6 +16,9 @@ class EditProfileSheet extends StatefulWidget {
 class _EditProfileSheetState extends State<EditProfileSheet> {
   late final TextEditingController _name;
   late final TextEditingController _bio;
+  late final TextEditingController _shopName;
+  late final TextEditingController _shopPhone;
+  late final TextEditingController _shopBio;
   XFile? _photo;
   bool _submitting = false;
   String? _error;
@@ -26,12 +29,18 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
     final profile = context.read<ProfileProvider>();
     _name = TextEditingController(text: profile.name);
     _bio = TextEditingController(text: profile.bio);
+    _shopName = TextEditingController(text: profile.shopName ?? '');
+    _shopPhone = TextEditingController(text: profile.shopPhone ?? '');
+    _shopBio = TextEditingController(text: profile.shopBio ?? '');
   }
 
   @override
   void dispose() {
     _name.dispose();
     _bio.dispose();
+    _shopName.dispose();
+    _shopPhone.dispose();
+    _shopBio.dispose();
     super.dispose();
   }
 
@@ -47,7 +56,15 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
       _error = null;
     });
     try {
-      await context.read<ProfileProvider>().updateProfile(name: _name.text.trim(), bio: _bio.text.trim(), photo: _photo);
+      final isVendeur = context.read<ProfileProvider>().role == 'vendeur';
+      await context.read<ProfileProvider>().updateProfile(
+            name: _name.text.trim(),
+            bio: _bio.text.trim(),
+            photo: _photo,
+            shopName: isVendeur ? _shopName.text.trim() : null,
+            shopPhone: isVendeur ? _shopPhone.text.trim() : null,
+            shopBio: isVendeur ? _shopBio.text.trim() : null,
+          );
       if (mounted) Navigator.pop(context);
     } catch (e) {
       setState(() => _error = e.toString());
@@ -105,6 +122,20 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
             const Text('Bio', style: TextStyle(color: ProfileColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             TextField(controller: _bio, maxLines: 3, decoration: _decoration(hint: 'Parlez un peu de vous...')),
+            if (profile.role == 'vendeur') ...[
+              const SizedBox(height: 14),
+              const Text('Nom de la boutique', style: TextStyle(color: ProfileColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
+              TextField(controller: _shopName, decoration: _decoration(hint: 'ex: Pharmacie Centrale')),
+              const SizedBox(height: 14),
+              const Text('Téléphone de contact', style: TextStyle(color: ProfileColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
+              TextField(controller: _shopPhone, keyboardType: TextInputType.phone, decoration: _decoration(hint: 'ex: 0555000000')),
+              const SizedBox(height: 14),
+              const Text('Description de la boutique', style: TextStyle(color: ProfileColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
+              TextField(controller: _shopBio, maxLines: 3, decoration: _decoration(hint: 'Présentez votre boutique...')),
+            ],
             if (_error != null) ...[
               const SizedBox(height: 12),
               Text(_error!, style: const TextStyle(color: ProfileColors.red, fontSize: 12)),
