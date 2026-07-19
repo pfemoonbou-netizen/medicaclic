@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/app_colors.dart';
+import 'exercise_library_screen.dart';
 import 'nutrition_plan_screen.dart';
 import 'workout_plan_screen.dart';
 
@@ -116,6 +117,31 @@ class _FitnessScreenState extends State<FitnessScreen> {
                         Text('Mon programme de nutrition', style: TextStyle(color: AppColors.text, fontSize: 14, fontWeight: FontWeight.w700)),
                         SizedBox(height: 2),
                         Text('Repas, macros et calories du jour', style: TextStyle(color: Color(0xFF9C9C9C), fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Color(0xFFB0B0B0)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExerciseLibraryScreen())),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFEDF1F0)), boxShadow: const [BoxShadow(color: Color(0x0F000000), offset: Offset(0, 4), blurRadius: 14)]),
+              child: Row(
+                children: [
+                  const Icon(Icons.photo_library_outlined, color: Color(0xFFEC5A8D), size: 22),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Bibliothèque d\'exercices', style: TextStyle(color: AppColors.text, fontSize: 14, fontWeight: FontWeight.w700)),
+                        SizedBox(height: 2),
+                        Text('Illustrations et technique pour chaque exercice', style: TextStyle(color: Color(0xFF9C9C9C), fontSize: 11)),
                       ],
                     ),
                   ),
