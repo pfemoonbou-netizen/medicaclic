@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../config/supabase_config.dart';
 import 'home_care_provider.dart';
+import 'product_provider.dart';
 
 class UserPost {
   final String id;
@@ -57,6 +58,8 @@ class ProfileProvider extends ChangeNotifier {
   CareProvider? providerInfo;
   List<UserPost> posts = [];
   List<FamilyMember> familyMembers = [];
+  List<Product> myProducts = [];
+  List<ProductRequest> myRequests = [];
 
   bool get isPro => role == 'prestataire' || role == 'vendeur' || isCreator;
   String get userId => supabase.auth.currentUser!.id;
@@ -95,6 +98,16 @@ class ProfileProvider extends ChangeNotifier {
         familyMembers = (memberRows as List).map((row) => FamilyMember.fromMap(row as Map<String, dynamic>)).toList();
       } else {
         familyMembers = [];
+      }
+
+      if (role == 'vendeur') {
+        final productRows = await supabase.from('products').select().eq('seller_id', uid).order('name');
+        myProducts = (productRows as List).map((row) => Product.fromMap(row as Map<String, dynamic>)).toList();
+        final requestRows = await supabase.from('product_requests').select().eq('seller_id', uid).order('created_at', ascending: false);
+        myRequests = (requestRows as List).map((row) => ProductRequest.fromMap(row as Map<String, dynamic>)).toList();
+      } else {
+        myProducts = [];
+        myRequests = [];
       }
 
       final postRows = await supabase.from('user_posts').select().eq('user_id', uid).order('created_at', ascending: false);
@@ -167,6 +180,38 @@ class ProfileProvider extends ChangeNotifier {
     await supabase.from('profiles').update({'is_creator': true}).eq('id', userId);
     isCreator = true;
     notifyListeners();
+  }
+
+  int get pendingRequestsCount => myRequests.where((r) => r.status == 'pending').length;
+
+  Future<void> addProduct({required String name, required String category, required String description, required double price, XFile? image}) async {
+    String? imageUrl;
+    if (image != null) imageUrl = await _uploadImage(image, 'product');
+    await supabase.from('products').insert({
+      'seller_id': userId,
+      'seller': shopName ?? name,
+      'phone': shopPhone ?? '',
+      'name': name,
+      'brand': shopName ?? '',
+      'category': category,
+      'description': description,
+      'price': price,
+      'image': imageUrl,
+      'rating': 0,
+      'review_count': 0,
+    });
+    await load();
+  }
+
+  Future<void> deleteProduct(String id) async {
+    await supabase.from('products').delete().eq('id', id);
+    myProducts.removeWhere((p) => p.id == id);
+    notifyListeners();
+  }
+
+  Future<void> respondToRequest(String id, {required bool accept}) async {
+    await supabase.from('product_requests').update({'status': accept ? 'accepted' : 'declined'}).eq('id', id);
+    await load();
   }
 
   Future<void> addPost({required String content, XFile? image}) async {

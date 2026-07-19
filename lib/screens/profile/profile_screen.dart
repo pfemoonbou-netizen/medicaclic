@@ -6,6 +6,7 @@ import '../../providers/profile_provider.dart';
 import '../premium/premium_screen.dart';
 import 'add_family_member_sheet.dart';
 import 'add_post_sheet.dart';
+import 'add_product_sheet.dart';
 import 'become_pro_sheet.dart';
 import 'edit_profile_sheet.dart';
 import 'profile_theme.dart';
@@ -44,6 +45,16 @@ class _ProfileBody extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => ChangeNotifierProvider.value(value: provider, child: const AddPostSheet()),
+    );
+  }
+
+  void _openAddProduct(BuildContext context) {
+    final provider = context.read<ProfileProvider>();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => ChangeNotifierProvider.value(value: provider, child: const AddProductSheet()),
     );
   }
 
@@ -177,7 +188,7 @@ class _ProfileBody extends StatelessWidget {
             if (profile.role == 'prestataire')
               _prestataireCard(profile)
             else if (profile.role == 'vendeur')
-              _vendeurCard(profile)
+              _vendeurCard(context, profile)
             else if (profile.role == 'admin')
               _adminCard()
             else
@@ -449,16 +460,152 @@ class _ProfileBody extends StatelessWidget {
     );
   }
 
-  Widget _vendeurCard(ProfileProvider profile) {
-    return _sectionCard(
-      title: 'Informations boutique',
+  Widget _vendeurCard(BuildContext context, ProfileProvider profile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _infoRow(Icons.storefront_outlined, 'Boutique', profile.shopName ?? '—'),
-        _infoRow(Icons.call_outlined, 'Téléphone', profile.shopPhone ?? '—'),
-        if (profile.shopBio != null && profile.shopBio!.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Text(profile.shopBio!, style: const TextStyle(color: ProfileColors.textSecondary, fontSize: 12)),
-        ],
+        _sectionCard(
+          title: 'Informations boutique',
+          children: [
+            _infoRow(Icons.storefront_outlined, 'Boutique', profile.shopName ?? '—'),
+            _infoRow(Icons.call_outlined, 'Téléphone', profile.shopPhone ?? '—'),
+            if (profile.shopBio != null && profile.shopBio!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(profile.shopBio!, style: const TextStyle(color: ProfileColors.textSecondary, fontSize: 12)),
+            ],
+          ],
+        ),
+        const SizedBox(height: 16),
+        _productsSection(context, profile),
+        const SizedBox(height: 16),
+        _requestsSection(profile),
+      ],
+    );
+  }
+
+  Widget _productsSection(BuildContext context, ProfileProvider profile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text('Mes articles', style: TextStyle(color: ProfileColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
+            const Spacer(),
+            GestureDetector(
+              onTap: () => _openAddProduct(context),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.add, color: ProfileColors.accent, size: 16),
+                  SizedBox(width: 2),
+                  Text('Ajouter un article', style: TextStyle(color: ProfileColors.accent, fontSize: 12, fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (profile.myProducts.isEmpty)
+          const Text('Aucun article publié pour le moment.', style: TextStyle(color: ProfileColors.textFaint, fontSize: 12))
+        else
+          ...profile.myProducts.map((p) => Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: ProfileColors.card, borderRadius: BorderRadius.circular(14), border: Border.all(color: ProfileColors.border)),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(p.name, style: const TextStyle(color: ProfileColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 2),
+                          Text('${p.category} · ${p.price.toStringAsFixed(0)} DA', style: const TextStyle(color: ProfileColors.textFaint, fontSize: 11)),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(Icons.delete_outline, color: ProfileColors.textFaint, size: 18),
+                      onPressed: () => profile.deleteProduct(p.id),
+                    ),
+                  ],
+                ),
+              )),
+      ],
+    );
+  }
+
+  Widget _requestsSection(ProfileProvider profile) {
+    final pending = profile.pendingRequestsCount;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text('Demandes reçues', style: TextStyle(color: ProfileColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
+            if (pending > 0) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(color: ProfileColors.red, borderRadius: BorderRadius.circular(20)),
+                child: Text('$pending', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (profile.myRequests.isEmpty)
+          const Text('Aucune demande pour le moment.', style: TextStyle(color: ProfileColors.textFaint, fontSize: 12))
+        else
+          ...profile.myRequests.map((r) => Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: r.status == 'pending' ? ProfileColors.accent.withValues(alpha: 0.06) : ProfileColors.card,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: r.status == 'pending' ? ProfileColors.accent.withValues(alpha: 0.3) : ProfileColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(r.productName, style: const TextStyle(color: ProfileColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 4),
+                    Text('${r.buyerName} · ${r.buyerPhone}', style: const TextStyle(color: ProfileColors.textSecondary, fontSize: 12)),
+                    if (r.message.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(r.message, style: const TextStyle(color: ProfileColors.textFaint, fontSize: 11, fontStyle: FontStyle.italic)),
+                    ],
+                    const SizedBox(height: 8),
+                    if (r.status == 'pending')
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => profile.respondToRequest(r.id, accept: false),
+                              style: OutlinedButton.styleFrom(side: const BorderSide(color: ProfileColors.red), padding: const EdgeInsets.symmetric(vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+                              child: const Text('Refuser', style: TextStyle(color: ProfileColors.red, fontSize: 12)),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => profile.respondToRequest(r.id, accept: true),
+                              style: ElevatedButton.styleFrom(backgroundColor: ProfileColors.accent, padding: const EdgeInsets.symmetric(vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+                              child: const Text('Accepter', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Text(
+                        r.status == 'accepted' ? '✓ Acceptée' : '✕ Refusée',
+                        style: TextStyle(color: r.status == 'accepted' ? Colors.green : ProfileColors.textFaint, fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                  ],
+                ),
+              )),
       ],
     );
   }

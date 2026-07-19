@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../config/supabase_config.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/cart_provider.dart';
 
@@ -19,6 +21,53 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   static const _bg = Color(0xFFF7F8FA);
 
   bool _fav = false;
+  bool _sendingRequest = false;
+
+  Future<void> _sendRequest() async {
+    final uid = supabase.auth.currentUser?.id;
+    if (uid == null) return;
+    final phoneController = TextEditingController();
+    final messageController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Faire une demande'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: phoneController, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Votre téléphone')),
+            const SizedBox(height: 12),
+            TextField(controller: messageController, maxLines: 3, decoration: const InputDecoration(labelText: 'Message (optionnel)')),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Annuler')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Envoyer')),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _sendingRequest = true);
+    try {
+      final buyerName = context.read<AuthProvider>().user?.name ?? '';
+      await context.read<ProductProvider>().sendProductRequest(
+            productId: widget.product.id,
+            productName: widget.product.name,
+            sellerId: widget.product.sellerId!,
+            buyerId: uid,
+            buyerName: buyerName,
+            buyerPhone: phoneController.text.trim(),
+            message: messageController.text.trim(),
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Demande envoyée au vendeur.')));
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur : $e')));
+    } finally {
+      if (mounted) setState(() => _sendingRequest = false);
+    }
+  }
 
   Future<void> _call() async {
     final phone = widget.product.phone;
@@ -164,6 +213,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ],
                   ),
                 ),
+                if (p.sellerId != null) ...[
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _sendingRequest ? null : _sendRequest,
+                      icon: _sendingRequest
+                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(_purple)))
+                          : const Icon(Icons.send_outlined, color: _purple, size: 18),
+                      label: const Text('Faire une demande au vendeur', style: TextStyle(color: _purple, fontWeight: FontWeight.w600)),
+                      style: OutlinedButton.styleFrom(side: const BorderSide(color: _purple), padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
               ],
             ),

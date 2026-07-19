@@ -14,6 +14,7 @@ class Product {
   final int reviewCount;
   final String seller;
   final String phone;
+  final String? sellerId;
   Product({
     required this.id,
     required this.name,
@@ -27,6 +28,7 @@ class Product {
     this.reviewCount = 0,
     required this.seller,
     required this.phone,
+    this.sellerId,
   });
 
   int? get discountPercent => originalPrice == null ? null : (((originalPrice! - price) / originalPrice!) * 100).round();
@@ -44,6 +46,39 @@ class Product {
         reviewCount: (map['review_count'] as num?)?.toInt() ?? 0,
         seller: map['seller'] as String? ?? '',
         phone: map['phone'] as String? ?? '',
+        sellerId: map['seller_id'] as String?,
+      );
+}
+
+class ProductRequest {
+  final String id;
+  final String productId;
+  final String productName;
+  final String buyerName;
+  final String buyerPhone;
+  final String message;
+  final String status;
+  final DateTime createdAt;
+  const ProductRequest({
+    required this.id,
+    required this.productId,
+    required this.productName,
+    required this.buyerName,
+    required this.buyerPhone,
+    required this.message,
+    required this.status,
+    required this.createdAt,
+  });
+
+  factory ProductRequest.fromMap(Map<String, dynamic> map) => ProductRequest(
+        id: map['id'] as String,
+        productId: map['product_id'] as String,
+        productName: map['product_name'] as String? ?? '',
+        buyerName: map['buyer_name'] as String? ?? '',
+        buyerPhone: map['buyer_phone'] as String? ?? '',
+        message: map['message'] as String? ?? '',
+        status: map['status'] as String? ?? 'pending',
+        createdAt: DateTime.parse(map['created_at'] as String),
       );
 }
 
@@ -359,9 +394,13 @@ class ProductProvider extends ChangeNotifier {
     }
 
     // Toujours ajouter les produits locaux (affichés meme hors ligne).
-    // On ne garde que les produits avec une image embarquee dans l'app
-    // (assets/...) : garantie de s'afficher, jamais de case vide ou d'icone.
-    _products = [..._localProducts, ..._products].where((p) => p.image != null && p.image!.trim().startsWith('assets/')).toList();
+    // On ne garde que les produits avec une image utilisable (asset embarque
+    // ou photo uploadee par un vendeur) : garantie de s'afficher, jamais de
+    // case vide ou d'icone.
+    _products = [..._localProducts, ..._products].where((p) {
+      final img = p.image?.trim();
+      return img != null && (img.startsWith('assets/') || img.startsWith('http'));
+    }).toList();
 
     // Bannières pub (table optionnelle) : isolé pour ne pas casser les
     // produits si la table n'existe pas encore.
@@ -384,5 +423,25 @@ class ProductProvider extends ChangeNotifier {
     } catch (e) {
       return null;
     }
+  }
+
+  Future<void> sendProductRequest({
+    required String productId,
+    required String productName,
+    required String sellerId,
+    required String buyerId,
+    required String buyerName,
+    required String buyerPhone,
+    String message = '',
+  }) async {
+    await supabase.from('product_requests').insert({
+      'product_id': productId,
+      'product_name': productName,
+      'seller_id': sellerId,
+      'buyer_id': buyerId,
+      'buyer_name': buyerName,
+      'buyer_phone': buyerPhone,
+      'message': message,
+    });
   }
 }
