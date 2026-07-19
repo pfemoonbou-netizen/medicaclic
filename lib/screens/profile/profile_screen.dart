@@ -537,6 +537,19 @@ class _ProfileBody extends StatelessWidget {
     );
   }
 
+  Widget _requestDetailRow(IconData icon, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        children: [
+          Icon(icon, size: 13, color: ProfileColors.textFaint),
+          const SizedBox(width: 6),
+          Expanded(child: Text(value, style: const TextStyle(color: ProfileColors.textSecondary, fontSize: 12))),
+        ],
+      ),
+    );
+  }
+
   Widget _requestsSection(ProfileProvider profile) {
     final pending = profile.pendingRequestsCount;
     return Column(
@@ -571,8 +584,10 @@ class _ProfileBody extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(r.productName, style: const TextStyle(color: ProfileColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 4),
-                    Text('${r.buyerName} · ${r.buyerPhone}', style: const TextStyle(color: ProfileColors.textSecondary, fontSize: 12)),
+                    const SizedBox(height: 6),
+                    _requestDetailRow(Icons.person_outline, r.buyerName.isEmpty ? '—' : r.buyerName),
+                    _requestDetailRow(Icons.call_outlined, r.buyerPhone.isEmpty ? '—' : r.buyerPhone),
+                    if (r.buyerAddress.isNotEmpty) _requestDetailRow(Icons.location_on_outlined, r.buyerAddress),
                     if (r.message.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(r.message, style: const TextStyle(color: ProfileColors.textFaint, fontSize: 11, fontStyle: FontStyle.italic)),
@@ -598,10 +613,21 @@ class _ProfileBody extends StatelessWidget {
                           ),
                         ],
                       )
+                    else if (r.status == 'declined')
+                      const Text('✕ Refusée', style: TextStyle(color: ProfileColors.textFaint, fontSize: 12, fontWeight: FontWeight.w600))
                     else
-                      Text(
-                        r.status == 'accepted' ? '✓ Acceptée' : '✕ Refusée',
-                        style: TextStyle(color: r.status == 'accepted' ? Colors.green : ProfileColors.textFaint, fontSize: 12, fontWeight: FontWeight.w600),
+                      Row(
+                        children: [
+                          const Expanded(child: Text('✓ Acceptée', style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.w600))),
+                          if (r.paymentReceived)
+                            const Text('💰 Paiement reçu', style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.w600))
+                          else
+                            OutlinedButton(
+                              onPressed: () => profile.markPaymentReceived(r.id),
+                              style: OutlinedButton.styleFrom(side: const BorderSide(color: ProfileColors.accent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+                              child: const Text('Marquer payé', style: TextStyle(color: ProfileColors.accent, fontSize: 11, fontWeight: FontWeight.w600)),
+                            ),
+                        ],
                       ),
                   ],
                 ),

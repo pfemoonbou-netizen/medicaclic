@@ -56,8 +56,10 @@ class ProductRequest {
   final String productName;
   final String buyerName;
   final String buyerPhone;
+  final String buyerAddress;
   final String message;
   final String status;
+  final bool paymentReceived;
   final DateTime createdAt;
   const ProductRequest({
     required this.id,
@@ -65,8 +67,10 @@ class ProductRequest {
     required this.productName,
     required this.buyerName,
     required this.buyerPhone,
+    required this.buyerAddress,
     required this.message,
     required this.status,
+    required this.paymentReceived,
     required this.createdAt,
   });
 
@@ -76,8 +80,10 @@ class ProductRequest {
         productName: map['product_name'] as String? ?? '',
         buyerName: map['buyer_name'] as String? ?? '',
         buyerPhone: map['buyer_phone'] as String? ?? '',
+        buyerAddress: map['buyer_address'] as String? ?? '',
         message: map['message'] as String? ?? '',
         status: map['status'] as String? ?? 'pending',
+        paymentReceived: map['payment_received'] as bool? ?? false,
         createdAt: DateTime.parse(map['created_at'] as String),
       );
 }
@@ -432,6 +438,7 @@ class ProductProvider extends ChangeNotifier {
     required String buyerId,
     required String buyerName,
     required String buyerPhone,
+    String buyerAddress = '',
     String message = '',
   }) async {
     await supabase.from('product_requests').insert({
@@ -441,6 +448,7 @@ class ProductProvider extends ChangeNotifier {
       'buyer_id': buyerId,
       'buyer_name': buyerName,
       'buyer_phone': buyerPhone,
+      'buyer_address': buyerAddress,
       'message': message,
     });
   }

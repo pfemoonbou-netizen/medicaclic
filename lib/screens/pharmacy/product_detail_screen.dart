@@ -27,6 +27,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final uid = supabase.auth.currentUser?.id;
     if (uid == null) return;
     final phoneController = TextEditingController();
+    final addressController = TextEditingController();
     final messageController = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
@@ -36,6 +37,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(controller: phoneController, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Votre téléphone')),
+            const SizedBox(height: 12),
+            TextField(controller: addressController, maxLines: 2, decoration: const InputDecoration(labelText: 'Adresse de livraison')),
             const SizedBox(height: 12),
             TextField(controller: messageController, maxLines: 3, decoration: const InputDecoration(labelText: 'Message (optionnel)')),
           ],
@@ -57,6 +60,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             buyerId: uid,
             buyerName: buyerName,
             buyerPhone: phoneController.text.trim(),
+            buyerAddress: addressController.text.trim(),
             message: messageController.text.trim(),
           );
       if (mounted) {

@@ -227,6 +227,11 @@ class ProfileProvider extends ChangeNotifier {
     await load();
   }
 
+  Future<void> markPaymentReceived(String id) async {
+    await supabase.from('product_requests').update({'payment_received': true}).eq('id', id);
+    await load();
+  }
+
   Future<void> addPost({required String content, XFile? image}) async {
     String? imageUrl;
     if (image != null) imageUrl = await _uploadImage(image, 'post');
