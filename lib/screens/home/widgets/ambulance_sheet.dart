@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../utils/app_colors.dart';
 
@@ -17,6 +19,7 @@ class AmbulanceSheet extends StatefulWidget {
 
 class _AmbulanceSheetState extends State<AmbulanceSheet> {
   LatLng? _userLocation;
+  String? _address;
   bool _loading = true;
   String? _error;
 
@@ -51,6 +54,7 @@ class _AmbulanceSheetState extends State<AmbulanceSheet> {
         _userLocation = LatLng(position.latitude, position.longitude);
         _loading = false;
       });
+      _resolveAddress(position.latitude, position.longitude);
     } catch (e) {
       setState(() {
         _userLocation = _kDefaultLocation;
@@ -60,8 +64,32 @@ class _AmbulanceSheetState extends State<AmbulanceSheet> {
     }
   }
 
+  Future<void> _resolveAddress(double lat, double lng) async {
+    try {
+      final placemarks = await placemarkFromCoordinates(lat, lng);
+      if (placemarks.isEmpty) return;
+      final p = placemarks.first;
+      final parts = [p.street, p.subLocality, p.locality].where((s) => s != null && s.trim().isNotEmpty).toList();
+      if (mounted) setState(() => _address = parts.join(', '));
+    } catch (_) {
+      // La reverse-geocoding peut echouer (pas de reseau, service indisponible) :
+      // on garde juste les coordonnees GPS dans ce cas.
+    }
+  }
+
   void _callAmbulance() {
     launchUrl(Uri(scheme: 'tel', path: _kAmbulanceNumber));
+  }
+
+  void _shareLocation() {
+    final loc = _userLocation ?? _kDefaultLocation;
+    final mapsUrl = 'https://maps.google.com/?q=${loc.latitude},${loc.longitude}';
+    final text = StringBuffer('🚑 Ma position actuelle\n\n');
+    if (_address != null && _address!.isNotEmpty) text.writeln('📍 $_address\n');
+    text.writeln('Latitude : ${loc.latitude.toStringAsFixed(6)}');
+    text.writeln('Longitude : ${loc.longitude.toStringAsFixed(6)}');
+    text.writeln('\n$mapsUrl');
+    SharePlus.instance.share(ShareParams(text: text.toString()));
   }
 
   @override
@@ -153,6 +181,32 @@ class _AmbulanceSheetState extends State<AmbulanceSheet> {
                           const SizedBox(height: 16),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Container(
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(12)),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Votre position actuelle', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.lightGray)),
+                                  const SizedBox(height: 8),
+                                  if (_address != null && _address!.isNotEmpty)
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('📍 ', style: TextStyle(fontSize: 14)),
+                                        Expanded(child: Text(_address!, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
+                                      ],
+                                    ),
+                                  const SizedBox(height: 6),
+                                  Text('Latitude : ${center.latitude.toStringAsFixed(6)}', style: const TextStyle(fontSize: 12, color: AppColors.lightGray)),
+                                  Text('Longitude : ${center.longitude.toStringAsFixed(6)}', style: const TextStyle(fontSize: 12, color: AppColors.lightGray)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -190,14 +244,26 @@ class _AmbulanceSheetState extends State<AmbulanceSheet> {
                 top: false,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _callAmbulance,
-                      icon: const Icon(Icons.call, color: Colors.white),
-                      label: const Text('Appeler le 14', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16)),
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32))),
-                    ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton.icon(
+                          onPressed: _callAmbulance,
+                          icon: const Icon(Icons.call, color: Colors.white),
+                          label: const Text('Appeler le 14', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16)),
+                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32))),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _shareLocation,
+                          style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), side: const BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32))),
+                          child: const Icon(Icons.share, color: AppColors.primary),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
